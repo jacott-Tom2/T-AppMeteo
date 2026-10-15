@@ -628,7 +628,7 @@
       document.getElementById("cloud-cover").textContent = current.cloud_cover + (units.cloud_cover || "%");
       document.getElementById("pressure").textContent = Math.round(current.surface_pressure) + " " + (units.surface_pressure || "hPa");
       const hourly = forecast.hourly || {};
-      const currentHour = (hourly.time || []).findIndex(time => time.slice(0, 13) === current.time.slice(0, 13));
+      const currentHour = (hourly.time || []).findIndex(time => time.slice(0, 14) === current.time.slice(0, 14));
       const previousPressure = currentHour >= 3 ? hourly.surface_pressure[currentHour - 3] : null;
       const pressureChange = Number.isFinite(previousPressure) ? current.surface_pressure - previousPressure : null;
       document.getElementById("pressure-trend").textContent = pressureChange === null
