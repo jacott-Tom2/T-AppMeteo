@@ -40,6 +40,10 @@
     .logbook-fields { display: grid; gap: 9px; }
     .logbook-fields label { margin-bottom: 4px; }
     .logbook-list { display: grid; gap: 9px; }
+    #stats-results { display: grid; gap: 9px; }
+    .stats-card { padding: 12px; border-radius: 10px; background: #f4f7fb; overflow-wrap: anywhere; }
+    .stats-card p { margin: 0 0 6px; }
+    .stats-card p:last-child { margin-bottom: 0; }
     .trip-entry { padding: 12px; border-radius: 10px; background: #f4f7fb; overflow-wrap: anywhere; }
     .trip-entry p { margin: 0 0 5px; }
     .trip-entry button { margin-top: 7px; min-height: 42px; background: #e7effa; color: #0b3d91; }
@@ -176,17 +180,42 @@
               <input id="trip-place" type="text" maxlength="100" placeholder="Ex. Yvonand, rive nord" required>
             </div>
             <div>
-              <label for="trip-lure">Leurre ou technique</label>
-              <input id="trip-lure" type="text" maxlength="100" placeholder="Ex. shad, cuillère, verticale">
+              <label for="trip-technique">Technique</label>
+              <select id="trip-technique">
+                <option value="">Non renseignée</option>
+                <option value="Lancer-ramener">Lancer-ramener</option>
+                <option value="Pêche verticale">Pêche verticale</option>
+                <option value="Drop shot">Drop shot</option>
+                <option value="Montage posé">Montage posé</option>
+                <option value="Jerkbait">Jerkbait</option>
+                <option value="Autre">Autre</option>
+              </select>
+            </div>
+            <div>
+              <label for="trip-animation">Animation</label>
+              <input id="trip-animation" type="text" maxlength="100" placeholder="Ex. récupération lente avec pauses">
+            </div>
+            <div>
+              <label for="trip-lure">Leurre</label>
+              <input id="trip-lure" type="text" maxlength="100" placeholder="Ex. shad, cuillère, leurre souple">
+            </div>
+            <div>
+              <label for="trip-catches">Poissons pris pendant cette sortie</label>
+              <input id="trip-catches" type="number" inputmode="numeric" min="0" max="99" step="1" value="0" required>
             </div>
             <div>
               <label for="trip-result">Résultat / notes</label>
-              <input id="trip-result" type="text" maxlength="240" placeholder="Ex. 2 perches, bancs repérés à 8 m">
+              <input id="trip-result" type="text" maxlength="240" placeholder="Ex. bancs à 8 m, fond rocheux">
             </div>
           </div>
           <button id="save-trip" type="submit">Enregistrer la sortie</button>
         </form>
         <div id="trip-list" class="logbook-list" aria-live="polite"></div>
+        <section aria-labelledby="stats-title">
+          <h2 id="stats-title">Statistiques et conseil du jour</h2>
+          <div id="stats-results" aria-live="polite"></div>
+          <p class="metric-note">Les conseils s’appuient sur tes sorties enregistrées pour l’espèce choisie et, si disponibles, une météo comparable. Ils indiquent des tendances, pas une garantie de prise.</p>
+        </section>
         <p class="metric-note">Le carnet reste dans le stockage local de cet appareil et de ce navigateur.</p>
       </section>
       <div class="location-actions" aria-label="Localiser une ville">
@@ -238,11 +267,16 @@
     const fishingInputs = ["water-temperature", "sonar-depth", "fish-depth", "sonar-frequency", "water-clarity"].map(id => document.getElementById(id));
     const tripDate = document.getElementById("trip-date");
     const tripPlace = document.getElementById("trip-place");
+    const tripTechnique = document.getElementById("trip-technique");
+    const tripAnimation = document.getElementById("trip-animation");
     const tripLure = document.getElementById("trip-lure");
+    const tripCatches = document.getElementById("trip-catches");
     const tripResult = document.getElementById("trip-result");
     const tripList = document.getElementById("trip-list");
+    const statsResults = document.getElementById("stats-results");
     const TRIP_STORAGE_KEY = "t-appmeteo-v2-trips";
     let tripPlaceEdited = false;
+    let currentWeatherSnapshot = null;
 
     const fishingNotes = {
       brochet: "À relever : température de l’eau, profondeur du poste, végétation et structures proches.",
@@ -270,6 +304,7 @@
     function updateSpeciesGuidance() {
       speciesGuidance.textContent = fishingNotes[targetSpecies.value] || fishingNotes.brochet;
       saveFishingSettings();
+      renderFishingAdvice();
     }
 
     restoreFishingSettings();
@@ -357,7 +392,7 @@
         const heading = document.createElement("p");
         heading.textContent = `${new Date(trip.date).toLocaleString("fr-CH")} · ${trip.species} · ${trip.place}`;
         entry.append(heading);
-        const details = [trip.lure && `Leurre/technique : ${trip.lure}`, trip.waterTemperature && `Eau : ${trip.waterTemperature} °C`, trip.depth && `Fond : ${trip.depth} m`, trip.fishDepth && `Poissons : ${trip.fishDepth} m`, trip.sonarFrequency && `Sondeur : ${trip.sonarFrequency}`, trip.result && `Notes : ${trip.result}`].filter(Boolean);
+        const details = [trip.technique && `Technique : ${trip.technique}`, trip.animation && `Animation : ${trip.animation}`, trip.lure && `Leurre : ${trip.lure}`, Number.isFinite(Number(trip.catches)) && `Prises : ${trip.catches}`, trip.waterTemperature && `Eau : ${trip.waterTemperature} °C`, trip.depth && `Fond : ${trip.depth} m`, trip.fishDepth && `Poissons : ${trip.fishDepth} m`, trip.sonarFrequency && `Sondeur : ${trip.sonarFrequency}`, trip.result && `Notes : ${trip.result}`].filter(Boolean);
         if (details.length) {
           const detail = document.createElement("p");
           detail.textContent = details.join(" · ");
@@ -373,6 +408,115 @@
         entry.append(remove);
         tripList.append(entry);
       });
+      renderFishingAdvice();
+    }
+
+    function currentSpeciesLabel() {
+      return targetSpecies.options[targetSpecies.selectedIndex].textContent;
+    }
+
+    function makeStatsCard(title, lines) {
+      const card = document.createElement("article");
+      card.className = "stats-card";
+      const heading = document.createElement("p");
+      const strong = document.createElement("strong");
+      strong.textContent = title;
+      heading.append(strong);
+      card.append(heading);
+      lines.forEach(line => {
+        const paragraph = document.createElement("p");
+        paragraph.textContent = line;
+        card.append(paragraph);
+      });
+      return card;
+    }
+
+    function rankFishingOptions(records, field) {
+      const groups = new Map();
+      records.forEach(trip => {
+        const name = String(trip[field] || "").trim();
+        if (!name) return;
+        const key = name.toLocaleLowerCase("fr");
+        if (!groups.has(key)) groups.set(key, { name, outings: 0, successfulOutings: 0, catches: 0 });
+        const group = groups.get(key);
+        group.outings += 1;
+        const count = Number(trip.catches);
+        if (count > 0) {
+          group.successfulOutings += 1;
+          group.catches += count;
+        }
+      });
+      return [...groups.values()].filter(group => group.successfulOutings > 0)
+        .sort((a, b) => (b.successfulOutings / b.outings) - (a.successfulOutings / a.outings) || b.catches - a.catches || b.outings - a.outings);
+    }
+
+    function conditionsAreSimilar(past, current) {
+      if (!past || !current) return false;
+      const checks = [
+        [past.airTemperature, current.airTemperature, 7],
+        [past.windSpeed, current.windSpeed, 10],
+        [past.pressure, current.pressure, 10],
+        [past.cloudCover, current.cloudCover, 35]
+      ];
+      const available = checks.filter(([a, b]) => Number.isFinite(Number(a)) && Number.isFinite(Number(b)));
+      if (available.length < 2) return false;
+      if (available.some(([a, b, tolerance]) => Math.abs(Number(a) - Number(b)) > tolerance)) return false;
+      return true;
+    }
+
+    function describeBest(records, field, label) {
+      const ranked = rankFishingOptions(records, field);
+      if (!ranked.length) return `${label} : pas encore assez de prises renseignées.`;
+      const best = ranked[0];
+      return `${label} : ${best.name} (${best.successfulOutings}/${best.outings} sorties avec prise, ${best.catches} poisson${best.catches > 1 ? "s" : ""}).`;
+    }
+
+    function renderFishingAdvice() {
+      if (!statsResults) return;
+      statsResults.replaceChildren();
+      const species = currentSpeciesLabel();
+      const speciesTrips = loadTrips().filter(trip => trip.species === species);
+      const recorded = speciesTrips.filter(trip => Number.isInteger(Number(trip.catches)) && Number(trip.catches) >= 0);
+      if (!recorded.length) {
+        statsResults.append(makeStatsCard("Conseil pour " + species, [
+          "Aucune prise structurée n’est encore enregistrée pour cette espèce.",
+          "Après chaque sortie, indique le spot, la technique, l’animation, le leurre et le nombre de prises pour alimenter les statistiques."
+        ]));
+        return;
+      }
+
+      const successful = recorded.filter(trip => Number(trip.catches) > 0);
+      const totalCatches = successful.reduce((sum, trip) => sum + Number(trip.catches), 0);
+      const similar = currentWeatherSnapshot ? recorded.filter(trip => conditionsAreSimilar(trip.weather, currentWeatherSnapshot)) : [];
+      const similarHasCatch = similar.some(trip => Number(trip.catches) > 0);
+      const recommendationRecords = similarHasCatch ? similar : recorded;
+      const conditionsLabel = similarHasCatch
+        ? `${similar.length} sortie${similar.length > 1 ? "s" : ""} avec une météo proche de celle d’aujourd’hui.`
+        : "Pas de prise enregistrée sous une météo comparable ; conseil calculé sur toutes les sorties de cette espèce.";
+      statsResults.append(makeStatsCard("Historique · " + species, [
+        `${recorded.length} sortie${recorded.length > 1 ? "s" : ""} avec résultat renseigné · ${successful.length} sortie${successful.length > 1 ? "s" : ""} avec prise · ${totalCatches} poisson${totalCatches > 1 ? "s" : ""} au total.`,
+        conditionsLabel
+      ]));
+
+      if (!successful.length) {
+        statsResults.append(makeStatsCard("Tendance actuelle", [
+          "Aucune prise n’est encore enregistrée pour cette espèce. Les statistiques afficheront les meilleures options après les premières prises."
+        ]));
+        return;
+      }
+
+      const recommendations = [
+        describeBest(recommendationRecords, "place", "Spot à retenter"),
+        describeBest(recommendationRecords, "animation", "Animation à privilégier"),
+        describeBest(recommendationRecords, "technique", "Technique à privilégier"),
+        describeBest(recommendationRecords, "lure", "Leurre à retenter")
+      ];
+      statsResults.append(makeStatsCard(similarHasCatch ? "Pistes pour aujourd’hui · météo proche" : "Pistes pour aujourd’hui · tendance générale", recommendations));
+      if (recorded.length < 3) {
+        statsResults.append(makeStatsCard("Historique encore court", [
+          "Il y a peu de sorties comparables. Ces pistes sont provisoires et gagneront en fiabilité avec davantage de résultats renseignés."
+        ]));
+      }
     }
 
     document.getElementById("trip-form").addEventListener("submit", event => {
@@ -383,20 +527,27 @@
         id: globalThis.crypto && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
         date: tripDate.value,
         place: tripPlace.value.trim(),
-        species: targetSpecies.options[targetSpecies.selectedIndex].textContent,
+        species: currentSpeciesLabel(),
+        technique: tripTechnique.value,
+        animation: tripAnimation.value.trim(),
         lure: tripLure.value.trim(),
+        catches: Number(tripCatches.value),
         result: tripResult.value.trim(),
         waterTemperature: fishingInputs[0].value,
         depth: fishingInputs[1].value,
         fishDepth: fishingInputs[2].value,
-        sonarFrequency: fishingInputs[3].value
+        sonarFrequency: fishingInputs[3].value,
+        weather: currentWeatherSnapshot ? { ...currentWeatherSnapshot } : null
       };
       const trips = loadTrips();
       trips.unshift(trip);
       try {
         saveTrips(trips);
         renderTrips();
+        tripTechnique.value = "";
+        tripAnimation.value = "";
         tripLure.value = "";
+        tripCatches.value = "0";
         tripResult.value = "";
         tripDate.value = localDateTimeValue(new Date());
         document.getElementById("status").textContent = "Sortie enregistrée dans ce navigateur.";
@@ -649,6 +800,15 @@
       document.getElementById("pressure-trend").textContent = pressureChange === null
         ? "Indisponible"
         : `${pressureChange > 0 ? "+" : ""}${pressureChange.toFixed(1)} hPa`;
+      currentWeatherSnapshot = {
+        airTemperature: Number(current.temperature_2m),
+        windSpeed: Number(current.wind_speed_10m),
+        pressure: Number(current.surface_pressure),
+        cloudCover: Number(current.cloud_cover),
+        precipitation: Number(current.precipitation),
+        pressureTrend: pressureChange
+      };
+      renderFishingAdvice();
       const daily = forecast.daily || {};
       const sunrise = daily.sunrise && daily.sunrise[0] ? new Date(daily.sunrise[0]).toLocaleTimeString("fr-CH", { hour: "2-digit", minute: "2-digit" }) : "—";
       const sunset = daily.sunset && daily.sunset[0] ? new Date(daily.sunset[0]).toLocaleTimeString("fr-CH", { hour: "2-digit", minute: "2-digit" }) : "—";
