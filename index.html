@@ -56,6 +56,22 @@
         <label for="city-select">Ville</label>
         <select id="city-select" aria-describedby="status"></select>
       </div>
+      <p id="status" role="status" aria-live="polite"></p>
+      <section class="weather" id="weather-card" aria-live="polite" hidden>
+        <h2 id="place-name"></h2>
+        <p id="updated"></p>
+        <div class="current">
+          <span id="icon" aria-hidden="true">🌤️</span>
+          <div><div id="temperature"></div><div id="condition"></div></div>
+        </div>
+        <dl>
+          <div><dt>Ressenti</dt><dd id="feels-like"></dd></div>
+          <div><dt>Humidité</dt><dd id="humidity"></dd></div>
+          <div><dt>Vent</dt><dd id="wind"></dd></div>
+          <div><dt>Précipitations</dt><dd id="rain"></dd></div>
+        </dl>
+        <button id="refresh-button" class="refresh" type="button">Actualiser la météo</button>
+      </section>
       <div class="location-actions" aria-label="Localiser une ville">
         <button id="gps-button" type="button">📍 Utiliser ma position GPS</button>
         <button id="network-button" type="button">📶 Localiser par réseau (approx.)</button>
@@ -68,23 +84,6 @@
           <button id="add-button" type="submit">Ajouter</button>
         </div>
       </form>
-      <p id="status" role="status" aria-live="polite"></p>
-    </section>
-
-    <section class="weather" id="weather-card" aria-live="polite" hidden>
-      <h2 id="place-name"></h2>
-      <p id="updated"></p>
-      <div class="current">
-        <span id="icon" aria-hidden="true">🌤️</span>
-        <div><div id="temperature"></div><div id="condition"></div></div>
-      </div>
-      <dl>
-        <div><dt>Ressenti</dt><dd id="feels-like"></dd></div>
-        <div><dt>Humidité</dt><dd id="humidity"></dd></div>
-        <div><dt>Vent</dt><dd id="wind"></dd></div>
-        <div><dt>Précipitations</dt><dd id="rain"></dd></div>
-      </dl>
-      <button id="refresh-button" class="refresh" type="button">Actualiser la météo</button>
     </section>
 
     <footer>Données météo : Open-Meteo · Application en développement</footer>
