@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b3d91">
+  <meta name="description" content="Météo et conditions utiles pour la pêche en lac : brochet, perche, silure et corégone.">
+  <title>T-AppMeteo V2 — Pêche en lac</title>
+  <style>
+    :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; color: #142033; background: #f3f7fb; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; }
+    main { width: calc(100% - 24px); max-width: 620px; margin: 0 auto; padding: 18px 0 28px; padding-top: calc(18px + env(safe-area-inset-top, 0px)); padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px)); }
+    header { margin-bottom: 16px; }
+    h1 { margin: 0; color: #0b3d91; font-size: 1.9rem; line-height: 1.15; }
+    .subtitle { margin: 7px 0 0; color: #536174; }
+    .panel, .weather { background: white; border: 1px solid #dce5ef; border-radius: 16px; padding: 18px; box-shadow: 0 6px 20px #173a5e0a; }
+    .panel { display: grid; gap: 14px; }
+    label { display: block; font-weight: 650; margin-bottom: 7px; }
+    select, input, button { width: 100%; min-height: 48px; border: 1px solid #b8c5d5; border-radius: 10px; padding: 11px 13px; font: inherit; font-size: 16px; background: white; }
+    button { border: 0; background: #0b3d91; color: white; font-weight: 650; cursor: pointer; }
+    button:focus, select:focus, input:focus { outline: 3px solid #84baff; outline-offset: 2px; }
+    button:focus:not(:focus-visible), select:focus:not(:focus-visible), input:focus:not(:focus-visible) { outline: none; }
+    button:disabled { opacity: .65; cursor: wait; }
+    button, select { touch-action: manipulation; }
+    .add-row { display: grid; gap: 9px; }
+    .location-actions { display: grid; gap: 9px; }
+    .location-actions button { background: #e7effa; color: #0b3d91; }
+    .fishing-panel { display: grid; gap: 12px; padding: 14px; border: 1px solid #dce5ef; border-radius: 12px; background: #f8fafc; }
+    .fishing-panel h2 { margin: 0; font-size: 1.1rem; color: #0b3d91; }
+    .fishing-panel p { margin: 0; color: #536174; line-height: 1.4; }
+    .fishing-fields { display: grid; gap: 9px; }
+    .fishing-fields label { margin-bottom: 4px; }
+    .fishing-fields input, .fishing-fields select { min-height: 46px; }
+    .metric-note { color: #536174; font-size: .88rem; }
+    .gps-proposal { border: 1px solid #a9c8ee; border-radius: 12px; padding: 14px; background: #f3f8ff; }
+    .gps-proposal[hidden] { display: none; }
+    .gps-proposal p { margin: 0 0 10px; }
+    .proposal-actions { display: grid; gap: 8px; }
+    .proposal-actions .secondary { background: #e7effa; color: #0b3d91; }
+    .privacy-note { margin: -5px 0 0; color: #536174; font-size: .875rem; line-height: 1.45; }
+    #status { min-height: 1.4em; margin: 0; color: #536174; font-size: .94rem; }
+    .weather { margin-top: 16px; }
+    .weather[hidden] { display: none; }
+    .weather h2 { margin: 0 0 3px; font-size: 1.25rem; }
+    #updated { margin: 0 0 14px; color: #64748b; font-size: .9rem; }
+    .current { display: flex; align-items: center; gap: 14px; margin-bottom: 15px; }
+    #icon { font-size: 2.8rem; line-height: 1; }
+    #temperature { font-size: 2.8rem; font-weight: 750; letter-spacing: -.04em; }
+    #condition { color: #536174; }
+    dl { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    dl div { background: #f4f7fb; border-radius: 10px; padding: 12px; }
+    dt { color: #64748b; font-size: .85rem; }
+    dd { margin: 3px 0 0; font-weight: 650; }
+    .refresh { margin-top: 14px; min-height: 48px; background: #e7effa; color: #0b3d91; }
+    footer { padding: 18px 4px 0; text-align: center; color: #718096; font-size: .82rem; }
+    @supports (min-height: 100dvh) { body { min-height: 100dvh; } }
+    @media (min-width: 520px) { .add-row { grid-template-columns: 1fr 160px; } .location-actions { grid-template-columns: 1fr 1fr; } h1 { font-size: 2.2rem; } }
+    @media (min-width: 520px) { .proposal-actions { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 360px) { main { width: calc(100% - 20px); } .panel, .weather { padding: 14px; border-radius: 13px; } .panel { gap: 11px; } dl { grid-template-columns: 1fr; gap: 8px; } dl div { padding: 10px; } }
+    @media (max-height: 500px) and (orientation: landscape) { main { padding-top: calc(10px + env(safe-area-inset-top, 0px)); } header { margin-bottom: 10px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>🎣 T-AppMeteo V2</h1>
+      <p class="subtitle">Météo et observations utiles pour la pêche en lac.</p>
+    </header>
+
+    <section class="panel" aria-label="Choisir une ville">
+      <div>
+        <label for="city-select">Ville</label>
+        <select id="city-select" aria-describedby="status"></select>
+      </div>
+      <p id="status" role="status" aria-live="polite"></p>
+      <section class="fishing-panel" aria-labelledby="fishing-title">
+        <h2 id="fishing-title">Paramètres pêche en lac</h2>
+        <div>
+          <label for="target-species">Espèce recherchée</label>
+          <select id="target-species">
+            <option value="brochet">Brochet</option>
+            <option value="perche">Perche</option>
+            <option value="silure">Silure</option>
+            <option value="coregone">Corégone</option>
+          </select>
+        </div>
+        <p id="species-guidance" aria-live="polite"></p>
+        <div class="fishing-fields">
+          <div>
+            <label for="water-temperature">Température de l’eau (si connue, °C)</label>
+            <input id="water-temperature" type="number" inputmode="decimal" min="0" max="35" step="0.1" placeholder="À mesurer sur place">
+          </div>
+          <div>
+            <label for="sonar-depth">Profondeur des poissons repérée au sondeur (m)</label>
+            <input id="sonar-depth" type="number" inputmode="decimal" min="0" max="500" step="0.5" placeholder="Optionnel">
+          </div>
+          <div>
+            <label for="water-clarity">Clarté de l’eau (observation)</label>
+            <select id="water-clarity">
+              <option value="">Non renseignée</option>
+              <option value="claire">Claire</option>
+              <option value="legerement-trouble">Légèrement trouble</option>
+              <option value="trouble">Trouble</option>
+            </select>
+          </div>
+        </div>
+        <p class="metric-note">La température et la clarté de l’eau sont à mesurer ou observer. La profondeur vient de ton sondeur : l’application ne la devine pas.</p>
+      </section>
+      <section class="weather" id="weather-card" aria-live="polite" hidden>
+        <h2 id="place-name"></h2>
+        <p id="updated"></p>
+        <div class="current">
+          <span id="icon" aria-hidden="true">🌤️</span>
+          <div><div id="temperature"></div><div id="condition"></div></div>
+        </div>
+        <dl>
+          <div><dt>Ressenti</dt><dd id="feels-like"></dd></div>
+          <div><dt>Humidité</dt><dd id="humidity"></dd></div>
+          <div><dt>Vent</dt><dd id="wind"></dd></div>
+          <div><dt>Rafales</dt><dd id="gusts"></dd></div>
+          <div><dt>Précipitations</dt><dd id="rain"></dd></div>
+          <div><dt>Couverture nuageuse</dt><dd id="cloud-cover"></dd></div>
+          <div><dt>Pression</dt><dd id="pressure"></dd></div>
+          <div><dt>Évolution sur 3 h</dt><dd id="pressure-trend"></dd></div>
+          <div><dt>Soleil</dt><dd id="sun-times"></dd></div>
+        </dl>
+        <button id="refresh-button" class="refresh" type="button">Actualiser la météo</button>
+      </section>
+      <div class="location-actions" aria-label="Localiser une ville">
+        <button id="gps-button" type="button">📍 Utiliser ma position GPS</button>
+        <button id="network-button" type="button">📶 Localiser par réseau (approx.)</button>
+      </div>
+      <section id="gps-proposal" class="gps-proposal" aria-live="polite" hidden>
+        <p><strong>Lieu trouvé :</strong> <span id="gps-proposal-name"></span></p>
+        <p>Veux-tu utiliser cette ville pour afficher la météo ?</p>
+        <div class="proposal-actions">
+          <button id="gps-accept" type="button">Utiliser cette ville</button>
+          <button id="gps-cancel" class="secondary" type="button">Annuler</button>
+        </div>
+      </section>
+      <p class="privacy-note">Le GPS demande l’autorisation du téléphone. Ses coordonnées sont conservées dans ce navigateur, envoyées à OpenStreetMap pour trouver la localité, puis à Open-Meteo pour la météo. La localisation réseau est moins précise : ipapi.co reçoit votre adresse IP pour estimer votre ville.</p>
+      <form id="add-form">
+        <label for="new-city">Ajouter une ville suisse</label>
+        <div class="add-row">
+          <input id="new-city" name="city" type="text" maxlength="80" placeholder="Ex. Lausanne" autocomplete="address-level2" required>
+          <button id="add-button" type="submit">Ajouter</button>
+        </div>
+      </form>
+    </section>
+
+    <footer>Données météo : Open-Meteo · Géocodage : <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap contributors</a> · Application en développement</footer>
+  </main>
+
+  <script>
+    "use strict";
+
+    const STORAGE_KEY = "t-appmeteo-cities-v1";
+    const initialCities = [
+      { name: "Yverdon-les-Bains", label: "Yverdon-les-Bains (1400)" },
+      { name: "Yvonand", label: "Yvonand" }
+    ];
+    const select = document.getElementById("city-select");
+    const status = document.getElementById("status");
+    const weatherCard = document.getElementById("weather-card");
+    const addButton = document.getElementById("add-button");
+    const gpsButton = document.getElementById("gps-button");
+    const networkButton = document.getElementById("network-button");
+    const gpsProposal = document.getElementById("gps-proposal");
+    const gpsProposalName = document.getElementById("gps-proposal-name");
+    const gpsAcceptButton = document.getElementById("gps-accept");
+    const gpsCancelButton = document.getElementById("gps-cancel");
+    let pendingGpsCity = null;
+    const targetSpecies = document.getElementById("target-species");
+    const speciesGuidance = document.getElementById("species-guidance");
+    const fishingInputs = ["water-temperature", "sonar-depth", "water-clarity"].map(id => document.getElementById(id));
+
+    const fishingNotes = {
+      brochet: "À relever : température de l’eau, profondeur du poste, végétation et structures proches.",
+      perche: "À relever : bancs repérés au sondeur, profondeur active, température et clarté de l’eau.",
+      silure: "À relever : température de l’eau, profondeur, structure du fond et heure de sortie.",
+      coregone: "À relever : température de l’eau et profondeur des bancs ou de la thermocline au sondeur."
+    };
+
+    function restoreFishingSettings() {
+      try {
+        const settings = JSON.parse(localStorage.getItem("t-appmeteo-v2-fishing") || "{}");
+        if (settings.species) targetSpecies.value = settings.species;
+        fishingInputs.forEach(input => {
+          if (settings[input.id] !== undefined) input.value = settings[input.id];
+        });
+      } catch { /* Réglages absents ou invalides : valeurs par défaut. */ }
+    }
+
+    function saveFishingSettings() {
+      const settings = { species: targetSpecies.value };
+      fishingInputs.forEach(input => { settings[input.id] = input.value; });
+      try { localStorage.setItem("t-appmeteo-v2-fishing", JSON.stringify(settings)); } catch { /* Stockage local indisponible. */ }
+    }
+
+    function updateSpeciesGuidance() {
+      speciesGuidance.textContent = fishingNotes[targetSpecies.value] || fishingNotes.brochet;
+      saveFishingSettings();
+    }
+
+    restoreFishingSettings();
+    targetSpecies.addEventListener("change", updateSpeciesGuidance);
+    fishingInputs.forEach(input => input.addEventListener("change", saveFishingSettings));
+    updateSpeciesGuidance();
+    let cities = loadCities();
+
+    function loadCities() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        const known = new Set(initialCities.map(city => city.name.toLocaleLowerCase("fr")));
+        return [...initialCities, ...stored.filter(city => {
+          if (!city || typeof city.name !== "string" || known.has(city.name.toLocaleLowerCase("fr"))) return false;
+          known.add(city.name.toLocaleLowerCase("fr"));
+          return Number.isFinite(city.latitude) && Number.isFinite(city.longitude);
+        })];
+      } catch {
+        return [...initialCities];
+      }
+    }
+
+    function saveCities() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cities.slice(initialCities.length)));
+    }
+
+    function renderCities(selectedName) {
+      select.replaceChildren();
+      cities.forEach(city => {
+        const option = document.createElement("option");
+        option.value = city.name;
+        option.textContent = city.label || city.name;
+        select.append(option);
+      });
+      if (selectedName) select.value = selectedName;
+    }
+
+    async function fetchJson(url, params) {
+      const query = new URLSearchParams(params);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 12000);
+      try {
+        const response = await fetch(url + "?" + query, { signal: controller.signal, cache: "no-store" });
+        if (!response.ok) throw new Error("Le service externe est momentanément indisponible.");
+        return await response.json();
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    function findCity(name) {
+      return cities.find(city => city.name === name);
+    }
+
+    function addOrUpdateLocatedCity(city) {
+      const existing = cities.find(item => item.name.toLocaleLowerCase("fr") === city.name.toLocaleLowerCase("fr"));
+      if (existing) {
+        if (cities.indexOf(existing) < initialCities.length) {
+          renderCities(existing.name);
+          return existing;
+        }
+        existing.latitude = city.latitude;
+        existing.longitude = city.longitude;
+        existing.label = city.label;
+        saveCities();
+        renderCities(existing.name);
+        return existing;
+      }
+      cities.push(city);
+      saveCities();
+      renderCities(city.name);
+      return city;
+    }
+
+    function setLocationButtonsDisabled(disabled) {
+      gpsButton.disabled = disabled;
+      networkButton.disabled = disabled;
+    }
+
+    async function findLocality(latitude, longitude) {
+      const result = await fetchJson("https://nominatim.openstreetmap.org/reverse", {
+        lat: latitude,
+        lon: longitude,
+        format: "jsonv2",
+        addressdetails: 1,
+        "accept-language": "fr"
+      });
+      const address = result.address || {};
+      const locality = address.city || address.town || address.village || address.municipality || address.hamlet || address.suburb;
+      if (!locality) throw new Error("La position GPS est trouvée, mais aucune localité n’a été identifiée à proximité.");
+      const area = [address.state, address.country].filter(value => value && value !== locality).join(", ");
+      return {
+        name: locality,
+        label: area ? `${locality} (${area})` : locality,
+        latitude,
+        longitude
+      };
+    }
+
+    gpsButton.addEventListener("click", () => {
+      gpsProposal.hidden = true;
+      pendingGpsCity = null;
+      if (!navigator.geolocation) {
+        status.textContent = "La géolocalisation GPS n’est pas disponible dans ce navigateur.";
+        return;
+      }
+      setLocationButtonsDisabled(true);
+      status.textContent = "Demande de position GPS… Autorise l’accès à la position si le téléphone le demande.";
+      navigator.geolocation.getCurrentPosition(async position => {
+        try {
+          status.textContent = "Recherche de la localité correspondant à votre position…";
+          pendingGpsCity = await findLocality(position.coords.latitude, position.coords.longitude);
+          gpsProposalName.textContent = pendingGpsCity.label;
+          gpsProposal.hidden = false;
+          status.textContent = "Vérifie la localité proposée, puis confirme pour afficher sa météo.";
+          gpsAcceptButton.focus();
+        } catch (error) {
+          status.textContent = error.name === "AbortError"
+            ? "La recherche de localité a dépassé le délai. Réessaie quand le réseau sera meilleur."
+            : (error.message || "Impossible de trouver la localité pour cette position.");
+        } finally {
+          setLocationButtonsDisabled(false);
+        }
+      }, error => {
+        const messages = {
+          1: "Accès GPS refusé. Autorise la localisation dans les réglages du navigateur pour réessayer.",
+          2: "Position GPS indisponible. Vérifie que la localisation est activée sur le téléphone.",
+          3: "La recherche GPS a dépassé le délai. Réessaie dans un endroit avec une meilleure réception."
+        };
+        status.textContent = messages[error.code] || "Impossible d’obtenir la position GPS.";
+        setLocationButtonsDisabled(false);
+      }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
+    });
+
+    gpsAcceptButton.addEventListener("click", async () => {
+      if (!pendingGpsCity) return;
+      gpsAcceptButton.disabled = true;
+      gpsCancelButton.disabled = true;
+      const city = addOrUpdateLocatedCity(pendingGpsCity);
+      pendingGpsCity = null;
+      gpsProposal.hidden = true;
+      try {
+        await loadWeather();
+      } finally {
+        gpsAcceptButton.disabled = false;
+        gpsCancelButton.disabled = false;
+      }
+    });
+
+    gpsCancelButton.addEventListener("click", () => {
+      pendingGpsCity = null;
+      gpsProposal.hidden = true;
+      status.textContent = "Sélection GPS annulée.";
+      gpsButton.focus();
+    });
+
+    networkButton.addEventListener("click", async () => {
+      setLocationButtonsDisabled(true);
+      status.textContent = "Estimation de la ville à partir de la connexion…";
+      try {
+        const location = await fetchJson("https://ipapi.co/json/", {});
+        if (!location.city || !Number.isFinite(Number(location.latitude)) || !Number.isFinite(Number(location.longitude))) {
+          throw new Error("La ville n’a pas pu être déterminée à partir du réseau.");
+        }
+        const area = [location.region, location.country_name].filter(Boolean).join(", ");
+        const city = {
+          name: `Réseau: ${location.city}${area ? `, ${area}` : ""}`,
+          label: `${location.city}${area ? ` (${area})` : ""} — réseau, approx.`,
+          latitude: Number(location.latitude),
+          longitude: Number(location.longitude)
+        };
+        addOrUpdateLocatedCity(city);
+        const loaded = await loadWeather();
+        if (loaded) status.textContent = "Ville estimée par le réseau. La position peut être imprécise.";
+      } catch (error) {
+        status.textContent = error.name === "AbortError"
+          ? "Connexion lente : l’estimation réseau a dépassé le délai. Réessaie."
+          : (error.message || "Impossible d’estimer la ville via le réseau. Vérifie la connexion Internet.");
+      } finally {
+        setLocationButtonsDisabled(false);
+      }
+    });
+
+    async function coordinatesFor(city) {
+      if (Number.isFinite(city.latitude) && Number.isFinite(city.longitude)) return city;
+      const data = await fetchJson("https://geocoding-api.open-meteo.com/v1/search", {
+        name: city.name,
+        count: 5,
+        language: "fr",
+        countryCode: "CH",
+        format: "json"
+      });
+      const results = data.results || [];
+      const found = results.find(item => item.name.toLocaleLowerCase("fr") === city.name.toLocaleLowerCase("fr")) || results[0];
+      if (!found) throw new Error("Ville suisse introuvable. Vérifie l’orthographe et réessaie.");
+      city.latitude = found.latitude;
+      city.longitude = found.longitude;
+      city.label = city.name;
+      return city;
+    }
+
+    function weatherDescription(code) {
+      const descriptions = {
+        0: ["Ciel dégagé", "☀️"], 1: ["Principalement dégagé", "🌤️"],
+        2: ["Partiellement nuageux", "⛅"], 3: ["Couvert", "☁️"],
+        45: ["Brouillard", "🌫️"], 48: ["Brouillard givrant", "🌫️"],
+        51: ["Bruine légère", "🌦️"], 53: ["Bruine modérée", "🌦️"],
+        55: ["Bruine forte", "🌧️"], 56: ["Bruine verglaçante", "🌧️"],
+        57: ["Bruine verglaçante forte", "🌧️"], 61: ["Pluie faible", "🌧️"],
+        63: ["Pluie modérée", "🌧️"], 65: ["Pluie forte", "🌧️"],
+        66: ["Pluie verglaçante", "🌧️"], 67: ["Pluie verglaçante forte", "🌧️"],
+        71: ["Neige faible", "🌨️"], 73: ["Neige modérée", "🌨️"],
+        75: ["Neige forte", "❄️"], 77: ["Grains de neige", "🌨️"],
+        80: ["Averses faibles", "🌦️"], 81: ["Averses modérées", "🌧️"],
+        82: ["Averses violentes", "⛈️"], 85: ["Averses de neige", "🌨️"],
+        86: ["Averses de neige fortes", "❄️"], 95: ["Orage", "⛈️"],
+        96: ["Orage avec grêle", "⛈️"], 99: ["Orage avec forte grêle", "⛈️"]
+      };
+      return descriptions[code] || ["Conditions météo", "🌡️"];
+    }
+
+    function windDirection(degrees) {
+      const directions = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
+      return directions[Math.round(degrees / 45) % 8];
+    }
+
+    function showWeather(city, forecast) {
+      const current = forecast.current;
+      const units = forecast.current_units || {};
+      const [description, icon] = weatherDescription(current.weather_code);
+      document.getElementById("place-name").textContent = city.label || city.name;
+      document.getElementById("updated").textContent = "Mis à jour : " + new Date(current.time).toLocaleString("fr-CH");
+      document.getElementById("icon").textContent = icon;
+      document.getElementById("temperature").textContent = Math.round(current.temperature_2m) + (units.temperature_2m || "°C");
+      document.getElementById("condition").textContent = description;
+      document.getElementById("feels-like").textContent = Math.round(current.apparent_temperature) + (units.apparent_temperature || "°C");
+      document.getElementById("humidity").textContent = current.relative_humidity_2m + (units.relative_humidity_2m || "%");
+      document.getElementById("wind").textContent = Math.round(current.wind_speed_10m) + " " + (units.wind_speed_10m || "km/h") + " " + windDirection(current.wind_direction_10m);
+      document.getElementById("gusts").textContent = Math.round(current.wind_gusts_10m) + " " + (units.wind_gusts_10m || "km/h");
+      document.getElementById("rain").textContent = current.precipitation + " " + (units.precipitation || "mm");
+      document.getElementById("cloud-cover").textContent = current.cloud_cover + (units.cloud_cover || "%");
+      document.getElementById("pressure").textContent = Math.round(current.surface_pressure) + " " + (units.surface_pressure || "hPa");
+      const hourly = forecast.hourly || {};
+      const currentHour = (hourly.time || []).findIndex(time => time === current.time);
+      const previousPressure = currentHour >= 3 ? hourly.surface_pressure[currentHour - 3] : null;
+      const pressureChange = Number.isFinite(previousPressure) ? current.surface_pressure - previousPressure : null;
+      document.getElementById("pressure-trend").textContent = pressureChange === null
+        ? "Indisponible"
+        : `${pressureChange > 0 ? "+" : ""}${pressureChange.toFixed(1)} hPa`;
+      const daily = forecast.daily || {};
+      const sunrise = daily.sunrise && daily.sunrise[0] ? new Date(daily.sunrise[0]).toLocaleTimeString("fr-CH", { hour: "2-digit", minute: "2-digit" }) : "—";
+      const sunset = daily.sunset && daily.sunset[0] ? new Date(daily.sunset[0]).toLocaleTimeString("fr-CH", { hour: "2-digit", minute: "2-digit" }) : "—";
+      document.getElementById("sun-times").textContent = `${sunrise} / ${sunset}`;
+      weatherCard.hidden = false;
+    }
+
+    async function loadWeather() {
+      const city = findCity(select.value);
+      if (!city) return;
+      const cacheKey = "t-appmeteo-weather-" + city.name;
+      try {
+        const cached = JSON.parse(sessionStorage.getItem(cacheKey) || "null");
+        if (cached) showWeather(city, cached.forecast || { current: cached.current, current_units: cached.units });
+      } catch { /* Cache invalide : on récupère les dernières données. */ }
+
+      status.textContent = "Récupération de la météo…";
+      try {
+        const location = await coordinatesFor(city);
+        const data = await fetchJson("https://api.open-meteo.com/v1/forecast", {
+          latitude: location.latitude,
+          longitude: location.longitude,
+          current: "temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,surface_pressure",
+          hourly: "surface_pressure,wind_gusts_10m,cloud_cover",
+          daily: "sunrise,sunset",
+          temperature_unit: "celsius",
+          wind_speed_unit: "kmh",
+          timezone: "auto"
+        });
+        showWeather(city, data);
+        sessionStorage.setItem(cacheKey, JSON.stringify({ forecast: data }));
+        if (cities.indexOf(city) >= initialCities.length) saveCities();
+        status.textContent = "Météo mise à jour.";
+        return true;
+      } catch (error) {
+        status.textContent = error.name === "AbortError"
+          ? "Connexion lente : délai dépassé. Réessaie quand le réseau sera meilleur."
+          : (error.message || "Impossible de récupérer la météo. Vérifie la connexion et réessaie.");
+        return false;
+      }
+    }
+
+    document.getElementById("add-form").addEventListener("submit", async event => {
+      event.preventDefault();
+      const name = document.getElementById("new-city").value.trim();
+      if (!name) return;
+      const existing = cities.find(city => city.name.toLocaleLowerCase("fr") === name.toLocaleLowerCase("fr"));
+      if (existing) {
+        renderCities(existing.name);
+        document.getElementById("new-city").value = "";
+        await loadWeather();
+        return;
+      }
+
+      addButton.disabled = true;
+      status.textContent = "Recherche de la ville…";
+      try {
+        const city = await coordinatesFor({ name, label: name });
+        cities.push(city);
+        saveCities();
+        renderCities(city.name);
+        document.getElementById("new-city").value = "";
+        await loadWeather();
+      } catch (error) {
+        status.textContent = error.name === "AbortError"
+          ? "Connexion lente : la recherche a dépassé le délai. Réessaie."
+          : (error.message || "Ville introuvable. Vérifie l’orthographe.");
+      } finally {
+        addButton.disabled = false;
+      }
+    });
+
+    select.addEventListener("change", loadWeather);
+    document.getElementById("refresh-button").addEventListener("click", loadWeather);
+    renderCities();
+    loadWeather();
+  </script>
+</body>
+</html>
