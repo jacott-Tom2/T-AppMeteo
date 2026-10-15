@@ -10,6 +10,9 @@ Copie indépendante de T-AppMeteo, avec des conditions météo utiles pour prép
 - Pression atmosphérique et évolution calculée sur les trois dernières heures lorsque les données horaires le permettent.
 - Espèce recherchée : brochet, perche, silure ou corégone.
 - Observations facultatives enregistrées dans le navigateur : température de l’eau, profondeur des poissons repérée au sondeur et clarté de l’eau.
+- Phase de lune et estimation de l’éclairage lunaire.
+- Niveau horaire du lac de Neuchâtel à la station de Grandson, via l’API ouverte de l’OFEV ; la dernière mesure peut manquer ou avoir un léger délai.
+- Carnet local des sorties : date/heure, lieu ou poste, espèce, leurre/technique, température de l’eau, profondeur et résultat.
 
 ## Idées de paramètres spécifiques à chaque espèce
 
@@ -18,7 +21,7 @@ Copie indépendante de T-AppMeteo, avec des conditions météo utiles pour prép
 - **Silure** : température de l’eau, profondeur, structure du fond et heure de sortie.
 - **Corégone** : température de l’eau et profondeur des bancs ou de la thermocline repérée au sondeur.
 
-La météo vient d’Open-Meteo. La température et la clarté de l’eau ainsi que les profondeurs de pêche ne sont pas fournies par cette API : elles doivent être mesurées ou observées sur place. Ces indicateurs aident à préparer une sortie ; ils ne prédisent pas les prises.
+La météo vient d’Open-Meteo et le niveau du lac des observations hydrologiques de l’OFEV. La température et la clarté de l’eau ainsi que les profondeurs de pêche ne sont pas automatiquement relevées par l’application : elles doivent être mesurées ou observées sur place. La phase de lune est une estimation astronomique. Ces indicateurs aident à préparer une sortie ; ils ne prédisent pas les prises.
 
 ## Lancer en local
 
