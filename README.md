@@ -2,7 +2,7 @@
 
 > **En développement!**
 
-La version pêche en lac est disponible dans [T-AppMeteo V2](https://jacott-tom2.github.io/T-AppMeteo/v2/).
+La version pêche en lac est disponible dans [T-AppMeteo V2](https://jacott-tom2.github.io/T-AppMeteo/v2/index.html).
 
 Application météo légère, en français, conçue pour Yverdon-les-Bains (1400), Yvonand et les localités suisses ajoutées par l’utilisateur.
 
