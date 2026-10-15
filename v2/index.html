@@ -156,7 +156,7 @@
   <script>
     "use strict";
 
-    const STORAGE_KEY = "t-appmeteo-cities-v1";
+    const STORAGE_KEY = "t-appmeteo-v2-cities-v1";
     const initialCities = [
       { name: "Yverdon-les-Bains", label: "Yverdon-les-Bains (1400)" },
       { name: "Yvonand", label: "Yvonand" }
@@ -461,7 +461,7 @@
     async function loadWeather() {
       const city = findCity(select.value);
       if (!city) return;
-      const cacheKey = "t-appmeteo-weather-" + city.name;
+      const cacheKey = "t-appmeteo-v2-weather-" + city.name;
       try {
         const cached = JSON.parse(sessionStorage.getItem(cacheKey) || "null");
         if (cached) showWeather(city, cached.forecast || { current: cached.current, current_units: cached.units });
