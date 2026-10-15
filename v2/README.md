@@ -9,11 +9,11 @@ Copie indépendante de T-AppMeteo, avec des conditions météo utiles pour prép
 - Couverture nuageuse et heures de lever/coucher du soleil.
 - Pression atmosphérique et évolution calculée sur les trois dernières heures lorsque les données horaires le permettent.
 - Espèce recherchée : brochet, perche, silure ou corégone.
-- Module sondeur avec profil Lowrance Hook 5 HDI : température de l’eau, profondeur sous le bateau, profondeur des poissons, vitesse en nœuds et fréquence utilisée. Saisie manuelle, car la page web ne reçoit pas directement les données du sondeur.
+- Module sondeur avec profil Lowrance Hook 5 HDI : température de l’eau, profondeur sous le bateau, profondeur des poissons et fréquence utilisée. Prévu pour la pêche à l’arrêt ; saisie manuelle, car la page web ne reçoit pas directement les données du sondeur.
 - Observations facultatives enregistrées dans le navigateur : température et clarté de l’eau, ainsi que les profondeurs repérées au sondeur.
 - Phase de lune et estimation de l’éclairage lunaire.
 - Niveau horaire du lac de Neuchâtel à la station de Grandson, via l’API ouverte de l’OFEV ; la dernière mesure peut manquer ou avoir un léger délai.
-- Carnet local des sorties : date/heure, lieu ou poste, espèce, leurre/technique, température de l’eau, profondeurs du fond et des poissons, vitesse, fréquence sonar et notes.
+- Carnet local des sorties : date/heure, lieu ou poste, espèce, leurre/technique, température de l’eau, profondeurs du fond et des poissons, fréquence sonar et notes.
 
 ## Idées de paramètres spécifiques à chaque espèce
 
