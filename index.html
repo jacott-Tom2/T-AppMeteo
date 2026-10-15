@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b3d91">
+  <meta name="description" content="Météo légère pour Yverdon-les-Bains, Yvonand et les villes ajoutées.">
+  <title>T-AppMeteo</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #142033; background: #f3f7fb; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; }
+    main { width: min(100% - 24px, 620px); margin: 0 auto; padding: 24px 0 40px; }
+    header { margin-bottom: 22px; }
+    h1 { margin: 0; color: #0b3d91; font-size: clamp(1.8rem, 7vw, 2.5rem); }
+    .subtitle { margin: 7px 0 0; color: #536174; }
+    .panel, .weather { background: white; border: 1px solid #dce5ef; border-radius: 16px; padding: 18px; box-shadow: 0 6px 20px #173a5e0a; }
+    .panel { display: grid; gap: 14px; }
+    label { display: block; font-weight: 650; margin-bottom: 7px; }
+    select, input, button { width: 100%; min-height: 48px; border: 1px solid #b8c5d5; border-radius: 10px; padding: 11px 13px; font: inherit; background: white; }
+    button { border: 0; background: #0b3d91; color: white; font-weight: 650; cursor: pointer; }
+    button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid #84baff; outline-offset: 2px; }
+    button:disabled { opacity: .65; cursor: wait; }
+    .add-row { display: grid; gap: 9px; }
+    .location-actions { display: grid; gap: 9px; }
+    .location-actions button { background: #e7effa; color: #0b3d91; }
+    .privacy-note { margin: -5px 0 0; color: #64748b; font-size: .84rem; line-height: 1.45; }
+    #status { min-height: 1.4em; margin: 0; color: #536174; font-size: .94rem; }
+    .weather { margin-top: 16px; }
+    .weather[hidden] { display: none; }
+    .weather h2 { margin: 0 0 3px; font-size: 1.25rem; }
+    #updated { margin: 0 0 14px; color: #64748b; font-size: .9rem; }
+    .current { display: flex; align-items: center; gap: 14px; margin-bottom: 15px; }
+    #icon { font-size: 2.8rem; line-height: 1; }
+    #temperature { font-size: 2.8rem; font-weight: 750; letter-spacing: -.04em; }
+    #condition { color: #536174; }
+    dl { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    dl div { background: #f4f7fb; border-radius: 10px; padding: 12px; }
+    dt { color: #64748b; font-size: .85rem; }
+    dd { margin: 3px 0 0; font-weight: 650; }
+    .refresh { margin-top: 14px; min-height: 44px; background: #e7effa; color: #0b3d91; }
+    footer { padding: 18px 4px 0; text-align: center; color: #718096; font-size: .82rem; }
+    @media (min-width: 520px) { .add-row { grid-template-columns: 1fr 160px; } .location-actions { grid-template-columns: 1fr 1fr; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>☁️ T-AppMeteo</h1>
+      <p class="subtitle">La météo actuelle, simplement.</p>
+    </header>
+
+    <section class="panel" aria-label="Choisir une ville">
+      <div>
+        <label for="city-select">Ville</label>
+        <select id="city-select" aria-describedby="status"></select>
+      </div>
+      <div class="location-actions" aria-label="Localiser une ville">
+        <button id="gps-button" type="button">📍 Utiliser ma position GPS</button>
+        <button id="network-button" type="button">📶 Localiser par réseau (approx.)</button>
+      </div>
+      <p class="privacy-note">Le GPS demande l’autorisation du téléphone. Ses coordonnées sont conservées dans ce navigateur et envoyées à Open-Meteo pour la météo. La localisation réseau est moins précise : ipapi.co reçoit votre adresse IP pour estimer votre ville.</p>
+      <form id="add-form">
+        <label for="new-city">Ajouter une ville suisse</label>
+        <div class="add-row">
+          <input id="new-city" name="city" type="text" maxlength="80" placeholder="Ex. Lausanne" autocomplete="address-level2" required>
+          <button id="add-button" type="submit">Ajouter</button>
+        </div>
+      </form>
+      <p id="status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="weather" id="weather-card" aria-live="polite" hidden>
+      <h2 id="place-name"></h2>
+      <p id="updated"></p>
+      <div class="current">
+        <span id="icon" aria-hidden="true">🌤️</span>
+        <div><div id="temperature"></div><div id="condition"></div></div>
+      </div>
+      <dl>
+        <div><dt>Ressenti</dt><dd id="feels-like"></dd></div>
+        <div><dt>Humidité</dt><dd id="humidity"></dd></div>
+        <div><dt>Vent</dt><dd id="wind"></dd></div>
+        <div><dt>Précipitations</dt><dd id="rain"></dd></div>
+      </dl>
+      <button id="refresh-button" class="refresh" type="button">Actualiser la météo</button>
+    </section>
+
+    <footer>Données météo : Open-Meteo · Application en développement</footer>
+  </main>
+
+  <script>
+    "use strict";
+
+    const STORAGE_KEY = "t-appmeteo-cities-v1";
+    const initialCities = [
+      { name: "Yverdon-les-Bains", label: "Yverdon-les-Bains (1400)" },
+      { name: "Yvonand", label: "Yvonand" }
+    ];
+    const select = document.getElementById("city-select");
+    const status = document.getElementById("status");
+    const weatherCard = document.getElementById("weather-card");
+    const addButton = document.getElementById("add-button");
+    const gpsButton = document.getElementById("gps-button");
+    const networkButton = document.getElementById("network-button");
+    let cities = loadCities();
+
+    function loadCities() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        const known = new Set(initialCities.map(city => city.name.toLocaleLowerCase("fr")));
+        return [...initialCities, ...stored.filter(city => {
+          if (!city || typeof city.name !== "string" || known.has(city.name.toLocaleLowerCase("fr"))) return false;
+          known.add(city.name.toLocaleLowerCase("fr"));
+          return Number.isFinite(city.latitude) && Number.isFinite(city.longitude);
+        })];
+      } catch {
+        return [...initialCities];
+      }
+    }
+
+    function saveCities() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cities.slice(initialCities.length)));
+    }
+
+    function renderCities(selectedName) {
+      select.replaceChildren();
+      cities.forEach(city => {
+        const option = document.createElement("option");
+        option.value = city.name;
+        option.textContent = city.label || city.name;
+        select.append(option);
+      });
+      if (selectedName) select.value = selectedName;
+    }
+
+    async function fetchJson(url, params) {
+      const query = new URLSearchParams(params);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 12000);
+      try {
+        const response = await fetch(url + "?" + query, { signal: controller.signal, cache: "no-store" });
+        if (!response.ok) throw new Error("Le service météo est momentanément indisponible.");
+        return await response.json();
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    function findCity(name) {
+      return cities.find(city => city.name === name);
+    }
+
+    function addOrUpdateLocatedCity(city) {
+      const existing = cities.find(item => item.name.toLocaleLowerCase("fr") === city.name.toLocaleLowerCase("fr"));
+      if (existing) {
+        existing.latitude = city.latitude;
+        existing.longitude = city.longitude;
+        existing.label = city.label;
+        saveCities();
+        renderCities(existing.name);
+        return existing;
+      }
+      cities.push(city);
+      saveCities();
+      renderCities(city.name);
+      return city;
+    }
+
+    function setLocationButtonsDisabled(disabled) {
+      gpsButton.disabled = disabled;
+      networkButton.disabled = disabled;
+    }
+
+    gpsButton.addEventListener("click", () => {
+      if (!navigator.geolocation) {
+        status.textContent = "La géolocalisation GPS n’est pas disponible dans ce navigateur.";
+        return;
+      }
+      setLocationButtonsDisabled(true);
+      status.textContent = "Demande de position GPS… Autorise l’accès à la position si le téléphone le demande.";
+      navigator.geolocation.getCurrentPosition(async position => {
+        try {
+          addOrUpdateLocatedCity({
+            name: "Position GPS",
+            label: "Ma position GPS",
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
+          const loaded = await loadWeather();
+          if (loaded) status.textContent = "Météo de votre position GPS mise à jour.";
+        } catch (error) {
+          status.textContent = error.message || "Impossible de récupérer la météo pour cette position.";
+        } finally {
+          setLocationButtonsDisabled(false);
+        }
+      }, error => {
+        const messages = {
+          1: "Accès GPS refusé. Autorise la localisation dans les réglages du navigateur pour réessayer.",
+          2: "Position GPS indisponible. Vérifie que la localisation est activée sur le téléphone.",
+          3: "La recherche GPS a dépassé le délai. Réessaie dans un endroit avec une meilleure réception."
+        };
+        status.textContent = messages[error.code] || "Impossible d’obtenir la position GPS.";
+        setLocationButtonsDisabled(false);
+      }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
+    });
+
+    networkButton.addEventListener("click", async () => {
+      setLocationButtonsDisabled(true);
+      status.textContent = "Estimation de la ville à partir de la connexion…";
+      try {
+        const location = await fetchJson("https://ipapi.co/json/", {});
+        if (!location.city || !Number.isFinite(Number(location.latitude)) || !Number.isFinite(Number(location.longitude))) {
+          throw new Error("La ville n’a pas pu être déterminée à partir du réseau.");
+        }
+        const area = [location.region, location.country_name].filter(Boolean).join(", ");
+        const city = {
+          name: `Réseau: ${location.city}${area ? `, ${area}` : ""}`,
+          label: `${location.city}${area ? ` (${area})` : ""} — réseau, approx.`,
+          latitude: Number(location.latitude),
+          longitude: Number(location.longitude)
+        };
+        addOrUpdateLocatedCity(city);
+        const loaded = await loadWeather();
+        if (loaded) status.textContent = "Ville estimée par le réseau. La position peut être imprécise.";
+      } catch (error) {
+        status.textContent = error.name === "AbortError"
+          ? "Connexion lente : l’estimation réseau a dépassé le délai. Réessaie."
+          : (error.message || "Impossible d’estimer la ville via le réseau. Vérifie la connexion Internet.");
+      } finally {
+        setLocationButtonsDisabled(false);
+      }
+    });
+
+    async function coordinatesFor(city) {
+      if (Number.isFinite(city.latitude) && Number.isFinite(city.longitude)) return city;
+      const data = await fetchJson("https://geocoding-api.open-meteo.com/v1/search", {
+        name: city.name,
+        count: 5,
+        language: "fr",
+        countryCode: "CH",
+        format: "json"
+      });
+      const results = data.results || [];
+      const found = results.find(item => item.name.toLocaleLowerCase("fr") === city.name.toLocaleLowerCase("fr")) || results[0];
+      if (!found) throw new Error("Ville suisse introuvable. Vérifie l’orthographe et réessaie.");
+      city.latitude = found.latitude;
+      city.longitude = found.longitude;
+      city.label = city.name;
+      return city;
+    }
+
+    function weatherDescription(code) {
+      const descriptions = {
+        0: ["Ciel dégagé", "☀️"], 1: ["Principalement dégagé", "🌤️"],
+        2: ["Partiellement nuageux", "⛅"], 3: ["Couvert", "☁️"],
+        45: ["Brouillard", "🌫️"], 48: ["Brouillard givrant", "🌫️"],
+        51: ["Bruine légère", "🌦️"], 53: ["Bruine modérée", "🌦️"],
+        55: ["Bruine forte", "🌧️"], 56: ["Bruine verglaçante", "🌧️"],
+        57: ["Bruine verglaçante forte", "🌧️"], 61: ["Pluie faible", "🌧️"],
+        63: ["Pluie modérée", "🌧️"], 65: ["Pluie forte", "🌧️"],
+        66: ["Pluie verglaçante", "🌧️"], 67: ["Pluie verglaçante forte", "🌧️"],
+        71: ["Neige faible", "🌨️"], 73: ["Neige modérée", "🌨️"],
+        75: ["Neige forte", "❄️"], 77: ["Grains de neige", "🌨️"],
+        80: ["Averses faibles", "🌦️"], 81: ["Averses modérées", "🌧️"],
+        82: ["Averses violentes", "⛈️"], 85: ["Averses de neige", "🌨️"],
+        86: ["Averses de neige fortes", "❄️"], 95: ["Orage", "⛈️"],
+        96: ["Orage avec grêle", "⛈️"], 99: ["Orage avec forte grêle", "⛈️"]
+      };
+      return descriptions[code] || ["Conditions météo", "🌡️"];
+    }
+
+    function windDirection(degrees) {
+      const directions = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
+      return directions[Math.round(degrees / 45) % 8];
+    }
+
+    function showWeather(city, current, units) {
+      const [description, icon] = weatherDescription(current.weather_code);
+      document.getElementById("place-name").textContent = city.label || city.name;
+      document.getElementById("updated").textContent = "Mis à jour : " + new Date(current.time).toLocaleString("fr-CH");
+      document.getElementById("icon").textContent = icon;
+      document.getElementById("temperature").textContent = Math.round(current.temperature_2m) + (units.temperature_2m || "°C");
+      document.getElementById("condition").textContent = description;
+      document.getElementById("feels-like").textContent = Math.round(current.apparent_temperature) + (units.apparent_temperature || "°C");
+      document.getElementById("humidity").textContent = current.relative_humidity_2m + (units.relative_humidity_2m || "%");
+      document.getElementById("wind").textContent = Math.round(current.wind_speed_10m) + " " + (units.wind_speed_10m || "km/h") + " " + windDirection(current.wind_direction_10m);
+      document.getElementById("rain").textContent = current.precipitation + " " + (units.precipitation || "mm");
+      weatherCard.hidden = false;
+    }
+
+    async function loadWeather() {
+      const city = findCity(select.value);
+      if (!city) return;
+      const cacheKey = "t-appmeteo-weather-" + city.name;
+      try {
+        const cached = JSON.parse(sessionStorage.getItem(cacheKey) || "null");
+        if (cached) showWeather(city, cached.current, cached.units);
+      } catch { /* Cache invalide : on récupère les dernières données. */ }
+
+      status.textContent = "Récupération de la météo…";
+      try {
+        const location = await coordinatesFor(city);
+        const data = await fetchJson("https://api.open-meteo.com/v1/forecast", {
+          latitude: location.latitude,
+          longitude: location.longitude,
+          current: "temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m",
+          temperature_unit: "celsius",
+          wind_speed_unit: "kmh",
+          timezone: "auto"
+        });
+        showWeather(city, data.current, data.current_units || {});
+        sessionStorage.setItem(cacheKey, JSON.stringify({ current: data.current, units: data.current_units || {} }));
+        if (cities.indexOf(city) >= initialCities.length) saveCities();
+        status.textContent = "Météo mise à jour.";
+        return true;
+      } catch (error) {
+        status.textContent = error.name === "AbortError"
+          ? "Connexion lente : délai dépassé. Réessaie quand le réseau sera meilleur."
+          : (error.message || "Impossible de récupérer la météo. Vérifie la connexion et réessaie.");
+        return false;
+      }
+    }
+
+    document.getElementById("add-form").addEventListener("submit", async event => {
+      event.preventDefault();
+      const name = document.getElementById("new-city").value.trim();
+      if (!name) return;
+      const existing = cities.find(city => city.name.toLocaleLowerCase("fr") === name.toLocaleLowerCase("fr"));
+      if (existing) {
+        renderCities(existing.name);
+        document.getElementById("new-city").value = "";
+        await loadWeather();
+        return;
+      }
+
+      addButton.disabled = true;
+      status.textContent = "Recherche de la ville…";
+      try {
+        const city = await coordinatesFor({ name, label: name });
+        cities.push(city);
+        saveCities();
+        renderCities(city.name);
+        document.getElementById("new-city").value = "";
+        await loadWeather();
+      } catch (error) {
+        status.textContent = error.name === "AbortError"
+          ? "Connexion lente : la recherche a dépassé le délai. Réessaie."
+          : (error.message || "Ville introuvable. Vérifie l’orthographe.");
+      } finally {
+        addButton.disabled = false;
+      }
+    });
+
+    select.addEventListener("change", loadWeather);
+    document.getElementById("refresh-button").addEventListener("click", loadWeather);
+    renderCities();
+    loadWeather();
+  </script>
+</body>
+</html>
