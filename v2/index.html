@@ -104,8 +104,25 @@
             <input id="water-temperature" type="number" inputmode="decimal" min="0" max="35" step="0.1" placeholder="À mesurer sur place">
           </div>
           <div>
-            <label for="sonar-depth">Profondeur des poissons repérée au sondeur (m)</label>
+            <label for="sonar-depth">Profondeur sous le bateau affichée au sondeur (m)</label>
             <input id="sonar-depth" type="number" inputmode="decimal" min="0" max="500" step="0.5" placeholder="Optionnel">
+          </div>
+          <div>
+            <label for="fish-depth">Profondeur des poissons repérée (m)</label>
+            <input id="fish-depth" type="number" inputmode="decimal" min="0" max="500" step="0.5" placeholder="Optionnel">
+          </div>
+          <div>
+            <label for="boat-speed">Vitesse du bateau (nœuds)</label>
+            <input id="boat-speed" type="number" inputmode="decimal" min="0" max="80" step="0.1" placeholder="Ex. 0,3">
+          </div>
+          <div>
+            <label for="sonar-frequency">Fréquence utilisée</label>
+            <select id="sonar-frequency">
+              <option value="">Non renseignée</option>
+              <option value="200 kHz">200 kHz</option>
+              <option value="800 kHz">800 kHz</option>
+              <option value="200 + 800 kHz">200 + 800 kHz</option>
+            </select>
           </div>
           <div>
             <label for="water-clarity">Clarté de l’eau (observation)</label>
@@ -117,7 +134,7 @@
             </select>
           </div>
         </div>
-        <p class="metric-note">La température et la clarté de l’eau sont à mesurer ou observer. La profondeur vient de ton sondeur : l’application ne la devine pas.</p>
+        <p class="metric-note">Profil : Lowrance Hook 5 HDI. Exemple visible sur ta photo : 0,3 kn, 14,6 m sous le bateau et 20,3 °C. Saisie manuelle : le navigateur ne lit pas automatiquement l’écran du sondeur.</p>
       </section>
       <section class="weather" id="weather-card" aria-live="polite" hidden>
         <h2 id="place-name"></h2>
@@ -222,7 +239,7 @@
     let pendingGpsCity = null;
     const targetSpecies = document.getElementById("target-species");
     const speciesGuidance = document.getElementById("species-guidance");
-    const fishingInputs = ["water-temperature", "sonar-depth", "water-clarity"].map(id => document.getElementById(id));
+    const fishingInputs = ["water-temperature", "sonar-depth", "fish-depth", "boat-speed", "sonar-frequency", "water-clarity"].map(id => document.getElementById(id));
     const tripDate = document.getElementById("trip-date");
     const tripPlace = document.getElementById("trip-place");
     const tripLure = document.getElementById("trip-lure");
@@ -344,7 +361,7 @@
         const heading = document.createElement("p");
         heading.textContent = `${new Date(trip.date).toLocaleString("fr-CH")} · ${trip.species} · ${trip.place}`;
         entry.append(heading);
-        const details = [trip.lure && `Leurre/technique : ${trip.lure}`, trip.waterTemperature && `Eau : ${trip.waterTemperature} °C`, trip.depth && `Profondeur : ${trip.depth} m`, trip.result && `Notes : ${trip.result}`].filter(Boolean);
+        const details = [trip.lure && `Leurre/technique : ${trip.lure}`, trip.waterTemperature && `Eau : ${trip.waterTemperature} °C`, trip.depth && `Fond : ${trip.depth} m`, trip.fishDepth && `Poissons : ${trip.fishDepth} m`, trip.boatSpeed && `Vitesse : ${trip.boatSpeed} kn`, trip.sonarFrequency && `Sondeur : ${trip.sonarFrequency}`, trip.result && `Notes : ${trip.result}`].filter(Boolean);
         if (details.length) {
           const detail = document.createElement("p");
           detail.textContent = details.join(" · ");
@@ -374,7 +391,10 @@
         lure: tripLure.value.trim(),
         result: tripResult.value.trim(),
         waterTemperature: fishingInputs[0].value,
-        depth: fishingInputs[1].value
+        depth: fishingInputs[1].value,
+        fishDepth: fishingInputs[2].value,
+        boatSpeed: fishingInputs[3].value,
+        sonarFrequency: fishingInputs[4].value
       };
       const trips = loadTrips();
       trips.unshift(trip);
