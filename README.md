@@ -7,6 +7,7 @@ Application météo légère, en français, conçue pour Yverdon-les-Bains (1400
 ## Fonctionnalités prévues
 
 - Yverdon-les-Bains et Yvonand apparaissent en tête du menu déroulant.
+- La météo de la ville choisie s’affiche automatiquement juste sous le menu.
 - Un champ permet de rechercher et d’ajouter une ville suisse.
 - Chaque nouvelle ville est ajoutée à la suite de la liste et conservée dans le navigateur.
 - Bouton GPS à la demande, avec autorisation du téléphone, pour afficher et mémoriser la météo de la position.
