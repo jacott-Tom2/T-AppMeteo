@@ -2,29 +2,31 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0b3d91">
   <meta name="description" content="Météo légère pour Yverdon-les-Bains, Yvonand et les villes ajoutées.">
   <title>T-AppMeteo</title>
   <style>
-    :root { color-scheme: light; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #142033; background: #f3f7fb; }
+    :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; color: #142033; background: #f3f7fb; }
     * { box-sizing: border-box; }
     body { margin: 0; min-height: 100vh; }
-    main { width: min(100% - 24px, 620px); margin: 0 auto; padding: 24px 0 40px; }
-    header { margin-bottom: 22px; }
-    h1 { margin: 0; color: #0b3d91; font-size: clamp(1.8rem, 7vw, 2.5rem); }
+    main { width: calc(100% - 24px); max-width: 620px; margin: 0 auto; padding: 18px 0 28px; padding-top: calc(18px + env(safe-area-inset-top, 0px)); padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px)); }
+    header { margin-bottom: 16px; }
+    h1 { margin: 0; color: #0b3d91; font-size: 1.9rem; line-height: 1.15; }
     .subtitle { margin: 7px 0 0; color: #536174; }
     .panel, .weather { background: white; border: 1px solid #dce5ef; border-radius: 16px; padding: 18px; box-shadow: 0 6px 20px #173a5e0a; }
     .panel { display: grid; gap: 14px; }
     label { display: block; font-weight: 650; margin-bottom: 7px; }
-    select, input, button { width: 100%; min-height: 48px; border: 1px solid #b8c5d5; border-radius: 10px; padding: 11px 13px; font: inherit; background: white; }
+    select, input, button { width: 100%; min-height: 48px; border: 1px solid #b8c5d5; border-radius: 10px; padding: 11px 13px; font: inherit; font-size: 16px; background: white; }
     button { border: 0; background: #0b3d91; color: white; font-weight: 650; cursor: pointer; }
-    button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid #84baff; outline-offset: 2px; }
+    button:focus, select:focus, input:focus { outline: 3px solid #84baff; outline-offset: 2px; }
+    button:focus:not(:focus-visible), select:focus:not(:focus-visible), input:focus:not(:focus-visible) { outline: none; }
     button:disabled { opacity: .65; cursor: wait; }
+    button, select { touch-action: manipulation; }
     .add-row { display: grid; gap: 9px; }
     .location-actions { display: grid; gap: 9px; }
     .location-actions button { background: #e7effa; color: #0b3d91; }
-    .privacy-note { margin: -5px 0 0; color: #64748b; font-size: .84rem; line-height: 1.45; }
+    .privacy-note { margin: -5px 0 0; color: #536174; font-size: .875rem; line-height: 1.45; }
     #status { min-height: 1.4em; margin: 0; color: #536174; font-size: .94rem; }
     .weather { margin-top: 16px; }
     .weather[hidden] { display: none; }
@@ -38,9 +40,12 @@
     dl div { background: #f4f7fb; border-radius: 10px; padding: 12px; }
     dt { color: #64748b; font-size: .85rem; }
     dd { margin: 3px 0 0; font-weight: 650; }
-    .refresh { margin-top: 14px; min-height: 44px; background: #e7effa; color: #0b3d91; }
+    .refresh { margin-top: 14px; min-height: 48px; background: #e7effa; color: #0b3d91; }
     footer { padding: 18px 4px 0; text-align: center; color: #718096; font-size: .82rem; }
-    @media (min-width: 520px) { .add-row { grid-template-columns: 1fr 160px; } .location-actions { grid-template-columns: 1fr 1fr; } }
+    @supports (min-height: 100dvh) { body { min-height: 100dvh; } }
+    @media (min-width: 520px) { .add-row { grid-template-columns: 1fr 160px; } .location-actions { grid-template-columns: 1fr 1fr; } h1 { font-size: 2.2rem; } }
+    @media (max-width: 360px) { main { width: calc(100% - 20px); } .panel, .weather { padding: 14px; border-radius: 13px; } .panel { gap: 11px; } dl { grid-template-columns: 1fr; gap: 8px; } dl div { padding: 10px; } }
+    @media (max-height: 500px) and (orientation: landscape) { main { padding-top: calc(10px + env(safe-area-inset-top, 0px)); } header { margin-bottom: 10px; } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
   </style>
 </head>
