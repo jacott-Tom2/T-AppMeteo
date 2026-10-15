@@ -13,7 +13,9 @@ Application météo légère, en français, conçue pour Yverdon-les-Bains (1400
 - Bouton GPS à la demande, avec autorisation du téléphone, pour afficher et mémoriser la météo de la position.
 - Localisation réseau facultative par adresse IP pour estimer une ville lorsque le GPS n’est pas utilisé ; elle peut être imprécise.
 - Affichage des conditions actuelles : température, ressenti, humidité, vent et précipitations.
-- Interface responsive, adaptée aux téléphones et aux connexions mobiles 3G, 4G et 5G.
+- Interface responsive, adaptée à Safari sur iPhone 15 Pro Max comme aux anciens iPhone et petits écrans.
+- Zones sûres de l’écran respectées, champs sans zoom automatique au toucher, boutons tactiles d’au moins 48 px.
+- Fonctionne avec les connexions mobiles 3G, 4G et 5G.
 - Cache de session, chargement à la demande et délais d’attente pour mieux gérer les réseaux lents.
 - Aucune clé API ni dépendance Python externe.
 
