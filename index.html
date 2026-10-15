@@ -26,6 +26,11 @@
     .add-row { display: grid; gap: 9px; }
     .location-actions { display: grid; gap: 9px; }
     .location-actions button { background: #e7effa; color: #0b3d91; }
+    .gps-proposal { border: 1px solid #a9c8ee; border-radius: 12px; padding: 14px; background: #f3f8ff; }
+    .gps-proposal[hidden] { display: none; }
+    .gps-proposal p { margin: 0 0 10px; }
+    .proposal-actions { display: grid; gap: 8px; }
+    .proposal-actions .secondary { background: #e7effa; color: #0b3d91; }
     .privacy-note { margin: -5px 0 0; color: #536174; font-size: .875rem; line-height: 1.45; }
     #status { min-height: 1.4em; margin: 0; color: #536174; font-size: .94rem; }
     .weather { margin-top: 16px; }
@@ -44,6 +49,7 @@
     footer { padding: 18px 4px 0; text-align: center; color: #718096; font-size: .82rem; }
     @supports (min-height: 100dvh) { body { min-height: 100dvh; } }
     @media (min-width: 520px) { .add-row { grid-template-columns: 1fr 160px; } .location-actions { grid-template-columns: 1fr 1fr; } h1 { font-size: 2.2rem; } }
+    @media (min-width: 520px) { .proposal-actions { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 360px) { main { width: calc(100% - 20px); } .panel, .weather { padding: 14px; border-radius: 13px; } .panel { gap: 11px; } dl { grid-template-columns: 1fr; gap: 8px; } dl div { padding: 10px; } }
     @media (max-height: 500px) and (orientation: landscape) { main { padding-top: calc(10px + env(safe-area-inset-top, 0px)); } header { margin-bottom: 10px; } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
@@ -81,7 +87,15 @@
         <button id="gps-button" type="button">📍 Utiliser ma position GPS</button>
         <button id="network-button" type="button">📶 Localiser par réseau (approx.)</button>
       </div>
-      <p class="privacy-note">Le GPS demande l’autorisation du téléphone. Ses coordonnées sont conservées dans ce navigateur et envoyées à Open-Meteo pour la météo. La localisation réseau est moins précise : ipapi.co reçoit votre adresse IP pour estimer votre ville.</p>
+      <section id="gps-proposal" class="gps-proposal" aria-live="polite" hidden>
+        <p><strong>Lieu trouvé :</strong> <span id="gps-proposal-name"></span></p>
+        <p>Veux-tu utiliser cette ville pour afficher la météo ?</p>
+        <div class="proposal-actions">
+          <button id="gps-accept" type="button">Utiliser cette ville</button>
+          <button id="gps-cancel" class="secondary" type="button">Annuler</button>
+        </div>
+      </section>
+      <p class="privacy-note">Le GPS demande l’autorisation du téléphone. Ses coordonnées sont conservées dans ce navigateur, envoyées à OpenStreetMap pour trouver la localité, puis à Open-Meteo pour la météo. La localisation réseau est moins précise : ipapi.co reçoit votre adresse IP pour estimer votre ville.</p>
       <form id="add-form">
         <label for="new-city">Ajouter une ville suisse</label>
         <div class="add-row">
@@ -91,7 +105,7 @@
       </form>
     </section>
 
-    <footer>Données météo : Open-Meteo · Application en développement</footer>
+    <footer>Données météo : Open-Meteo · Géocodage : <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap contributors</a> · Application en développement</footer>
   </main>
 
   <script>
@@ -108,6 +122,11 @@
     const addButton = document.getElementById("add-button");
     const gpsButton = document.getElementById("gps-button");
     const networkButton = document.getElementById("network-button");
+    const gpsProposal = document.getElementById("gps-proposal");
+    const gpsProposalName = document.getElementById("gps-proposal-name");
+    const gpsAcceptButton = document.getElementById("gps-accept");
+    const gpsCancelButton = document.getElementById("gps-cancel");
+    let pendingGpsCity = null;
     let cities = loadCities();
 
     function loadCities() {
@@ -145,7 +164,7 @@
       const timeout = setTimeout(() => controller.abort(), 12000);
       try {
         const response = await fetch(url + "?" + query, { signal: controller.signal, cache: "no-store" });
-        if (!response.ok) throw new Error("Le service météo est momentanément indisponible.");
+        if (!response.ok) throw new Error("Le service externe est momentanément indisponible.");
         return await response.json();
       } finally {
         clearTimeout(timeout);
@@ -159,6 +178,10 @@
     function addOrUpdateLocatedCity(city) {
       const existing = cities.find(item => item.name.toLocaleLowerCase("fr") === city.name.toLocaleLowerCase("fr"));
       if (existing) {
+        if (cities.indexOf(existing) < initialCities.length) {
+          renderCities(existing.name);
+          return existing;
+        }
         existing.latitude = city.latitude;
         existing.longitude = city.longitude;
         existing.label = city.label;
@@ -177,7 +200,29 @@
       networkButton.disabled = disabled;
     }
 
+    async function findLocality(latitude, longitude) {
+      const result = await fetchJson("https://nominatim.openstreetmap.org/reverse", {
+        lat: latitude,
+        lon: longitude,
+        format: "jsonv2",
+        addressdetails: 1,
+        "accept-language": "fr"
+      });
+      const address = result.address || {};
+      const locality = address.city || address.town || address.village || address.municipality || address.hamlet || address.suburb;
+      if (!locality) throw new Error("La position GPS est trouvée, mais aucune localité n’a été identifiée à proximité.");
+      const area = [address.state, address.country].filter(value => value && value !== locality).join(", ");
+      return {
+        name: locality,
+        label: area ? `${locality} (${area})` : locality,
+        latitude,
+        longitude
+      };
+    }
+
     gpsButton.addEventListener("click", () => {
+      gpsProposal.hidden = true;
+      pendingGpsCity = null;
       if (!navigator.geolocation) {
         status.textContent = "La géolocalisation GPS n’est pas disponible dans ce navigateur.";
         return;
@@ -186,16 +231,16 @@
       status.textContent = "Demande de position GPS… Autorise l’accès à la position si le téléphone le demande.";
       navigator.geolocation.getCurrentPosition(async position => {
         try {
-          addOrUpdateLocatedCity({
-            name: "Position GPS",
-            label: "Ma position GPS",
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
-          });
-          const loaded = await loadWeather();
-          if (loaded) status.textContent = "Météo de votre position GPS mise à jour.";
+          status.textContent = "Recherche de la localité correspondant à votre position…";
+          pendingGpsCity = await findLocality(position.coords.latitude, position.coords.longitude);
+          gpsProposalName.textContent = pendingGpsCity.label;
+          gpsProposal.hidden = false;
+          status.textContent = "Vérifie la localité proposée, puis confirme pour afficher sa météo.";
+          gpsAcceptButton.focus();
         } catch (error) {
-          status.textContent = error.message || "Impossible de récupérer la météo pour cette position.";
+          status.textContent = error.name === "AbortError"
+            ? "La recherche de localité a dépassé le délai. Réessaie quand le réseau sera meilleur."
+            : (error.message || "Impossible de trouver la localité pour cette position.");
         } finally {
           setLocationButtonsDisabled(false);
         }
@@ -208,6 +253,28 @@
         status.textContent = messages[error.code] || "Impossible d’obtenir la position GPS.";
         setLocationButtonsDisabled(false);
       }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
+    });
+
+    gpsAcceptButton.addEventListener("click", async () => {
+      if (!pendingGpsCity) return;
+      gpsAcceptButton.disabled = true;
+      gpsCancelButton.disabled = true;
+      const city = addOrUpdateLocatedCity(pendingGpsCity);
+      pendingGpsCity = null;
+      gpsProposal.hidden = true;
+      try {
+        await loadWeather();
+      } finally {
+        gpsAcceptButton.disabled = false;
+        gpsCancelButton.disabled = false;
+      }
+    });
+
+    gpsCancelButton.addEventListener("click", () => {
+      pendingGpsCity = null;
+      gpsProposal.hidden = true;
+      status.textContent = "Sélection GPS annulée.";
+      gpsButton.focus();
     });
 
     networkButton.addEventListener("click", async () => {
