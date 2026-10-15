@@ -10,7 +10,7 @@ Application météo légère, en français, conçue pour Yverdon-les-Bains (1400
 - La météo de la ville choisie s’affiche automatiquement juste sous le menu.
 - Un champ permet de rechercher et d’ajouter une ville suisse.
 - Chaque nouvelle ville est ajoutée à la suite de la liste et conservée dans le navigateur.
-- Bouton GPS à la demande, avec autorisation du téléphone, pour afficher et mémoriser la météo de la position.
+- Bouton GPS à la demande : l’application propose la localité trouvée avant de l’ajouter et d’afficher sa météo.
 - Localisation réseau facultative par adresse IP pour estimer une ville lorsque le GPS n’est pas utilisé ; elle peut être imprécise.
 - Affichage des conditions actuelles : température, ressenti, humidité, vent et précipitations.
 - Interface responsive, adaptée à Safari sur iPhone 15 Pro Max comme aux anciens iPhone et petits écrans.
@@ -35,8 +35,8 @@ Pour tester depuis un autre appareil du même réseau local, lance le serveur av
 
 Pour l’utiliser depuis une connexion mobile en dehors du réseau local, héberge les fichiers sur un serveur accessible publiquement en HTTPS. `index.html` est un site statique léger et peut être publié avec GitHub Pages. Le script Python sert surtout à tester le projet ou à le lancer sur un serveur Python.
 
-Le GPS du navigateur nécessite une connexion sécurisée HTTPS (ou `localhost`) et l’autorisation de l’utilisateur. La position GPS ajoutée est enregistrée dans le stockage local du navigateur ; ses coordonnées sont envoyées à Open-Meteo pour obtenir la météo. L’option réseau envoie la requête à [ipapi.co](https://ipapi.co/api/) : ce service reçoit l’adresse IP publique et retourne une estimation de la ville, qui peut être inexacte sur un réseau mobile.
+Le GPS du navigateur nécessite une connexion sécurisée HTTPS (ou `localhost`) et l’autorisation de l’utilisateur. Après confirmation de la localité proposée, la position GPS est enregistrée dans le stockage local du navigateur. Ses coordonnées sont envoyées à [Nominatim / OpenStreetMap](https://nominatim.openstreetmap.org/) pour identifier la localité, puis à Open-Meteo pour obtenir la météo. L’option réseau envoie la requête à [ipapi.co](https://ipapi.co/api/) : ce service reçoit l’adresse IP publique et retourne une estimation de la ville, qui peut être inexacte sur un réseau mobile.
 
 ## Données météo
 
-Les données et la recherche des localités utilisent les API d’[Open-Meteo](https://open-meteo.com/). Une connexion Internet est nécessaire pour obtenir les données actuelles.
+Les données météo et la recherche des villes ajoutées utilisent les API d’[Open-Meteo](https://open-meteo.com/). Le GPS utilise le géocodage inverse de [Nominatim](https://nominatim.org/) basé sur les données © OpenStreetMap contributors. Une connexion Internet est nécessaire pour obtenir les données actuelles.
