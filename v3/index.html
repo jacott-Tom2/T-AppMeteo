@@ -65,6 +65,13 @@
     .bait-card h3 { margin: 0 0 5px; color: #0b3d91; font-size: 1rem; }
     .bait-card p { margin: 0 0 5px; font-size: .88rem; line-height: 1.35; }
     .bait-card button { grid-column: 1 / -1; min-height: 40px; background: #e7effa; color: #0b3d91; }
+    .gear-grid { display: grid; gap: 10px; }
+    .gear-fields { display: grid; gap: 9px; }
+    .gear-card { padding: 12px; border-radius: 10px; background: #f4f7fb; }
+    .gear-card h3 { margin: 0 0 5px; color: #0b3d91; }
+    .gear-card p { margin: 0 0 8px; font-size: .9rem; }
+    .gear-card button { min-height: 42px; background: #e7effa; color: #0b3d91; }
+    .sync-fields { display: grid; gap: 9px; }
     #stats-results { display: grid; gap: 9px; }
     .stats-card { padding: 12px; border-radius: 10px; background: #f4f7fb; overflow-wrap: anywhere; }
     .stats-card p { margin: 0 0 6px; }
@@ -278,6 +285,43 @@
         <div id="bait-list" class="bait-list" aria-live="polite"></div>
         <p class="metric-note">Les informations sont celles que tu saisis. Vérifie la profondeur annoncée par le fabricant : elle dépend du montage et de la récupération.</p>
       </section>
+      <section class="extra-panel" aria-labelledby="gear-title">
+        <h2 id="gear-title">Matériel de pêche</h2>
+        <p>Note le matériel emporté et associe-le à chaque sortie pour retrouver ce qui a été utilisé.</p>
+        <form id="gear-form">
+          <div class="gear-fields">
+            <div>
+              <label for="gear-category">Catégorie</label>
+              <select id="gear-category">
+                <option value="Canne">Canne</option><option value="Moulinet">Moulinet</option>
+                <option value="Tresse">Tresse</option><option value="Fil nylon">Fil nylon</option>
+                <option value="Aucune ligne">Aucune ligne</option><option value="Hameçon">Hameçon</option>
+                <option value="Appât">Appât</option>
+              </select>
+            </div>
+            <div><label for="gear-name">Nom / modèle</label><input id="gear-name" maxlength="100" required placeholder="Ex. canne verticale 2,10 m"></div>
+            <div><label for="gear-maker">Marque</label><input id="gear-maker" maxlength="80" placeholder="Facultatif"></div>
+            <div><label for="gear-spec">Taille, puissance ou poids</label><input id="gear-spec" maxlength="100" placeholder="Ex. 10–30 g, taille 3000, 0,18 mm"></div>
+            <div><label for="gear-notes">Notes</label><input id="gear-notes" maxlength="180" placeholder="Montage, résistance, usage…"></div>
+          </div>
+          <button type="submit">Ajouter au matériel</button>
+        </form>
+        <div id="gear-list" class="gear-grid" aria-live="polite"></div>
+      </section>
+      <section class="extra-panel" aria-labelledby="sync-title">
+        <h2 id="sync-title">Synchronisation du carnet et des photos</h2>
+        <p>Configure une adresse HTTPS de serveur privé. L’application synchronisera les sorties, les fiches de leurres, le matériel et les photos dès qu’une connexion est disponible. Le serveur peut être joignable par Wi‑Fi ou via Tailscale sur le réseau mobile.</p>
+        <form id="sync-form">
+          <div class="sync-fields">
+            <div><label for="sync-url">Adresse HTTPS du serveur de synchronisation</label><input id="sync-url" type="url" inputmode="url" placeholder="https://mon-serveur.example/api/sync" autocomplete="url"></div>
+            <div><label for="sync-token">Jeton privé du serveur</label><input id="sync-token" type="password" autocomplete="off" placeholder="Jeton configuré sur le serveur"></div>
+          </div>
+          <button id="sync-save" type="submit">Enregistrer et synchroniser</button>
+          <button id="sync-now" type="button" class="refresh">Synchroniser maintenant</button>
+        </form>
+        <p id="sync-status" role="status" aria-live="polite">Synchronisation non configurée. Les données ne quittent pas cet appareil tant qu’une adresse n’est pas renseignée.</p>
+        <p class="metric-note">Les appareils doivent utiliser le même serveur et le même jeton. Le serveur proposé dans le dépôt s’installe sur un ordinateur ou NAS privé ; l’accès distant peut passer par Tailscale. GitHub Pages seul ne synchronise pas les données. La connexion au serveur est désactivée jusqu’à ta configuration.</p>
+      </section>
       <section class="extra-panel" aria-labelledby="moon-title">
         <h2 id="moon-title">Phase de lune</h2>
         <p id="moon-phase" aria-live="polite">Calcul…</p>
@@ -341,6 +385,10 @@
             <div>
               <label for="trip-lure">Leurre</label>
               <input id="trip-lure" type="text" maxlength="100" list="bait-options" placeholder="Choisir dans la bibliothèque ou saisir un leurre">
+            </div>
+            <div>
+              <label>Matériel utilisé</label>
+              <div id="trip-gear-options" class="species-check-grid" aria-live="polite"></div>
             </div>
             <div>
               <label for="trip-catches">Poissons pris pendant cette sortie</label>
@@ -432,6 +480,11 @@
     const baitPhotoPreview = document.getElementById("bait-photo-preview");
     const baitPhotoStatus = document.getElementById("bait-photo-status");
     const baitOptions = document.getElementById("bait-options");
+    const gearForm = document.getElementById("gear-form");
+    const gearList = document.getElementById("gear-list");
+    const tripGearOptions = document.getElementById("trip-gear-options");
+    const GEAR_STORAGE_KEY = "t-appmeteo-v3-gear-v1";
+    const SYNC_SETTINGS_KEY = "t-appmeteo-v3-sync-settings";
     const TRIP_STORAGE_KEY = "t-appmeteo-v2-trips";
     const PHOTO_DB_NAME = "t-appmeteo-v3-photos";
     const PHOTO_STORE_NAME = "trip-photos";
@@ -682,13 +735,49 @@
     function loadBaits() {
       try {
         const items = JSON.parse(localStorage.getItem(BAIT_STORAGE_KEY) || "[]");
-        return Array.isArray(items) ? items.filter(item => item && typeof item.id === "string" && typeof item.name === "string") : [];
+        return Array.isArray(items) ? items.filter(item => item && typeof item.id === "string" && typeof item.name === "string" && !item.deletedAt) : [];
       } catch { return []; }
     }
 
     function saveBaits(items) {
       localStorage.setItem(BAIT_STORAGE_KEY, JSON.stringify(items.slice(0, 300)));
     }
+
+    function loadGear() {
+      try { const rows = JSON.parse(localStorage.getItem(GEAR_STORAGE_KEY) || "[]"); return Array.isArray(rows) ? rows.filter(row => row && typeof row.id === "string" && !row.deletedAt) : []; }
+      catch { return []; }
+    }
+
+    function saveGear(rows) { localStorage.setItem(GEAR_STORAGE_KEY, JSON.stringify(rows.slice(0, 300))); }
+
+    function renderGear() {
+      gearList.replaceChildren();
+      tripGearOptions.replaceChildren();
+      const rows = loadGear();
+      if (!rows.length) {
+        const empty = document.createElement("p"); empty.className = "metric-note"; empty.textContent = "Aucun matériel enregistré pour le moment."; gearList.append(empty);
+        const hint = document.createElement("span"); hint.className = "metric-note"; hint.textContent = "Ajoute du matériel pour pouvoir le sélectionner sur une sortie."; tripGearOptions.append(hint);
+        return;
+      }
+      rows.forEach(item => {
+        const card = document.createElement("article"); card.className = "gear-card";
+        const title = document.createElement("h3"); title.textContent = `${item.category} · ${item.name}`;
+        const detail = document.createElement("p"); detail.textContent = [item.maker, item.spec, item.notes].filter(Boolean).join(" · ") || "Aucun détail";
+        const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "Retirer";
+        remove.addEventListener("click", () => { const all = JSON.parse(localStorage.getItem(GEAR_STORAGE_KEY) || "[]"); const row = all.find(value => value.id === item.id); if (row) { row.deletedAt = new Date().toISOString(); row.updatedAt = row.deletedAt; localStorage.setItem(GEAR_STORAGE_KEY, JSON.stringify(all)); } renderGear(); performSync(); });
+        card.append(title, detail, remove); gearList.append(card);
+        const label = document.createElement("label"); label.className = "species-check";
+        const check = document.createElement("input"); check.type = "checkbox"; check.name = "trip-gear"; check.value = item.id;
+        label.append(check, document.createTextNode(` ${item.category} : ${item.name}`)); tripGearOptions.append(label);
+      });
+    }
+
+    gearForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const row = { id: makeId(), updatedAt: new Date().toISOString(), category: document.getElementById("gear-category").value, name: document.getElementById("gear-name").value.trim(), maker: document.getElementById("gear-maker").value.trim(), spec: document.getElementById("gear-spec").value.trim(), notes: document.getElementById("gear-notes").value.trim() };
+      const all = JSON.parse(localStorage.getItem(GEAR_STORAGE_KEY) || "[]"); saveGear([row, ...all]); gearForm.reset(); renderGear(); performSync();
+    });
+    renderGear();
 
     function renderBaits() {
       const renderToken = ++baitRenderToken;
@@ -762,11 +851,14 @@
           remove.type = "button";
           remove.textContent = "Retirer de la bibliothèque";
           remove.addEventListener("click", async () => {
-            saveBaits(loadBaits().filter(item => item.id !== bait.id));
+            const all = JSON.parse(localStorage.getItem(BAIT_STORAGE_KEY) || "[]");
+            const row = all.find(item => item.id === bait.id);
+            if (row) { row.deletedAt = new Date().toISOString(); row.updatedAt = row.deletedAt; localStorage.setItem(BAIT_STORAGE_KEY, JSON.stringify(all)); }
             if (bait.photoId) {
               try { await deleteTripPhotos(`bait:${bait.id}`); } catch { /* La fiche est retirée même si le stockage image est indisponible. */ }
             }
             renderBaits();
+            performSync();
           });
           card.append(remove);
           baitListElement.append(card);
@@ -836,6 +928,7 @@
       }
       const bait = {
         id: makeId(),
+        updatedAt: new Date().toISOString(),
         name,
         manufacturer: document.getElementById("bait-manufacturer").value.trim(),
         size: document.getElementById("bait-size").value,
@@ -850,13 +943,15 @@
       saveButton.disabled = true;
       try {
         if (pendingBaitPhoto) await persistTripPhotos(`bait:${bait.id}`, [pendingBaitPhoto]);
-        saveBaits([bait, ...loadBaits()]);
+        const allBaits = JSON.parse(localStorage.getItem(BAIT_STORAGE_KEY) || "[]");
+        saveBaits([bait, ...allBaits]);
         baitForm.reset();
         pendingBaitPhoto = null;
         clearObjectUrls(baitPreviewUrls);
         baitPhotoPreview.replaceChildren();
         baitPhotoStatus.textContent = "Leurre ajouté à la bibliothèque sur cet appareil.";
         renderBaits();
+        performSync();
       } catch (error) {
         if (bait.photoId) {
           try { await deleteTripPhotos(`bait:${bait.id}`); } catch { /* Nettoyage au mieux après un échec local. */ }
@@ -912,7 +1007,7 @@
     function loadTrips() {
       try {
         const trips = JSON.parse(localStorage.getItem(TRIP_STORAGE_KEY) || "[]");
-        return Array.isArray(trips) ? trips.filter(trip => trip && typeof trip.id === "string") : [];
+        return Array.isArray(trips) ? trips.filter(trip => trip && typeof trip.id === "string" && !trip.deletedAt) : [];
       } catch { return []; }
     }
 
@@ -932,7 +1027,8 @@
         const heading = document.createElement("p");
         heading.textContent = `${new Date(trip.date).toLocaleString("fr-CH")} · ${trip.species} · ${trip.place} · Pêcheur : ${trip.angler || "non précisé"}`;
         entry.append(heading);
-        const details = [trip.technique && `Technique : ${trip.technique}`, trip.animation && `Animation : ${trip.animation}`, trip.lure && `Leurre : ${trip.lure}`, Number.isFinite(Number(trip.catches)) && `Prises : ${trip.catches}`, trip.waterTemperature && `Eau : ${trip.waterTemperature} °C`, trip.depth && `Fond : ${trip.depth} m`, trip.fishDepth && `Poissons : ${trip.fishDepth} m`, trip.sonarFrequency && `Sondeur : ${trip.sonarFrequency}`, trip.result && `Notes : ${trip.result}`].filter(Boolean);
+        const gearNames = (trip.gear || []).map(id => loadGear().find(item => item.id === id)).filter(Boolean).map(item => `${item.category} : ${item.name}`);
+        const details = [trip.technique && `Technique : ${trip.technique}`, trip.animation && `Animation : ${trip.animation}`, trip.lure && `Leurre : ${trip.lure}`, gearNames.length && `Matériel : ${gearNames.join(", ")}`, Number.isFinite(Number(trip.catches)) && `Prises : ${trip.catches}`, trip.waterTemperature && `Eau : ${trip.waterTemperature} °C`, trip.depth && `Fond : ${trip.depth} m`, trip.fishDepth && `Poissons : ${trip.fishDepth} m`, trip.sonarFrequency && `Sondeur : ${trip.sonarFrequency}`, trip.result && `Notes : ${trip.result}`].filter(Boolean);
         if (details.length) {
           const detail = document.createElement("p");
           detail.textContent = details.join(" · ");
@@ -960,9 +1056,11 @@
         remove.type = "button";
         remove.textContent = "Supprimer cette sortie";
         remove.addEventListener("click", async () => {
-          saveTrips(loadTrips().filter(item => item.id !== trip.id));
+          const allTrips = JSON.parse(localStorage.getItem(TRIP_STORAGE_KEY) || "[]");
+          const removed = allTrips.find(item => item.id === trip.id);
+          if (removed) { removed.deletedAt = new Date().toISOString(); removed.updatedAt = removed.deletedAt; saveTrips(allTrips); }
           try { await deleteTripPhotos(trip.id); } catch { /* Le carnet reste supprimé même si le navigateur ne nettoie pas les images. */ }
-          await renderTrips();
+          await renderTrips(); performSync();
         });
         entry.append(remove);
         tripList.append(entry);
@@ -1138,6 +1236,7 @@
       }
       const trip = {
         id: makeId(),
+        updatedAt: new Date().toISOString(),
         date: tripDate.value,
         angler,
         place: tripPlace.value.trim(),
@@ -1162,7 +1261,8 @@
         weather: currentWeatherSnapshot ? { ...currentWeatherSnapshot } : null,
         photos: queuedPhotos.map(photo => ({ id: photo.id, category: photo.category }))
       };
-      const trips = loadTrips();
+      trip.gear = Array.from(tripGearOptions.querySelectorAll('input[name="trip-gear"]:checked')).map(input => input.value);
+      const trips = JSON.parse(localStorage.getItem(TRIP_STORAGE_KEY) || "[]");
       trips.unshift(trip);
       const saveButton = document.getElementById("save-trip");
       saveButton.disabled = true;
@@ -1180,6 +1280,7 @@
         tripResult.value = "";
         tripDate.value = localDateTimeValue(new Date());
         document.getElementById("status").textContent = "Sortie enregistrée dans ce navigateur.";
+        performSync();
       } catch (error) {
         try { await deleteTripPhotos(trip.id); } catch { /* Aucun enregistrement photo exploitable n’est gardé. */ }
         document.getElementById("status").textContent = error.message || "Impossible d’enregistrer la sortie dans le navigateur.";
@@ -1525,6 +1626,103 @@
     const initialSelectedCity = findCity(select.value);
     if (initialSelectedCity) tripPlace.value = initialSelectedCity.label || initialSelectedCity.name;
     loadWeather();
+    function syncSetting() {
+      try { return JSON.parse(localStorage.getItem(SYNC_SETTINGS_KEY) || "{}"); } catch { return {}; }
+    }
+    const syncUrlInput = document.getElementById("sync-url");
+    const syncTokenInput = document.getElementById("sync-token");
+    const syncStatus = document.getElementById("sync-status");
+    const savedSyncSettings = syncSetting();
+    syncUrlInput.value = savedSyncSettings.url || "";
+    syncTokenInput.value = savedSyncSettings.token || "";
+    let syncRunning = false;
+
+    function allStoredRows(key) {
+      try { const rows = JSON.parse(localStorage.getItem(key) || "[]"); return Array.isArray(rows) ? rows : []; } catch { return []; }
+    }
+    function newerRows(localRows, remoteRows) {
+      const merged = new Map();
+      [...localRows, ...remoteRows].forEach(row => {
+        if (!row || typeof row.id !== "string") return;
+        const current = merged.get(row.id);
+        const timestamp = value => Date.parse(value.updatedAt || value.date || "1970-01-01T00:00:00Z") || 0;
+        if (!current || timestamp(row) >= timestamp(current)) merged.set(row.id, { ...row, updatedAt: row.updatedAt || row.date || "1970-01-01T00:00:00Z" });
+      });
+      return Array.from(merged.values());
+    }
+    function blobAsDataUrl(blob) {
+      return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = () => reject(new Error("Lecture d’une photo impossible.")); reader.readAsDataURL(blob); });
+    }
+    function blobFromDataUrl(value) {
+      const [meta, payload] = String(value).split(",", 2);
+      const mime = (meta.match(/^data:([^;]+)/) || [])[1] || "image/jpeg";
+      const binary = atob(payload || ""); const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return new Blob([bytes], { type: mime });
+    }
+    async function readAllPhotos() {
+      const db = await openPhotoDatabase();
+      try { return await new Promise((resolve, reject) => { const tx = db.transaction(PHOTO_STORE_NAME, "readonly"); const request = tx.objectStore(PHOTO_STORE_NAME).getAll(); request.onsuccess = () => resolve(request.result || []); request.onerror = () => reject(request.error); }); }
+      finally { db.close(); }
+    }
+    async function replaceAllPhotos(rows) {
+      const db = await openPhotoDatabase();
+      try { await new Promise((resolve, reject) => { const tx = db.transaction(PHOTO_STORE_NAME, "readwrite"); const store = tx.objectStore(PHOTO_STORE_NAME); store.clear(); rows.forEach(row => store.put({ id: row.id, tripId: row.tripId, category: row.category, blob: row.blob })); tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); tx.onabort = () => reject(tx.error); }); }
+      finally { db.close(); }
+    }
+    async function performSync() {
+      const settings = syncSetting();
+      if (!settings.url || !settings.token || !navigator.onLine || syncRunning) return;
+      let endpoint;
+      try { endpoint = new URL(settings.url); if (endpoint.protocol !== "https:") throw new Error("L’adresse doit commencer par https:// pour protéger les données et fonctionner depuis GitHub Pages."); }
+      catch (error) { syncStatus.textContent = error.message || "Adresse de synchronisation invalide."; return; }
+      syncRunning = true; syncStatus.textContent = "Synchronisation du carnet, du matériel et des photos…";
+      try {
+        const trips = allStoredRows(TRIP_STORAGE_KEY);
+        const baits = allStoredRows(BAIT_STORAGE_KEY);
+        const gear = allStoredRows(GEAR_STORAGE_KEY);
+        const activeTripIds = new Set(trips.filter(row => !row.deletedAt).map(row => row.id));
+        const activeBaitPhotoIds = new Set(baits.filter(row => !row.deletedAt && row.photoId).map(row => row.photoId));
+        const photos = (await readAllPhotos()).filter(photo => activeTripIds.has(photo.tripId) || activeBaitPhotoIds.has(photo.id));
+        const photosPayload = await Promise.all(photos.map(async photo => ({ id: photo.id, tripId: photo.tripId, category: photo.category, data: await blobAsDataUrl(photo.blob) })));
+        const localBundle = { trips, baits, gear, photos: photosPayload };
+        const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 60000);
+        let response;
+        try { response = await fetch(settings.url, { method: "PUT", headers: { "Authorization": `Bearer ${settings.token}`, "Content-Type": "application/json" }, body: JSON.stringify(localBundle), signal: controller.signal }); }
+        finally { clearTimeout(timeout); }
+        if (!response.ok) throw new Error(response.status === 401 ? "Jeton refusé par le serveur." : `Serveur de synchronisation : erreur ${response.status}.`);
+        const remote = await response.json();
+        const mergedTrips = newerRows(trips, remote.trips || []);
+        const mergedBaits = newerRows(baits, remote.baits || []);
+        const mergedGear = newerRows(gear, remote.gear || []);
+        localStorage.setItem(TRIP_STORAGE_KEY, JSON.stringify(mergedTrips));
+        localStorage.setItem(BAIT_STORAGE_KEY, JSON.stringify(mergedBaits));
+        localStorage.setItem(GEAR_STORAGE_KEY, JSON.stringify(mergedGear));
+        const mergedActiveTripIds = new Set(mergedTrips.filter(row => !row.deletedAt).map(row => row.id));
+        const mergedBaitPhotoIds = new Set(mergedBaits.filter(row => !row.deletedAt && row.photoId).map(row => row.photoId));
+        const allPhotoRows = new Map();
+        [...photosPayload, ...(remote.photos || [])].forEach(photo => { if (photo && photo.id && photo.data) allPhotoRows.set(photo.id, photo); });
+        const livePhotos = Array.from(allPhotoRows.values()).filter(photo => mergedActiveTripIds.has(photo.tripId) || mergedBaitPhotoIds.has(photo.id));
+        await replaceAllPhotos(livePhotos.map(photo => ({ id: photo.id, tripId: photo.tripId, category: photo.category, blob: blobFromDataUrl(photo.data) })));
+        syncStatus.textContent = `Synchronisé à ${new Date().toLocaleTimeString("fr-CH", { hour: "2-digit", minute: "2-digit" })} · ${mergedTrips.filter(row => !row.deletedAt).length} sorties · ${livePhotos.length} photos.`;
+        await renderTrips(); renderBaits(); renderGear();
+      } catch (error) {
+        syncStatus.textContent = `${error.message || "Serveur indisponible."} Les données locales sont conservées et seront réessayées quand le réseau sera accessible.`;
+      } finally { syncRunning = false; }
+    }
+    document.getElementById("sync-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const url = syncUrlInput.value.trim(); const token = syncTokenInput.value.trim();
+      if (!url || !token) { syncStatus.textContent = "Indique l’adresse HTTPS et le jeton pour activer la synchronisation."; return; }
+      localStorage.setItem(SYNC_SETTINGS_KEY, JSON.stringify({ url, token }));
+      syncStatus.textContent = "Configuration enregistrée sur cet appareil."; performSync();
+    });
+    document.getElementById("sync-now").addEventListener("click", performSync);
+    window.addEventListener("online", performSync);
+    window.addEventListener("focus", performSync);
+    if (savedSyncSettings.url && savedSyncSettings.token) performSync();
+    setInterval(performSync, 120000);
+
   </script>
 </body>
 </html>
