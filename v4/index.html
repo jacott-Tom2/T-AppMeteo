@@ -776,8 +776,8 @@
     bindCustomSelect(document.getElementById("sonar-frequency"), "sonarFrequencies", "sonar-frequency-entry", "sonar-frequency-new", "sonar-frequency-confirm", [document.getElementById("sonar-frequency")]);
     bindCustomSelect(document.getElementById("water-clarity"), "waterClarities", "water-clarity-entry", "water-clarity-new", "water-clarity-confirm", [document.getElementById("water-clarity")]);
     bindCustomSelect(document.getElementById("gear-category"), "gearCategories", "gear-category-entry", "gear-category-new", "gear-category-confirm", [document.getElementById("gear-category")]);
-    bindCustomSelect(tripTechnique, "techniques", "technique-entry", "technique-new", "technique-confirm", [tripTechnique]);
-    bindCustomSelect(tripPhotoCategory, "photoCategories", "photo-category-entry", "photo-category-new", "photo-category-confirm", [tripPhotoCategory]);
+    bindCustomSelect(tripTechnique, "techniques", "trip-technique-entry", "trip-technique-new", "trip-technique-confirm", [tripTechnique]);
+    bindCustomSelect(tripPhotoCategory, "photoCategories", "trip-photo-category-entry", "trip-photo-category-new", "trip-photo-category-confirm", [tripPhotoCategory]);
     bindCustomSelect(tripAngler, "anglers", "angler-entry", "new-angler", "confirm-angler", [tripAngler]);
     tripAngler.addEventListener("change", () => { newAngler.required = tripAngler.value === "__new__"; });
     fishingInputs.forEach(input => input.addEventListener("change", () => {
