@@ -188,17 +188,7 @@
         <summary>🌦️ Conditions météorologiques et observations</summary>
         <div class="accordion-body">
       <section class="fishing-panel" aria-labelledby="fishing-title">
-        <h2 id="fishing-title">Paramètres pêche en lac</h2>
-        <div>
-          <label for="target-species">Espèce recherchée</label>
-          <select id="target-species">
-            <option value="brochet">Brochet</option>
-            <option value="perche">Perche</option>
-            <option value="silure">Silure</option>
-            <option value="coregone">Corégone</option>
-          </select>
-        </div>
-        <p id="species-guidance" aria-live="polite"></p>
+        <h2 id="fishing-title">Observations de l’eau et du sondeur</h2>
         <div class="fishing-fields">
           <div>
             <label for="water-temperature">Température de l’eau (si connue, °C)</label>
@@ -234,6 +224,25 @@
         <p class="metric-note">Profil : Lowrance Hook 5 HDI. Exemple visible sur ta photo : 14,6 m sous le bateau et 20,3 °C. Saisie manuelle : le navigateur ne lit pas automatiquement l’écran du sondeur.</p>
       </section>
       </div>
+      </details>
+      <details class="accordion" data-section="fish">
+        <summary>🐟 Poissons</summary>
+        <div class="accordion-body">
+          <section class="fishing-panel" aria-labelledby="species-title">
+            <h2 id="species-title">Espèce recherchée</h2>
+        <div>
+          <label for="target-species">Espèce recherchée</label>
+          <select id="target-species">
+            <option value="brochet">Brochet</option>
+            <option value="perche">Perche</option>
+            <option value="silure">Silure</option>
+            <option value="coregone">Corégone</option>
+          </select>
+        </div>
+        <p id="species-guidance" aria-live="polite"></p>
+            <p class="metric-note">Les poissons capturés se notent dans « Fin de session » pour alimenter les cumuls, coupes et records personnels.</p>
+          </section>
+        </div>
       </details>
       <details class="accordion" data-section="techniques">
         <summary>🎣 Techniques de pêche et matériel</summary>
@@ -504,10 +513,10 @@
         </div>
       </details>
       <details class="accordion" data-section="advice">
-        <summary>📊 Résumé, conseil et statistiques</summary>
+        <summary>📊 Résumé, retour et informations</summary>
         <div class="accordion-body">
           <section class="extra-panel" aria-labelledby="stats-title">
-          <h2 id="stats-title">Résumé statistique et conseil du jour</h2>
+          <h2 id="stats-title">Statistiques et conseil de pêche du jour</h2>
           <div id="stats-results" aria-live="polite"></div>
         <p class="metric-note">Les pistes de spot, technique, leurre, animation et profondeur se basent sur les sorties de l’espèce choisie, la météo proche et les observations renseignées. Ce sont des tendances, pas une garantie de prise.</p>
           </section>
