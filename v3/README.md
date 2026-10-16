@@ -2,31 +2,43 @@
 
 V3 est une copie indépendante de la V2, adaptée à la pêche à l’arrêt sur le lac de Neuchâtel. Elle conserve le carnet, le sondeur manuel Lowrance Hook 5 HDI, les statistiques par espèce et les conseils issus des sorties enregistrées.
 
-## Sources ajoutées
+## Fonctions de pêche
+
+- Logo vectoriel « Jarod Jacot Fishing », inspiré des couleurs turquoise, crème, anthracite et rouge du bateau.
+- Bibliothèque de leurres avec photo, nom, fabricant, taille, poids, profondeur, animation et espèces ciblées (brochet, perche, silure, corégone).
+- Inventaire : canne, moulinet, tresse, fil nylon, aucune ligne, hameçon et appât. Le matériel peut être sélectionné dans chaque sortie.
+- Carnet avec pêcheur (Jarod, Thomas ou nom ajouté), lieu, prises, météo, observations du sondeur, notes et photos prises sur le moment ou choisies dans la photothèque.
+- Catégories photo : leurre, poisson, ou leurre et poisson ensemble.
+- Statistiques par espèce et pistes de spot, technique, animation, leurre et profondeur, fondées sur les sorties enregistrées. Elles ne garantissent pas une prise.
+
+## Synchroniser plusieurs appareils
+
+Le carnet et les photos restent enregistrés sur l’appareil jusqu’à ce qu’un serveur soit configuré. Une fois l’adresse HTTPS et le jeton du serveur saisis dans **Synchronisation du carnet et des photos**, l’application synchronise les sorties, les fiches de leurres, le matériel et les images au retour du réseau, au retour dans l’application et périodiquement pendant qu’elle est ouverte. Les saisies hors connexion restent sur l’appareil pour le prochain essai.
+
+Le serveur Python fourni ici est un petit service privé, sans dépendance externe. Il doit être installé sur un ordinateur ou NAS toujours joignable. Pour l’accès depuis GitHub Pages, il faut le publier derrière un accès HTTPS avec authentification par jeton. Une option consiste à utiliser un reverse proxy Tailscale avec HTTPS : les appareils peuvent alors le joindre sur le Wi-Fi ou en réseau mobile lorsque Tailscale est connecté. Ne publie pas le port du service directement sur Internet. Les photos et le carnet envoyés au serveur sont des données personnelles.
+
+Exemple de lancement sur le serveur privé (génère un jeton aléatoire unique et garde-le secret) :
+
+```bash
+cd v3
+export TAPPMETEO_SYNC_TOKEN='remplacer-par-un-secret-aleatoire-de-32-caracteres-ou-plus'
+export TAPPMETEO_SYNC_HOST='127.0.0.1'
+export TAPPMETEO_SYNC_PORT='8765'
+python3 sync_server.py
+```
+
+Le service attend les requêtes `PUT /api/sync`. Dans l’application, saisis l’URL HTTPS complète, par exemple `https://nom-prive.example/api/sync`, ainsi que le même jeton. Tous les appareils doivent utiliser le même serveur et le même jeton. Le serveur fusionne les fiches par date de modification et conserve les suppressions pour les propager. Son fichier de données `t-appmeteo-sync.json` doit être inclus dans les sauvegardes du serveur.
+
+Sans serveur configuré, les photos, le carnet et le matériel ne quittent pas le navigateur. La publication GitHub Pages de l’interface ne crée pas le serveur et ne suffit donc pas à synchroniser les appareils.
+
+## Sources météo et pêche
 
 - **YvBeach, Yvonand** : lien vers les relevés de la station locale.
-- **MeteoNews, Grandson** : accès aux prévisions de proximité.
-- **AccuWeather, Neuchâtel** : avis météo destiné à la pêche.
-- **Windy.app, Neuchâtel** : prévision et indice de mordant. Le point du lien fourni se situe à Neuchâtel, pas à Yvonand.
-- **Port d’Yvonand** : ouverture de la webcam uniquement après sélection du bouton.
+- **MeteoNews, Grandson** : prévisions de proximité.
+- **AccuWeather, Neuchâtel** et **Windy.app, Neuchâtel** : avis secondaires destinés à la pêche.
+- **Port d’Yvonand** : webcam ouverte à la demande.
 
-Les liens tiers sont ouverts à la demande. La météo principale affichée par l’application et ses statistiques restent séparées des avis de ces sites. Aucun indice externe n’est présenté comme une garantie de prise. L’application ne récupère pas automatiquement les relevés des sites qui ne fournissent pas d’accès de données vérifié.
-
-## Carnet et statistiques
-
-Le carnet enregistre le pêcheur (Jarod, Thomas ou un nom ajouté), l’espèce, le spot, le nombre de prises, la technique, l’animation, le leurre, les observations au sondeur, les notes et la météo disponible au moment de la sortie.
-
-Les photos peuvent être prises avec l’appareil photo ou choisies dans la photothèque. Chaque photo est classée comme **leurre**, **poisson** ou **leurre et poisson ensemble**. Les images sont réduites et conservées dans le stockage local de ce navigateur ; elles ne sont pas téléversées.
-
-Les statistiques classent les résultats par espèce et proposent des pistes pour le spot, la technique, le leurre, l’animation et la profondeur des poissons repérés. Elles favorisent les sorties avec météo proche et prennent aussi en compte, lorsque les valeurs ont été notées, la température et la clarté de l’eau ainsi que la profondeur des poissons. Les indications reposent sur les sorties enregistrées : elles restent provisoires avec peu de données et ne garantissent pas une prise. Les données du carnet et les photos ne sont pas synchronisées entre appareils.
-
-Le choix ou la recherche de ville, le GPS et la localisation réseau sont regroupés en haut de l’application, avant la météo et le carnet.
-
-## Logo et bibliothèque de leurres
-
-Le logo vectoriel « Jarod Jacot Fishing » reprend le turquoise, le crème, l’anthracite et le rouge visibles sur le bateau. La bibliothèque permet d’ajouter une photo prise sur le moment ou choisie dans la photothèque, puis de noter le nom, le fabricant, la taille, le poids, la profondeur d’utilisation, l’animation et les espèces ciblées. Elle peut être filtrée par espèce et triée par nom, fabricant, poids ou profondeur.
-
-Les fiches et images de la bibliothèque sont conservées dans le navigateur de l’appareil. Aucune fiche de leurre n’est préremplie : les photos fournies représentent le bateau et une sortie, pas les modèles de leurres.
+Les liens externes s’ouvrent à la demande. L’application ne récupère pas automatiquement les données des sites qui ne fournissent pas d’accès vérifié.
 
 ## Lancer en local
 
@@ -34,8 +46,4 @@ Les fiches et images de la bibliothèque sont conservées dans le navigateur de 
 python3 app.py
 ```
 
-Puis ouvre [http://localhost:8000](http://localhost:8000). La page peut également être publiée sur GitHub Pages et utilisée sur iPhone.
-
-## Données et confidentialité
-
-La webcam, les prévisions et indices externes ne sont pas chargés automatiquement. Un clic ouvre le site concerné dans un nouvel onglet. Les données du carnet restent localement dans le navigateur.
+Puis ouvre [http://localhost:8000](http://localhost:8000). La page peut aussi être publiée sur GitHub Pages.
