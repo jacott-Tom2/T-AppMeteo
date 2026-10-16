@@ -23,24 +23,25 @@
     <path d="M170 205C282 219 431 217 578 197" fill="none" stroke="#f1e8d5" stroke-width="4" stroke-linecap="round" opacity=".7"/>
     <path d="M177 207c69 2 138 4 208 2 61-2 124-6 185-15" fill="none" stroke="#f1e8d5" stroke-width="2" stroke-dasharray="5 8" opacity=".85"/>
     <path d="M591 192c12 15 15 29 9 40-6 10-19 14-31 7" fill="none" stroke="#e95b53" stroke-width="7" stroke-linecap="round"/>
-    <!-- Brochet allongé, mâchoire entrouverte, nageoires et regard marqué -->
-    <path d="M178 361 103 300l24 61-24 57 75-43Z" fill="#087873" stroke="#17232b" stroke-width="11" stroke-linejoin="round"/>
-    <path d="M174 362c45-60 132-92 244-87 69 3 120 22 157 51l73-8-37 36 40 17-77 12c-47 48-125 75-223 76-82 1-145-24-177-69Z" fill="url(#fish)" stroke="#17232b" stroke-width="12" stroke-linejoin="round"/>
-    <!-- mâchoire ouverte : cavité sombre et petits crocs -->
-    <path d="m571 341 77 30-71 12-35-17Z" fill="#17232b" stroke="#17232b" stroke-width="7" stroke-linejoin="round"/>
-    <path d="m576 345 8 12-14-6m27 6 8 13-15-8m25 9 10 11-18-6" fill="#fff8e8" stroke="#f1e8d5" stroke-width="2" stroke-linejoin="round"/>
-    <path d="m579 380 9-11 3 13m15-1 10-10 2 12" fill="#fff8e8" stroke="#f1e8d5" stroke-width="2" stroke-linejoin="round"/>
-    <!-- nageoires dorsale et ventrales anguleuses -->
-    <path d="m233 296 22-45 24 35 32-48 23 43 37-50 28 51 34-39 27 49" fill="#087873" stroke="#17232b" stroke-width="10" stroke-linejoin="round"/>
-    <path d="m284 435 32 44 29-42m88 39 37 34 22-52" fill="#087873" stroke="#17232b" stroke-width="10" stroke-linejoin="round"/>
-    <path d="m377 381 54 20-31 36-54-28Z" fill="#119b95" stroke="#17232b" stroke-width="8" stroke-linejoin="round"/>
+    <!-- Brochet fuselé, mâchoire ouverte et regard agressif -->
+    <path d="M178 360 103 300l24 61-24 57 75-47Z" fill="#087873" stroke="#17232b" stroke-width="11" stroke-linejoin="round"/>
+    <path d="M176 361c42-43 124-64 225-60 67 3 118 17 151 40l94-13-37 33 39 12-75 9c-47 29-119 47-211 47-82 0-149-13-186-43Z" fill="url(#fish)" stroke="#17232b" stroke-width="12" stroke-linejoin="round"/>
+    <!-- mâchoire entrouverte, avec crocs visibles -->
+    <path d="m573 344 73 17-70 20-35-18Z" fill="#17232b" stroke="#17232b" stroke-width="7" stroke-linejoin="round"/>
+    <path d="m576 346 8 10-14-5m27 3 8 11-15-6m24 4 11 9-18-4" fill="#fff8e8" stroke="#f1e8d5" stroke-width="2" stroke-linejoin="round"/>
+    <path d="m577 379 9-11 3 13m15-4 10-10 2 12" fill="#fff8e8" stroke="#f1e8d5" stroke-width="2" stroke-linejoin="round"/>
+    <!-- nageoire dorsale haute et nageoires latérales -->
+    <path d="m231 315 25-42 24 33 31-44 25 40 36-44 29 45 32-34 25 47" fill="#087873" stroke="#17232b" stroke-width="10" stroke-linejoin="round"/>
+    <path d="m283 411 31 38 31-37m81 35 35 27 22-42" fill="#087873" stroke="#17232b" stroke-width="10" stroke-linejoin="round"/>
+    <path d="m375 369 52 18-30 31-52-25Z" fill="#119b95" stroke="#17232b" stroke-width="8" stroke-linejoin="round"/>
     <!-- branchies et marques de flanc -->
-    <path d="M498 312c-5 38-19 74-43 105m-238-76c38 3 67-1 94-12m-83 39c39 7 72 3 104-10m-104 38c42 8 77 5 111-8m27-82c-20 23-34 48-44 75m119-69c-14 21-23 43-28 65" fill="none" stroke="#718b80" stroke-width="7" stroke-linecap="round" opacity=".8"/>
-    <path d="M183 389c58 31 116 43 181 40 47-2 86-12 119-29" fill="none" stroke="#fff8e8" stroke-width="7" stroke-linecap="round" opacity=".78"/>
-    <!-- œil vif -->
-    <path d="m530 293 31-10 25 18-23 21-31-7Z" fill="#e95b53" stroke="#17232b" stroke-width="7" stroke-linejoin="round"/>
-    <circle cx="548" cy="300" r="7" fill="#17232b"/>
-    <circle cx="546" cy="298" r="2.5" fill="#fff8e8"/>
+    <path d="M500 319c-6 30-19 58-42 81m-241-47c38 2 67-1 94-10m-80 30c39 5 70 2 102-7m-83 27c40 6 75 3 108-5m18-74c-18 18-32 39-42 61m113-58c-13 17-22 35-28 54" fill="none" stroke="#718b80" stroke-width="7" stroke-linecap="round" opacity=".82"/>
+    <path d="M184 374c58 21 118 29 181 27 47-1 85-8 119-20" fill="none" stroke="#fff8e8" stroke-width="7" stroke-linecap="round" opacity=".8"/>
+    <!-- œil rouge sous un sourcil incliné -->
+    <path d="m523 310 34-13 29 18-22 25-34-9Z" fill="#e95b53" stroke="#17232b" stroke-width="7" stroke-linejoin="round"/>
+    <path d="m518 305 33-13 31 12" fill="none" stroke="#17232b" stroke-width="10" stroke-linecap="round"/>
+    <circle cx="544" cy="315" r="7" fill="#17232b"/>
+    <circle cx="542" cy="313" r="2.5" fill="#fff8e8"/>
     <path d="M124 446c73 36 157 55 252 54 97-1 185-23 260-67" fill="none" stroke="url(#water)" stroke-width="17" stroke-linecap="round"/>
     <path d="M151 475c64 28 138 42 221 41 83-1 157-16 222-46" fill="none" stroke="#f1e8d5" stroke-width="7" stroke-linecap="round"/>
     <path d="M213 503c58 17 117 25 177 24 63-1 120-10 174-27" fill="none" stroke="#e95b53" stroke-width="8" stroke-linecap="round"/>
