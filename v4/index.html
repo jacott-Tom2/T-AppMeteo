@@ -28,6 +28,11 @@
     .inner-accordion > summary { padding: 11px 12px; color: #0b3d91; font-weight: 650; cursor: pointer; }
     .inner-accordion[open] > summary { border-bottom: 1px solid #dce5ef; }
     .inner-accordion > div { padding: 10px; display: grid; gap: 9px; }
+    .custom-entry-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; margin-top: 8px; }
+    .custom-entry-controls[hidden] { display: none; }
+    .custom-entry-controls input { min-width: 0; }
+    .custom-entry-controls button { width: auto; min-width: 112px; min-height: 46px; padding: 10px 13px; background: #167445; color: #fff; }
+    .city-add-button { background: #167445; }
     label { display: block; font-weight: 650; margin-bottom: 7px; }
     select, input, button { width: 100%; min-height: 48px; border: 1px solid #b8c5d5; border-radius: 10px; padding: 11px 13px; font: inherit; font-size: 16px; background: white; }
     button { border: 0; background: #0b3d91; color: white; font-weight: 650; cursor: pointer; }
@@ -141,10 +146,10 @@
         <select id="city-select" aria-describedby="status"></select>
       </div>
       <form id="add-form">
-        <label for="new-city">Rechercher / ajouter une ville suisse</label>
+        <label for="new-city">＋ Nouvelle ville (recherche dans les localités suisses)</label>
         <div class="add-row">
           <input id="new-city" name="city" type="text" maxlength="80" placeholder="Ex. Lausanne" autocomplete="address-level2" required>
-          <button id="add-button" type="submit">Ajouter</button>
+          <button id="add-button" class="city-add-button" type="submit">✓ Valider la ville</button>
         </div>
       </form>
       <div class="location-actions" aria-label="Localiser une ville">
@@ -209,7 +214,11 @@
               <option value="200 kHz">200 kHz</option>
               <option value="800 kHz">800 kHz</option>
               <option value="200 + 800 kHz">200 + 800 kHz</option>
-            </select>
+            <option value="__new__">＋ Nouvelle fréquence…</option></select>
+<div class="custom-entry-controls" id="sonar-frequency-entry" hidden>
+  <input id="sonar-frequency-new" type="text" maxlength="40" placeholder="Ex. fréquence personnalisée" aria-label="Nouvelle fréquence du sondeur">
+  <button id="sonar-frequency-confirm" type="button">✓ Valider</button>
+</div>
           </div>
           <div>
             <label for="water-clarity">Clarté de l’eau (observation)</label>
@@ -218,7 +227,11 @@
               <option value="claire">Claire</option>
               <option value="legerement-trouble">Légèrement trouble</option>
               <option value="trouble">Trouble</option>
-            </select>
+            <option value="__new__">＋ Nouvelle observation…</option></select>
+<div class="custom-entry-controls" id="water-clarity-entry" hidden>
+  <input id="water-clarity-new" type="text" maxlength="50" placeholder="Nouvelle observation" aria-label="Nouvelle observation de clarté">
+  <button id="water-clarity-confirm" type="button">✓ Valider</button>
+</div>
           </div>
         </div>
         <p class="metric-note">Profil : Lowrance Hook 5 HDI. Exemple visible sur ta photo : 14,6 m sous le bateau et 20,3 °C. Saisie manuelle : le navigateur ne lit pas automatiquement l’écran du sondeur.</p>
@@ -237,7 +250,11 @@
             <option value="perche">Perche</option>
             <option value="silure">Silure</option>
             <option value="coregone">Corégone</option>
-          </select>
+          <option value="__new__">＋ Nouvelle espèce…</option></select>
+<div class="custom-entry-controls" id="target-species-entry" hidden>
+  <input id="target-species-new" type="text" maxlength="60" placeholder="Nom de l’espèce" aria-label="Nom de la nouvelle espèce">
+  <button id="target-species-confirm" type="button">✓ Valider</button>
+</div>
         </div>
         <p id="species-guidance" aria-live="polite"></p>
             <p class="metric-note">Les poissons capturés se notent dans « Fin de session » pour alimenter les cumuls, coupes et records personnels.</p>
@@ -257,6 +274,7 @@
           <option value="perche">Perche</option>
           <option value="silure">Silure</option>
           <option value="coregone">Corégone</option>
+          <option value="__new__">＋ Nouvelle espèce…</option>
         </select>
         <label for="bait-sort">Trier la bibliothèque</label>
         <select id="bait-sort">
@@ -333,7 +351,11 @@
                 <option value="Tresse">Tresse</option><option value="Fil nylon">Fil nylon</option>
                 <option value="Aucune ligne">Aucune ligne</option><option value="Hameçon">Hameçon</option>
                 <option value="Appât">Appât</option>
-              </select>
+              <option value="__new__">＋ Nouvelle catégorie…</option></select>
+<div class="custom-entry-controls" id="gear-category-entry" hidden>
+  <input id="gear-category-new" type="text" maxlength="50" placeholder="Catégorie de matériel" aria-label="Nouvelle catégorie de matériel">
+  <button id="gear-category-confirm" type="button">✓ Valider</button>
+</div>
             </div>
             <div><label for="gear-name">Nom / modèle</label><input id="gear-name" maxlength="100" required placeholder="Ex. canne verticale 2,10 m"></div>
             <div><label for="gear-maker">Marque</label><input id="gear-maker" maxlength="80" placeholder="Facultatif"></div>
@@ -350,8 +372,8 @@
         <summary>🔄 Synchronisation entre appareils</summary>
         <div class="accordion-body">
       <section class="extra-panel" aria-labelledby="sync-title">
-        <h2 id="sync-title">Synchronisation du carnet et des photos</h2>
-        <p>Configure une adresse HTTPS de serveur privé. L’application synchronisera les sorties, les fiches de leurres, le matériel et les photos dès qu’une connexion est disponible. Le serveur peut être joignable par Wi‑Fi ou via Tailscale sur le réseau mobile.</p>
+        <h2 id="sync-title">Synchronisation du carnet, des photos et des listes</h2>
+        <p>Configure une adresse HTTPS de serveur privé. L’application synchronisera les sorties, les fiches de leurres, le matériel, les listes personnalisées et les photos dès qu’une connexion est disponible. Le serveur V4 fourni inclut les nouvelles listes. Le serveur peut être joignable par Wi‑Fi ou via Tailscale sur le réseau mobile.</p>
         <form id="sync-form">
           <div class="sync-fields">
             <div><label for="sync-url">Adresse HTTPS du serveur de synchronisation</label><input id="sync-url" type="url" inputmode="url" placeholder="https://mon-serveur.example/api/sync" autocomplete="url"></div>
@@ -409,9 +431,12 @@
               <select id="trip-angler">
                 <option value="Jarod">Jarod</option>
                 <option value="Thomas">Thomas</option>
-                <option value="__new__">Nouveau pêcheur…</option>
+                <option value="__new__">＋ Nouveau pêcheur…</option>
               </select>
-              <input id="new-angler" class="new-angler" type="text" maxlength="60" placeholder="Nom du pêcheur" aria-label="Nom du nouveau pêcheur" hidden>
+              <div class="custom-entry-controls" id="angler-entry" hidden>
+                <input id="new-angler" type="text" maxlength="60" placeholder="Nom du pêcheur" aria-label="Nom du nouveau pêcheur">
+                <button id="confirm-angler" type="button">✓ Valider</button>
+              </div>
             </div>
             <div>
               <label for="trip-place">Lieu ou poste</label>
@@ -427,7 +452,11 @@
                 <option value="Montage posé">Montage posé</option>
                 <option value="Jerkbait">Jerkbait</option>
                 <option value="Autre">Autre</option>
-              </select>
+              <option value="__new__">＋ Nouvelle technique…</option></select>
+<div class="custom-entry-controls" id="trip-technique-entry" hidden>
+  <input id="trip-technique-new" type="text" maxlength="60" placeholder="Nom de la technique" aria-label="Nom de la nouvelle technique">
+  <button id="trip-technique-confirm" type="button">✓ Valider</button>
+</div>
             </div>
             <div>
               <label for="trip-animation">Animation</label>
@@ -453,7 +482,11 @@
                 <select id="caught-species" aria-label="Espèce du poisson">
                   <option value="Brochet">Brochet</option><option value="Perche">Perche</option>
                   <option value="Silure">Silure</option><option value="Corégone">Corégone</option>
-                </select>
+                <option value="__new__">＋ Nouvelle espèce…</option></select>
+<div class="custom-entry-controls" id="caught-species-entry" hidden>
+  <input id="caught-species-new" type="text" maxlength="60" placeholder="Nom de l’espèce" aria-label="Nom de la nouvelle espèce">
+  <button id="caught-species-confirm" type="button">✓ Valider</button>
+</div>
                 <input id="caught-length" type="number" inputmode="decimal" min="1" max="300" step="0.5" placeholder="Longueur cm" aria-label="Longueur du poisson en centimètres">
                 <input id="caught-weight" type="number" inputmode="decimal" min="0" max="500" step="0.01" placeholder="Poids kg" aria-label="Poids du poisson en kilogrammes">
               </div>
@@ -472,7 +505,11 @@
                 <option value="Leurre">Leurre</option>
                 <option value="Poisson">Poisson</option>
                 <option value="Leurre et poisson">Leurre et poisson ensemble</option>
-              </select>
+              <option value="__new__">＋ Nouvelle catégorie…</option></select>
+<div class="custom-entry-controls" id="trip-photo-category-entry" hidden>
+  <input id="trip-photo-category-new" type="text" maxlength="50" placeholder="Catégorie de photo" aria-label="Nouvelle catégorie de photo">
+  <button id="trip-photo-category-confirm" type="button">✓ Valider</button>
+</div>
             </div>
             <div>
               <label>Photos de cette sortie (6 maximum)</label>
@@ -500,12 +537,8 @@
             <h3>Coupes et poissons d’or</h3>
             <p>La coupe revient au premier poisson enregistré de chaque espèce. Le poisson d’or atteint le seuil du défi défini ci-dessous; ces seuils sont personnalisables et ne sont pas des normes officielles.</p>
             <form id="gold-threshold-form">
-              <div class="threshold-grid">
-                <div><label for="gold-brochet">Seuil Brochet (cm)</label><input id="gold-brochet" type="number" min="1" max="300" step="1" value="100"></div>
-                <div><label for="gold-perche">Seuil Perche (cm)</label><input id="gold-perche" type="number" min="1" max="200" step="1" value="40"></div>
-                <div><label for="gold-silure">Seuil Silure (cm)</label><input id="gold-silure" type="number" min="1" max="350" step="1" value="150"></div>
-                <div><label for="gold-coregone">Seuil Corégone (cm)</label><input id="gold-coregone" type="number" min="1" max="100" step="1" value="50"></div>
-              </div>
+              <div class="threshold-grid" id="gold-threshold-fields"></div>
+              <div class="metric-note">Définis un seuil pour chaque espèce personnalisée si tu veux aussi attribuer un poisson d’or.</div>
               <button type="submit" class="refresh">Enregistrer les seuils</button>
             </form>
             <div id="trophy-results" aria-live="polite"></div>
@@ -522,7 +555,7 @@
           </section>
         </div>
       </details>
-        <p class="metric-note">Le carnet et les photos sont conservés sur cet appareil, puis synchronisés entre appareils si un serveur privé a été configuré.</p>
+        <p class="metric-note">Le carnet, les photos et les choix personnalisés sont conservés sur cet appareil, puis synchronisés entre appareils si un serveur privé est configuré.</p>
     </section>
 
     <footer>Données météo : Open-Meteo · Géocodage : <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap contributors</a> · Application en développement</footer>
@@ -571,6 +604,87 @@
     const caughtWeightInput = document.getElementById("caught-weight");
     const caughtFishList = document.getElementById("caught-fish-list");
     const GOLD_THRESHOLD_STORAGE_KEY = "t-appmeteo-v3-gold-thresholds";
+    const CUSTOM_OPTIONS_STORAGE_KEY = "t-appmeteo-v4-custom-options";
+    const TRIP_DRAFT_STORAGE_KEY = "t-appmeteo-v4-trip-draft";
+    const customListNames = ["anglers", "species", "techniques", "gearCategories", "sonarFrequencies", "waterClarities", "photoCategories"];
+    function loadCustomLists() {
+      const lists = Object.fromEntries(customListNames.map(name => [name, []]));
+      try {
+        const saved = JSON.parse(localStorage.getItem(CUSTOM_OPTIONS_STORAGE_KEY) || "{}");
+        customListNames.forEach(name => { if (Array.isArray(saved[name])) lists[name] = saved[name].filter(value => typeof value === "string" && value.trim()).map(value => value.trim()).slice(0, 500); });
+      } catch { /* Une liste invalide repart de zéro sans bloquer l’application. */ }
+      return lists;
+    }
+    let customLists = loadCustomLists();
+
+    function saveCustomLists(sync = true) {
+      try {
+        localStorage.setItem(CUSTOM_OPTIONS_STORAGE_KEY, JSON.stringify(customLists));
+        if (sync) performSync();
+        return true;
+      } catch (error) {
+        document.getElementById("status").textContent = "Impossible d’enregistrer cette liste dans le stockage de cet appareil.";
+        return false;
+      }
+    }
+
+    function insertCustomOption(selectElement, value) {
+      if (!selectElement || Array.from(selectElement.options).some(option => option.value.toLocaleLowerCase("fr") === value.toLocaleLowerCase("fr"))) return;
+      const option = document.createElement("option");
+      option.value = value; option.textContent = value; option.dataset.custom = "true";
+      const sentinel = selectElement.querySelector('option[value="__new__"]');
+      selectElement.insertBefore(option, sentinel || null);
+    }
+
+    function renderCustomOptions() {
+      const targets = {
+        anglers: [tripAngler],
+        species: [targetSpecies, document.getElementById("caught-species"), baitFilter],
+        techniques: [tripTechnique],
+        gearCategories: [document.getElementById("gear-category")],
+        sonarFrequencies: [document.getElementById("sonar-frequency")],
+        waterClarities: [document.getElementById("water-clarity")],
+        photoCategories: [tripPhotoCategory]
+      };
+      customListNames.forEach(name => (customLists[name] || []).forEach(value => (targets[name] || []).forEach(selectElement => insertCustomOption(selectElement, value))));
+      renderCustomSpeciesCheckboxes();
+    }
+
+    function addCustomOption(listName, value, activeSelect, allSelects, afterAdd) {
+      const clean = String(value || "").trim().replace(/\s+/g, " ");
+      if (!clean) { document.getElementById("status").textContent = "Saisis un nom avant de valider."; return false; }
+      const existing = customLists[listName].find(item => item.toLocaleLowerCase("fr") === clean.toLocaleLowerCase("fr"));
+      const savedValue = existing || clean;
+      if (!existing) customLists[listName].push(clean);
+      if (!saveCustomLists()) return false;
+      renderCustomOptions();
+      (allSelects || [activeSelect]).forEach(selectElement => insertCustomOption(selectElement, savedValue));
+      if (activeSelect) activeSelect.value = savedValue;
+      if (afterAdd) afterAdd(savedValue);
+      document.getElementById("status").textContent = `« ${savedValue} » enregistré et disponible pour les prochaines sorties.`;
+      saveTripDraft();
+      return true;
+    }
+
+    function bindCustomSelect(selectElement, listName, panelId, inputId, buttonId, allSelects, afterAdd) {
+      const panel = document.getElementById(panelId);
+      const input = document.getElementById(inputId);
+      const button = document.getElementById(buttonId);
+      selectElement.addEventListener("change", () => {
+        const adding = selectElement.value === "__new__";
+        panel.hidden = !adding;
+        if (adding) input.focus();
+      });
+      const confirm = () => {
+        if (addCustomOption(listName, input.value, selectElement, allSelects, afterAdd)) {
+          if (selectElement === tripAngler) newAngler.required = false;
+          input.value = ""; panel.hidden = true;
+        }
+      };
+      button.addEventListener("click", confirm);
+      input.addEventListener("keydown", event => { if (event.key === "Enter") { event.preventDefault(); confirm(); } });
+    }
+
     let pendingFish = [];
     const baitForm = document.getElementById("bait-form");
     const baitListElement = document.getElementById("bait-list");
@@ -581,6 +695,18 @@
     const baitPhotoPreview = document.getElementById("bait-photo-preview");
     const baitPhotoStatus = document.getElementById("bait-photo-status");
     const baitOptions = document.getElementById("bait-options");
+    function renderCustomSpeciesCheckboxes() {
+      const grid = baitForm.querySelector(".species-check-grid");
+      if (!grid) return;
+      grid.querySelectorAll("[data-custom-species]").forEach(node => node.remove());
+      const builtins = new Set(Array.from(grid.querySelectorAll('input[name="bait-species"]')).map(input => input.value.toLocaleLowerCase("fr")));
+      customLists.species.forEach(species => {
+        if (builtins.has(species.toLocaleLowerCase("fr"))) return;
+        const label = document.createElement("label"); label.className = "species-check"; label.dataset.customSpecies = "true";
+        const input = document.createElement("input"); input.type = "checkbox"; input.name = "bait-species"; input.value = species;
+        label.append(input, document.createTextNode(` ${species}`)); grid.append(label);
+      });
+    }
     const gearForm = document.getElementById("gear-form");
     const gearList = document.getElementById("gear-list");
     const tripGearOptions = document.getElementById("trip-gear-options");
@@ -624,15 +750,36 @@
     }
 
     function updateSpeciesGuidance() {
+      if (targetSpecies.value === "__new__") return;
       speciesGuidance.textContent = fishingNotes[targetSpecies.value] || fishingNotes.brochet;
       saveFishingSettings();
       renderFishingAdvice();
+      saveTripDraft();
     }
 
+    function customSpeciesAdded(value) {
+      caughtSpeciesInput.value = value;
+      saveFishingSettings();
+      renderGoldThresholdFields();
+      renderFishingAdvice();
+      renderTrophyStats();
+    }
+
+    renderCustomOptions();
     restoreFishingSettings();
-    caughtSpeciesInput.value = targetSpecies.options[targetSpecies.selectedIndex].textContent;
-    targetSpecies.addEventListener("change", updateSpeciesGuidance);
-    targetSpecies.addEventListener("change", () => { caughtSpeciesInput.value = targetSpecies.options[targetSpecies.selectedIndex].textContent; });
+    caughtSpeciesInput.value = targetSpecies.options[targetSpecies.selectedIndex]?.textContent || "Brochet";
+    targetSpecies.addEventListener("change", () => {
+      if (targetSpecies.value !== "__new__") { updateSpeciesGuidance(); caughtSpeciesInput.value = targetSpecies.options[targetSpecies.selectedIndex].textContent; }
+    });
+    bindCustomSelect(targetSpecies, "species", "target-species-entry", "target-species-new", "target-species-confirm", [targetSpecies, caughtSpeciesInput, baitFilter], customSpeciesAdded);
+    bindCustomSelect(caughtSpeciesInput, "species", "caught-species-entry", "caught-species-new", "caught-species-confirm", [targetSpecies, caughtSpeciesInput, baitFilter], value => { renderGoldThresholdFields(); renderTrophyStats(); });
+    bindCustomSelect(document.getElementById("sonar-frequency"), "sonarFrequencies", "sonar-frequency-entry", "sonar-frequency-new", "sonar-frequency-confirm", [document.getElementById("sonar-frequency")]);
+    bindCustomSelect(document.getElementById("water-clarity"), "waterClarities", "water-clarity-entry", "water-clarity-new", "water-clarity-confirm", [document.getElementById("water-clarity")]);
+    bindCustomSelect(document.getElementById("gear-category"), "gearCategories", "gear-category-entry", "gear-category-new", "gear-category-confirm", [document.getElementById("gear-category")]);
+    bindCustomSelect(tripTechnique, "techniques", "technique-entry", "technique-new", "technique-confirm", [tripTechnique]);
+    bindCustomSelect(tripPhotoCategory, "photoCategories", "photo-category-entry", "photo-category-new", "photo-category-confirm", [tripPhotoCategory]);
+    bindCustomSelect(tripAngler, "anglers", "angler-entry", "new-angler", "confirm-angler", [tripAngler]);
+    tripAngler.addEventListener("change", () => { newAngler.required = tripAngler.value === "__new__"; });
     fishingInputs.forEach(input => input.addEventListener("change", () => {
       saveFishingSettings();
       renderFishingAdvice();
@@ -742,6 +889,7 @@
         remove.addEventListener("click", () => {
           queuedPhotos.splice(index, 1);
           renderPhotoQueue();
+          saveDraftPhotos().then(saveTripDraft).catch(error => { photoStatus.textContent = error.message || "Le brouillon photo n’a pas été enregistré."; });
         });
         card.append(image, caption, remove);
         photoQueueElement.append(card);
@@ -762,8 +910,9 @@
           const blob = await resizePhoto(file);
           queuedPhotos.push({ id: makeId(), category: tripPhotoCategory.value, blob });
         }
-        photoStatus.textContent = `${queuedPhotos.length} photo${queuedPhotos.length > 1 ? "s" : ""} prête${queuedPhotos.length > 1 ? "s" : ""} à enregistrer.`;
-        renderPhotoQueue();
+        await saveDraftPhotos();
+        photoStatus.textContent = `${queuedPhotos.length} photo${queuedPhotos.length > 1 ? "s" : ""} enregistrée${queuedPhotos.length > 1 ? "s" : ""} dans le brouillon local.`;
+        renderPhotoQueue(); saveTripDraft();
       } catch (error) {
         photoStatus.textContent = error.message || "La photo n’a pas pu être ajoutée.";
       }
@@ -786,6 +935,54 @@
         transaction.onabort = () => reject(transaction.error || new Error("Enregistrement des photos interrompu."));
       });
       db.close();
+    }
+
+    async function saveDraftPhotos() {
+      const db = await openPhotoDatabase();
+      try {
+        await new Promise((resolve, reject) => {
+          const transaction = db.transaction(PHOTO_STORE_NAME, "readwrite");
+          const store = transaction.objectStore(PHOTO_STORE_NAME);
+          const request = store.index("tripId").getAllKeys("__draft__");
+          request.onsuccess = () => {
+            request.result.forEach(key => store.delete(key));
+            queuedPhotos.forEach(photo => store.put({ id: photo.id, tripId: "__draft__", category: photo.category, blob: photo.blob }));
+          };
+          request.onerror = () => reject(request.error || new Error("Le brouillon photo n’a pas pu être lu."));
+          transaction.oncomplete = resolve;
+          transaction.onerror = () => reject(transaction.error || new Error("Les photos du brouillon n’ont pas été enregistrées."));
+          transaction.onabort = () => reject(transaction.error || new Error("L’enregistrement des photos a été interrompu."));
+        });
+      } finally { db.close(); }
+    }
+
+    async function restoreDraftPhotos() {
+      const db = await openPhotoDatabase();
+      try {
+        const photos = await new Promise((resolve, reject) => {
+          const transaction = db.transaction(PHOTO_STORE_NAME, "readonly");
+          const request = transaction.objectStore(PHOTO_STORE_NAME).index("tripId").getAll("__draft__");
+          request.onsuccess = () => resolve(request.result || []);
+          request.onerror = () => reject(request.error || new Error("Le brouillon photo n’a pas pu être chargé."));
+        });
+        queuedPhotos = photos.map(photo => ({ id: photo.id, category: photo.category, blob: photo.blob }));
+        renderPhotoQueue();
+      } finally { db.close(); }
+    }
+
+    async function clearDraftPhotos() {
+      const db = await openPhotoDatabase();
+      try {
+        await new Promise((resolve, reject) => {
+          const transaction = db.transaction(PHOTO_STORE_NAME, "readwrite");
+          const store = transaction.objectStore(PHOTO_STORE_NAME);
+          const request = store.index("tripId").getAllKeys("__draft__");
+          request.onsuccess = () => request.result.forEach(key => store.delete(key));
+          request.onerror = () => reject(request.error || new Error("Le brouillon photo n’a pas pu être nettoyé."));
+          transaction.oncomplete = resolve;
+          transaction.onerror = () => reject(transaction.error || new Error("Le brouillon photo n’a pas pu être nettoyé."));
+        });
+      } finally { db.close(); }
     }
 
     async function readTripPhotosForTrips(trips) {
@@ -877,6 +1074,7 @@
 
     gearForm.addEventListener("submit", event => {
       event.preventDefault();
+      if (document.getElementById("gear-category").value === "__new__") { document.getElementById("gear-category-new").focus(); document.getElementById("status").textContent = "Valide d’abord la nouvelle catégorie avec ✓."; return; }
       const row = { id: makeId(), updatedAt: new Date().toISOString(), category: document.getElementById("gear-category").value, name: document.getElementById("gear-name").value.trim(), maker: document.getElementById("gear-maker").value.trim(), spec: document.getElementById("gear-spec").value.trim(), notes: document.getElementById("gear-notes").value.trim() };
       const all = JSON.parse(localStorage.getItem(GEAR_STORAGE_KEY) || "[]"); saveGear([row, ...all]); gearForm.reset(); renderGear(); performSync();
     });
@@ -1012,7 +1210,15 @@
     document.getElementById("bait-choose-photo").addEventListener("click", () => baitGalleryPhoto.click());
     baitCameraPhoto.addEventListener("change", () => chooseBaitPhoto(baitCameraPhoto));
     baitGalleryPhoto.addEventListener("change", () => chooseBaitPhoto(baitGalleryPhoto));
-    baitFilter.addEventListener("change", renderBaits);
+    baitFilter.addEventListener("change", () => {
+      if (baitFilter.value === "__new__") {
+        baitFilter.value = "all";
+        const fishSection = document.querySelector('details[data-section="fish"]');
+        if (fishSection) fishSection.open = true;
+        targetSpecies.value = "__new__";
+        targetSpecies.dispatchEvent(new Event("change", { bubbles: true }));
+      } else renderBaits();
+    });
     baitSort.addEventListener("change", renderBaits);
     baitForm.addEventListener("submit", async event => {
       event.preventDefault();
@@ -1118,6 +1324,43 @@
       localStorage.setItem(TRIP_STORAGE_KEY, JSON.stringify(trips.slice(0, 100)));
     }
 
+    function saveTripDraft() {
+      const draft = {
+        date: tripDate.value, angler: tripAngler.value, newAngler: newAngler.value, place: tripPlace.value,
+        technique: tripTechnique.value, animation: tripAnimation.value, lure: tripLure.value,
+        catches: tripCatches.value, result: tripResult.value, photoCategory: tripPhotoCategory.value,
+        caughtSpecies: caughtSpeciesInput.value, caughtLength: caughtLengthInput.value, caughtWeight: caughtWeightInput.value,
+        fishDetails: pendingFish.map(fish => ({ ...fish })),
+        gear: Array.from(tripGearOptions.querySelectorAll('input[name="trip-gear"]:checked')).map(input => input.value),
+        updatedAt: new Date().toISOString()
+      };
+      try { localStorage.setItem(TRIP_DRAFT_STORAGE_KEY, JSON.stringify(draft)); }
+      catch { document.getElementById("status").textContent = "Le brouillon n’a pas pu être enregistré sur cet appareil; vérifie l’espace de stockage."; }
+    }
+
+    function restoreTripDraft() {
+      try {
+        const draft = JSON.parse(localStorage.getItem(TRIP_DRAFT_STORAGE_KEY) || "null");
+        if (!draft) return;
+        if (draft.date) tripDate.value = draft.date;
+        if (draft.angler && Array.from(tripAngler.options).some(option => option.value === draft.angler)) tripAngler.value = draft.angler;
+        if (draft.newAngler) newAngler.value = draft.newAngler;
+        if (draft.place) tripPlace.value = draft.place;
+        if (draft.technique && Array.from(tripTechnique.options).some(option => option.value === draft.technique)) tripTechnique.value = draft.technique;
+        tripAnimation.value = draft.animation || ""; tripLure.value = draft.lure || "";
+        tripCatches.value = draft.catches || "0"; tripResult.value = draft.result || "";
+        if (draft.photoCategory && Array.from(tripPhotoCategory.options).some(option => option.value === draft.photoCategory)) tripPhotoCategory.value = draft.photoCategory;
+        if (draft.caughtSpecies && Array.from(caughtSpeciesInput.options).some(option => option.value === draft.caughtSpecies)) caughtSpeciesInput.value = draft.caughtSpecies;
+        caughtLengthInput.value = draft.caughtLength || ""; caughtWeightInput.value = draft.caughtWeight || "";
+        pendingFish = Array.isArray(draft.fishDetails) ? draft.fishDetails : [];
+        renderPendingFish();
+        requestAnimationFrame(() => draft.gear?.forEach(id => { const input = tripGearOptions.querySelector(`input[name="trip-gear"][value="${CSS.escape(id)}"]`); if (input) input.checked = true; }));
+      } catch { localStorage.removeItem(TRIP_DRAFT_STORAGE_KEY); }
+    }
+
+    document.getElementById("trip-form").addEventListener("input", saveTripDraft);
+    document.getElementById("trip-form").addEventListener("change", saveTripDraft);
+
     function renderPendingFish() {
       caughtFishList.replaceChildren();
       pendingFish.forEach((fish, index) => {
@@ -1125,7 +1368,7 @@
         const description = document.createElement("span");
         description.textContent = `${fish.species} · ${fish.lengthCm} cm${fish.weightKg ? ` · ${fish.weightKg} kg` : " · poids non renseigné"}`;
         const remove = document.createElement("button"); remove.type = "button"; remove.className = "refresh"; remove.textContent = "Retirer";
-        remove.addEventListener("click", () => { pendingFish.splice(index, 1); tripCatches.value = String(Math.max(0, Number(tripCatches.value) - 1)); renderPendingFish(); });
+        remove.addEventListener("click", () => { pendingFish.splice(index, 1); tripCatches.value = String(Math.max(0, Number(tripCatches.value) - 1)); renderPendingFish(); saveTripDraft(); });
         row.append(description, remove); caughtFishList.append(row);
       });
     }
@@ -1137,7 +1380,8 @@
       if (weightKg !== "" && (!Number.isFinite(weightKg) || weightKg < 0 || weightKg > 500)) { caughtWeightInput.focus(); document.getElementById("status").textContent = "Indique un poids valide en kilogrammes."; return; }
       pendingFish.push({ id: makeId(), species: caughtSpeciesInput.value, lengthCm, weightKg });
       tripCatches.value = String(Math.max(Number(tripCatches.value) || 0, pendingFish.length));
-      caughtLengthInput.value = ""; caughtWeightInput.value = ""; renderPendingFish();
+      caughtLengthInput.value = ""; caughtWeightInput.value = ""; renderPendingFish(); saveTripDraft();
+      document.getElementById("status").textContent = "Poisson ajouté au brouillon de cette sortie.";
     });
 
     async function renderTrips() {
@@ -1202,14 +1446,32 @@
       try { return { ...defaults, ...JSON.parse(localStorage.getItem(GOLD_THRESHOLD_STORAGE_KEY) || "{}") }; } catch { return defaults; }
     }
 
-    const goldThresholdFields = { Brochet: "gold-brochet", Perche: "gold-perche", Silure: "gold-silure", Corégone: "gold-coregone" };
-    const existingThresholds = loadGoldThresholds();
-    Object.entries(goldThresholdFields).forEach(([species, id]) => { document.getElementById(id).value = existingThresholds[species]; });
+    const goldThresholdFields = document.getElementById("gold-threshold-fields");
+    function renderGoldThresholdFields() {
+      const saved = loadGoldThresholds();
+      const names = [...new Set(["Brochet", "Perche", "Silure", "Corégone", ...customLists.species])];
+      goldThresholdFields.replaceChildren();
+      names.forEach((species, index) => {
+        const row = document.createElement("div");
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        const id = `gold-species-${index}`;
+        label.htmlFor = id; label.textContent = `Seuil ${species} (cm)`;
+        input.id = id; input.type = "number"; input.min = "1"; input.max = "500"; input.step = "1"; input.dataset.species = species;
+        input.value = saved[species] ?? ""; input.placeholder = "Facultatif";
+        row.append(label, input); goldThresholdFields.append(row);
+      });
+    }
+    renderGoldThresholdFields();
     document.getElementById("gold-threshold-form").addEventListener("submit", event => {
       event.preventDefault();
-      const values = Object.fromEntries(Object.entries(goldThresholdFields).map(([species, id]) => [species, Number(document.getElementById(id).value)]));
+      const values = Object.fromEntries(Array.from(goldThresholdFields.querySelectorAll("input[data-species]"))
+        .filter(input => input.value !== "" && Number(input.value) > 0)
+        .map(input => [input.dataset.species, Number(input.value)]));
       localStorage.setItem(GOLD_THRESHOLD_STORAGE_KEY, JSON.stringify(values));
-      renderFishingAdvice();
+      renderTrophyStats(); renderFishingAdvice();
+      document.getElementById("status").textContent = "Seuils des poissons d’or enregistrés sur cet appareil.";
+      performSync();
     });
 
     function renderTrophyStats() {
@@ -1239,7 +1501,7 @@
       [...fish].sort((a,b) => new Date(a.date || 0) - new Date(b.date || 0)).forEach(row => { if (!firstBySpecies.has(row.species)) firstBySpecies.set(row.species, row); });
       addGroup("🏆 Coupe du premier poisson par espèce", [...firstBySpecies.values()].map(row => `${row.species} : ${row.angler} · ${row.lengthCm} cm · ${dateLabel(row)} · ${row.place}`));
       const thresholds = loadGoldThresholds();
-      const gold = fish.filter(row => Number(row.lengthCm) >= Number(thresholds[row.species])).sort((a,b) => Number(b.lengthCm)-Number(a.lengthCm));
+      const gold = fish.filter(row => Number(thresholds[row.species]) > 0 && Number(row.lengthCm) >= Number(thresholds[row.species])).sort((a,b) => Number(b.lengthCm)-Number(a.lengthCm));
       addGroup("🐟 Poissons d’or — seuil atteint", gold.map(row => `${row.species} : ${row.angler} · ${row.lengthCm} cm (seuil ${thresholds[row.species]} cm) · ${dateLabel(row)} · ${row.place}`));
       const recordRows = [...byPair.values()].sort((a,b) => a.species.localeCompare(b.species, "fr") || b.lengthCm-a.lengthCm || a.angler.localeCompare(b.angler, "fr"));
       addGroup("Record de chaque pêcheur par espèce", recordRows.map(row => `${row.angler} — ${row.species} : ${row.lengthCm} cm${row.weightKg !== "" && row.weightKg != null ? ` · ${row.weightKg} kg` : " · poids non renseigné"} · ${dateLabel(row)} · ${row.place}`));
@@ -1400,6 +1662,8 @@
 
     document.getElementById("trip-form").addEventListener("submit", async event => {
       event.preventDefault();
+      const unfinished = [targetSpecies, tripAngler, tripTechnique, caughtSpeciesInput, tripPhotoCategory, ...fishingInputs].find(input => input.value === "__new__");
+      if (unfinished) { unfinished.closest("details")?.setAttribute("open", ""); document.getElementById("status").textContent = "Valide l’option personnalisée avec ✓ avant d’enregistrer la sortie."; unfinished.focus(); return; }
       const selectedCity = findCity(select.value);
       if (!tripPlace.value.trim() && selectedCity) tripPlace.value = selectedCity.label || selectedCity.name;
       const angler = tripAngler.value === "__new__" ? newAngler.value.trim() : tripAngler.value;
@@ -1443,7 +1707,9 @@
       saveButton.disabled = true;
       try {
         await persistTripPhotos(trip.id, queuedPhotos);
+        await clearDraftPhotos();
         saveTrips(trips);
+        localStorage.removeItem(TRIP_DRAFT_STORAGE_KEY);
         await renderTrips();
         queuedPhotos = [];
         pendingFish = [];
@@ -1468,6 +1734,7 @@
 
     renderTrips();
     let cities = loadCities();
+    let lastSelectedCity = select.value;
 
     function loadCities() {
       try {
@@ -1495,7 +1762,9 @@
         option.textContent = city.label || city.name;
         select.append(option);
       });
+      const addOption = document.createElement("option"); addOption.value = "__new__"; addOption.textContent = "＋ Nouvelle ville…"; select.append(addOption);
       if (selectedName) select.value = selectedName;
+      if (select.value !== "__new__") lastSelectedCity = select.value;
     }
 
     async function fetchJson(url, params) {
@@ -1792,6 +2061,8 @@
     });
 
     select.addEventListener("change", () => {
+      if (select.value === "__new__") { select.value = lastSelectedCity || cities[0]?.name || ""; document.getElementById("new-city").focus(); return; }
+      lastSelectedCity = select.value;
       if (!tripPlaceEdited) {
         const city = findCity(select.value);
         if (city) tripPlace.value = city.label || city.name;
@@ -1802,6 +2073,8 @@
     renderCities();
     const initialSelectedCity = findCity(select.value);
     if (initialSelectedCity) tripPlace.value = initialSelectedCity.label || initialSelectedCity.name;
+    restoreTripDraft();
+    restoreDraftPhotos().catch(error => { photoStatus.textContent = error.message || "Aucun brouillon photo restauré."; });
     loadWeather();
     function syncSetting() {
       try { return JSON.parse(localStorage.getItem(SYNC_SETTINGS_KEY) || "{}"); } catch { return {}; }
@@ -1862,7 +2135,7 @@
         const activeBaitPhotoIds = new Set(baits.filter(row => !row.deletedAt && row.photoId).map(row => row.photoId));
         const photos = (await readAllPhotos()).filter(photo => activeTripIds.has(photo.tripId) || activeBaitPhotoIds.has(photo.id));
         const photosPayload = await Promise.all(photos.map(async photo => ({ id: photo.id, tripId: photo.tripId, category: photo.category, data: await blobAsDataUrl(photo.blob) })));
-        const localBundle = { trips, baits, gear, photos: photosPayload };
+        const localBundle = { trips, baits, gear, photos: photosPayload, customOptions: customLists };
         const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 60000);
         let response;
         try { response = await fetch(settings.url, { method: "PUT", headers: { "Authorization": `Bearer ${settings.token}`, "Content-Type": "application/json" }, body: JSON.stringify(localBundle), signal: controller.signal }); }
@@ -1872,6 +2145,13 @@
         const mergedTrips = newerRows(trips, remote.trips || []);
         const mergedBaits = newerRows(baits, remote.baits || []);
         const mergedGear = newerRows(gear, remote.gear || []);
+        const mergedCustomOptions = Object.fromEntries(customListNames.map(name => {
+          const values = [...(customLists[name] || []), ...(Array.isArray(remote.customOptions?.[name]) ? remote.customOptions[name] : [])];
+          return [name, [...new Map(values.filter(value => typeof value === "string" && value.trim()).map(value => [value.toLocaleLowerCase("fr"), value.trim()])).values()]];
+        }));
+        customLists = mergedCustomOptions;
+        localStorage.setItem(CUSTOM_OPTIONS_STORAGE_KEY, JSON.stringify(customLists));
+        renderCustomOptions();
         localStorage.setItem(TRIP_STORAGE_KEY, JSON.stringify(mergedTrips));
         localStorage.setItem(BAIT_STORAGE_KEY, JSON.stringify(mergedBaits));
         localStorage.setItem(GEAR_STORAGE_KEY, JSON.stringify(mergedGear));
@@ -1881,7 +2161,7 @@
         [...photosPayload, ...(remote.photos || [])].forEach(photo => { if (photo && photo.id && photo.data) allPhotoRows.set(photo.id, photo); });
         const livePhotos = Array.from(allPhotoRows.values()).filter(photo => mergedActiveTripIds.has(photo.tripId) || mergedBaitPhotoIds.has(photo.id));
         await replaceAllPhotos(livePhotos.map(photo => ({ id: photo.id, tripId: photo.tripId, category: photo.category, blob: blobFromDataUrl(photo.data) })));
-        syncStatus.textContent = `Synchronisé à ${new Date().toLocaleTimeString("fr-CH", { hour: "2-digit", minute: "2-digit" })} · ${mergedTrips.filter(row => !row.deletedAt).length} sorties · ${livePhotos.length} photos.`;
+        syncStatus.textContent = `Synchronisé à ${new Date().toLocaleTimeString("fr-CH", { hour: "2-digit", minute: "2-digit" })} · ${mergedTrips.filter(row => !row.deletedAt).length} sorties · ${livePhotos.length} photos · listes personnalisées.`;
         await renderTrips(); renderBaits(); renderGear();
       } catch (error) {
         syncStatus.textContent = `${error.message || "Serveur indisponible."} Les données locales sont conservées et seront réessayées quand le réseau sera accessible.`;
