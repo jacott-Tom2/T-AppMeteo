@@ -43,6 +43,14 @@
     .logbook-fields { display: grid; gap: 9px; }
     .logbook-fields label { margin-bottom: 4px; }
     .logbook-list { display: grid; gap: 9px; }
+    .photo-actions { display: grid; gap: 8px; }
+    .photo-queue, .trip-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 8px; }
+    .photo-card { min-width: 0; padding: 7px; border-radius: 10px; background: #f4f7fb; }
+    .photo-card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 7px; }
+    .photo-card p { margin: 5px 0; font-size: .82rem; overflow-wrap: anywhere; }
+    .photo-card button { min-height: 38px; padding: 7px; background: #e7effa; color: #0b3d91; font-size: .88rem; }
+    .file-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+    .new-angler[hidden] { display: none; }
     #stats-results { display: grid; gap: 9px; }
     .stats-card { padding: 12px; border-radius: 10px; background: #f4f7fb; overflow-wrap: anywhere; }
     .stats-card p { margin: 0 0 6px; }
@@ -92,7 +100,49 @@
         <label for="city-select">Ville</label>
         <select id="city-select" aria-describedby="status"></select>
       </div>
+      <form id="add-form">
+        <label for="new-city">Rechercher / ajouter une ville suisse</label>
+        <div class="add-row">
+          <input id="new-city" name="city" type="text" maxlength="80" placeholder="Ex. Lausanne" autocomplete="address-level2" required>
+          <button id="add-button" type="submit">Ajouter</button>
+        </div>
+      </form>
+      <div class="location-actions" aria-label="Localiser une ville">
+        <button id="gps-button" type="button">📍 Utiliser ma position GPS</button>
+        <button id="network-button" type="button">📶 Localiser par réseau (approx.)</button>
+      </div>
+      <section id="gps-proposal" class="gps-proposal" aria-live="polite" hidden>
+        <p><strong>Lieu trouvé :</strong> <span id="gps-proposal-name"></span></p>
+        <p>Veux-tu utiliser cette ville pour afficher la météo ?</p>
+        <div class="proposal-actions">
+          <button id="gps-accept" type="button">Utiliser cette ville</button>
+          <button id="gps-cancel" class="secondary" type="button">Annuler</button>
+        </div>
+      </section>
+      <p class="privacy-note">Le GPS demande l’autorisation du téléphone. Ses coordonnées sont conservées dans ce navigateur, envoyées à OpenStreetMap pour trouver la localité, puis à Open-Meteo pour la météo. La localisation réseau est moins précise : ipapi.co reçoit votre adresse IP pour estimer votre ville.</p>
       <p id="status" role="status" aria-live="polite"></p>
+      <section class="weather" id="weather-card" aria-live="polite" hidden>
+        <h2 id="place-name"></h2>
+        <p id="updated"></p>
+        <div class="current">
+          <span id="icon" aria-hidden="true">🌤️</span>
+          <div><div id="temperature"></div><div id="condition"></div></div>
+        </div>
+        <dl>
+          <div><dt>Ressenti</dt><dd id="feels-like"></dd></div>
+          <div><dt>Humidité</dt><dd id="humidity"></dd></div>
+          <div><dt>Vent</dt><dd id="wind"></dd></div>
+          <div><dt>Rafales</dt><dd id="gusts"></dd></div>
+          <div><dt>Précipitations</dt><dd id="rain"></dd></div>
+          <div><dt>Couverture nuageuse</dt><dd id="cloud-cover"></dd></div>
+          <div><dt>Pression</dt><dd id="pressure"></dd></div>
+          <div><dt>Évolution sur 3 h</dt><dd id="pressure-trend"></dd></div>
+          <div><dt>Soleil</dt><dd id="sun-times"></dd></div>
+        </dl>
+        <button id="refresh-button" class="refresh" type="button">Actualiser la météo</button>
+      </section>
+      <p class="metric-note">Choisis d’abord ta ville ou ton lieu de pêche ; la météo se charge automatiquement. Tu peux aussi ajouter une localité ou utiliser le GPS/réseau.</p>
+      <section class="fishing-panel" aria-labelledby="fishing-title">
       <section class="fishing-panel" aria-labelledby="fishing-title">
         <h2 id="fishing-title">Paramètres pêche en lac</h2>
         <div>
@@ -139,26 +189,6 @@
         </div>
         <p class="metric-note">Profil : Lowrance Hook 5 HDI. Exemple visible sur ta photo : 14,6 m sous le bateau et 20,3 °C. Saisie manuelle : le navigateur ne lit pas automatiquement l’écran du sondeur.</p>
       </section>
-      <section class="weather" id="weather-card" aria-live="polite" hidden>
-        <h2 id="place-name"></h2>
-        <p id="updated"></p>
-        <div class="current">
-          <span id="icon" aria-hidden="true">🌤️</span>
-          <div><div id="temperature"></div><div id="condition"></div></div>
-        </div>
-        <dl>
-          <div><dt>Ressenti</dt><dd id="feels-like"></dd></div>
-          <div><dt>Humidité</dt><dd id="humidity"></dd></div>
-          <div><dt>Vent</dt><dd id="wind"></dd></div>
-          <div><dt>Rafales</dt><dd id="gusts"></dd></div>
-          <div><dt>Précipitations</dt><dd id="rain"></dd></div>
-          <div><dt>Couverture nuageuse</dt><dd id="cloud-cover"></dd></div>
-          <div><dt>Pression</dt><dd id="pressure"></dd></div>
-          <div><dt>Évolution sur 3 h</dt><dd id="pressure-trend"></dd></div>
-          <div><dt>Soleil</dt><dd id="sun-times"></dd></div>
-        </dl>
-        <button id="refresh-button" class="refresh" type="button">Actualiser la météo</button>
-      </section>
       <section class="extra-panel" aria-labelledby="moon-title">
         <h2 id="moon-title">Phase de lune</h2>
         <p id="moon-phase" aria-live="polite">Calcul…</p>
@@ -189,6 +219,15 @@
             <div>
               <label for="trip-date">Date et heure</label>
               <input id="trip-date" type="datetime-local" required>
+            </div>
+            <div>
+              <label for="trip-angler">Pêcheur</label>
+              <select id="trip-angler">
+                <option value="Jarod">Jarod</option>
+                <option value="Thomas">Thomas</option>
+                <option value="__new__">Nouveau pêcheur…</option>
+              </select>
+              <input id="new-angler" class="new-angler" type="text" maxlength="60" placeholder="Nom du pêcheur" aria-label="Nom du nouveau pêcheur" hidden>
             </div>
             <div>
               <label for="trip-place">Lieu ou poste</label>
@@ -222,6 +261,25 @@
               <label for="trip-result">Résultat / notes</label>
               <input id="trip-result" type="text" maxlength="240" placeholder="Ex. bancs à 8 m, fond rocheux">
             </div>
+            <div>
+              <label for="trip-photo-category">Catégorie de la photo</label>
+              <select id="trip-photo-category">
+                <option value="Leurre">Leurre</option>
+                <option value="Poisson">Poisson</option>
+                <option value="Leurre et poisson">Leurre et poisson ensemble</option>
+              </select>
+            </div>
+            <div>
+              <label>Photos de cette sortie (6 maximum)</label>
+              <div class="photo-actions">
+                <button id="take-photo" type="button">📷 Prendre une photo</button>
+                <button id="choose-photo" type="button" class="refresh">🖼️ Choisir une photo existante</button>
+              </div>
+              <input id="camera-photos" class="file-input" type="file" accept="image/*" capture="environment" multiple>
+              <input id="gallery-photos" class="file-input" type="file" accept="image/*" multiple>
+              <p id="photo-status" class="metric-note" aria-live="polite">Les images sont réduites puis conservées sur cet appareil.</p>
+              <div id="photo-queue" class="photo-queue" aria-live="polite"></div>
+            </div>
           </div>
           <button id="save-trip" type="submit">Enregistrer la sortie</button>
         </form>
@@ -233,26 +291,6 @@
         </section>
         <p class="metric-note">Le carnet reste dans le stockage local de cet appareil et de ce navigateur.</p>
       </section>
-      <div class="location-actions" aria-label="Localiser une ville">
-        <button id="gps-button" type="button">📍 Utiliser ma position GPS</button>
-        <button id="network-button" type="button">📶 Localiser par réseau (approx.)</button>
-      </div>
-      <section id="gps-proposal" class="gps-proposal" aria-live="polite" hidden>
-        <p><strong>Lieu trouvé :</strong> <span id="gps-proposal-name"></span></p>
-        <p>Veux-tu utiliser cette ville pour afficher la météo ?</p>
-        <div class="proposal-actions">
-          <button id="gps-accept" type="button">Utiliser cette ville</button>
-          <button id="gps-cancel" class="secondary" type="button">Annuler</button>
-        </div>
-      </section>
-      <p class="privacy-note">Le GPS demande l’autorisation du téléphone. Ses coordonnées sont conservées dans ce navigateur, envoyées à OpenStreetMap pour trouver la localité, puis à Open-Meteo pour la météo. La localisation réseau est moins précise : ipapi.co reçoit votre adresse IP pour estimer votre ville.</p>
-      <form id="add-form">
-        <label for="new-city">Ajouter une ville suisse</label>
-        <div class="add-row">
-          <input id="new-city" name="city" type="text" maxlength="80" placeholder="Ex. Lausanne" autocomplete="address-level2" required>
-          <button id="add-button" type="submit">Ajouter</button>
-        </div>
-      </form>
     </section>
 
     <footer>Données météo : Open-Meteo · Géocodage : <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap contributors</a> · Application en développement</footer>
@@ -281,15 +319,28 @@
     const speciesGuidance = document.getElementById("species-guidance");
     const fishingInputs = ["water-temperature", "sonar-depth", "fish-depth", "sonar-frequency", "water-clarity"].map(id => document.getElementById(id));
     const tripDate = document.getElementById("trip-date");
+    const tripAngler = document.getElementById("trip-angler");
+    const newAngler = document.getElementById("new-angler");
     const tripPlace = document.getElementById("trip-place");
     const tripTechnique = document.getElementById("trip-technique");
     const tripAnimation = document.getElementById("trip-animation");
     const tripLure = document.getElementById("trip-lure");
     const tripCatches = document.getElementById("trip-catches");
     const tripResult = document.getElementById("trip-result");
+    const tripPhotoCategory = document.getElementById("trip-photo-category");
+    const cameraPhotos = document.getElementById("camera-photos");
+    const galleryPhotos = document.getElementById("gallery-photos");
+    const photoQueueElement = document.getElementById("photo-queue");
+    const photoStatus = document.getElementById("photo-status");
     const tripList = document.getElementById("trip-list");
     const statsResults = document.getElementById("stats-results");
     const TRIP_STORAGE_KEY = "t-appmeteo-v2-trips";
+    const PHOTO_DB_NAME = "t-appmeteo-v3-photos";
+    const PHOTO_STORE_NAME = "trip-photos";
+    const MAX_TRIP_PHOTOS = 6;
+    let queuedPhotos = [];
+    const tripPhotoUrls = new Set();
+    const queuePhotoUrls = new Set();
     let tripPlaceEdited = false;
     let currentWeatherSnapshot = null;
 
@@ -324,7 +375,10 @@
 
     restoreFishingSettings();
     targetSpecies.addEventListener("change", updateSpeciesGuidance);
-    fishingInputs.forEach(input => input.addEventListener("change", saveFishingSettings));
+    fishingInputs.forEach(input => input.addEventListener("change", () => {
+      saveFishingSettings();
+      renderFishingAdvice();
+    }));
     updateSpeciesGuidance();
 
     function localDateTimeValue(date) {
@@ -346,6 +400,155 @@
     moonInformation(new Date());
     tripDate.value = localDateTimeValue(new Date());
     tripPlace.addEventListener("input", () => { tripPlaceEdited = true; });
+    tripAngler.addEventListener("change", () => {
+      const needsName = tripAngler.value === "__new__";
+      newAngler.hidden = !needsName;
+      newAngler.required = needsName;
+      if (needsName) newAngler.focus();
+    });
+
+    function makeId() {
+      return globalThis.crypto && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function openPhotoDatabase() {
+      return new Promise((resolve, reject) => {
+        if (!globalThis.indexedDB) {
+          reject(new Error("Le stockage de photos n’est pas disponible dans ce navigateur."));
+          return;
+        }
+        const request = indexedDB.open(PHOTO_DB_NAME, 1);
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          if (!db.objectStoreNames.contains(PHOTO_STORE_NAME)) {
+            const store = db.createObjectStore(PHOTO_STORE_NAME, { keyPath: "id" });
+            store.createIndex("tripId", "tripId", { unique: false });
+          }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || new Error("Impossible d’ouvrir le stockage des photos."));
+      });
+    }
+
+    function resizePhoto(file) {
+      return new Promise((resolve, reject) => {
+        if (!file.type.startsWith("image/")) {
+          reject(new Error("Choisis un fichier image."));
+          return;
+        }
+        const sourceUrl = URL.createObjectURL(file);
+        const image = new Image();
+        image.onload = () => {
+          URL.revokeObjectURL(sourceUrl);
+          const scale = Math.min(1, 1440 / Math.max(image.naturalWidth, image.naturalHeight));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+          canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("Impossible de préparer cette photo.")), "image/jpeg", 0.78);
+        };
+        image.onerror = () => {
+          URL.revokeObjectURL(sourceUrl);
+          reject(new Error("Cette image ne peut pas être ouverte."));
+        };
+        image.src = sourceUrl;
+      });
+    }
+
+    function clearObjectUrls(urls) {
+      urls.forEach(url => URL.revokeObjectURL(url));
+      urls.clear();
+    }
+
+    function renderPhotoQueue() {
+      clearObjectUrls(queuePhotoUrls);
+      photoQueueElement.replaceChildren();
+      queuedPhotos.forEach((photo, index) => {
+        const card = document.createElement("div");
+        card.className = "photo-card";
+        const image = document.createElement("img");
+        image.alt = `Aperçu photo : ${photo.category}`;
+        image.src = URL.createObjectURL(photo.blob);
+        queuePhotoUrls.add(image.src);
+        const caption = document.createElement("p");
+        caption.textContent = photo.category;
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.textContent = "Retirer";
+        remove.addEventListener("click", () => {
+          queuedPhotos.splice(index, 1);
+          renderPhotoQueue();
+        });
+        card.append(image, caption, remove);
+        photoQueueElement.append(card);
+      });
+    }
+
+    async function queueSelectedPhotos(input) {
+      const files = Array.from(input.files || []);
+      input.value = "";
+      if (!files.length) return;
+      if (queuedPhotos.length + files.length > MAX_TRIP_PHOTOS) {
+        photoStatus.textContent = `Maximum ${MAX_TRIP_PHOTOS} photos par sortie.`;
+        return;
+      }
+      photoStatus.textContent = "Préparation des photos…";
+      try {
+        for (const file of files) {
+          const blob = await resizePhoto(file);
+          queuedPhotos.push({ id: makeId(), category: tripPhotoCategory.value, blob });
+        }
+        photoStatus.textContent = `${queuedPhotos.length} photo${queuedPhotos.length > 1 ? "s" : ""} prête${queuedPhotos.length > 1 ? "s" : ""} à enregistrer.`;
+        renderPhotoQueue();
+      } catch (error) {
+        photoStatus.textContent = error.message || "La photo n’a pas pu être ajoutée.";
+      }
+    }
+
+    document.getElementById("take-photo").addEventListener("click", () => cameraPhotos.click());
+    document.getElementById("choose-photo").addEventListener("click", () => galleryPhotos.click());
+    cameraPhotos.addEventListener("change", () => queueSelectedPhotos(cameraPhotos));
+    galleryPhotos.addEventListener("change", () => queueSelectedPhotos(galleryPhotos));
+
+    async function persistTripPhotos(tripId, photos) {
+      if (!photos.length) return;
+      const db = await openPhotoDatabase();
+      await new Promise((resolve, reject) => {
+        const transaction = db.transaction(PHOTO_STORE_NAME, "readwrite");
+        const store = transaction.objectStore(PHOTO_STORE_NAME);
+        photos.forEach(photo => store.put({ id: photo.id, tripId, category: photo.category, blob: photo.blob }));
+        transaction.oncomplete = resolve;
+        transaction.onerror = () => reject(transaction.error || new Error("Les photos n’ont pas été enregistrées."));
+        transaction.onabort = () => reject(transaction.error || new Error("Enregistrement des photos interrompu."));
+      });
+      db.close();
+    }
+
+    async function readTripPhotos(tripId) {
+      const db = await openPhotoDatabase();
+      const photos = await new Promise((resolve, reject) => {
+        const transaction = db.transaction(PHOTO_STORE_NAME, "readonly");
+        const request = transaction.objectStore(PHOTO_STORE_NAME).index("tripId").getAll(tripId);
+        request.onsuccess = () => resolve(request.result || []);
+        request.onerror = () => reject(request.error || new Error("Photos indisponibles."));
+      });
+      db.close();
+      return photos;
+    }
+
+    async function deleteTripPhotos(tripId) {
+      const db = await openPhotoDatabase();
+      await new Promise((resolve, reject) => {
+        const transaction = db.transaction(PHOTO_STORE_NAME, "readwrite");
+        const store = transaction.objectStore(PHOTO_STORE_NAME);
+        const request = store.index("tripId").getAllKeys(tripId);
+        request.onsuccess = () => request.result.forEach(key => store.delete(key));
+        request.onerror = () => reject(request.error || new Error("Impossible de supprimer les photos."));
+        transaction.oncomplete = resolve;
+        transaction.onerror = () => reject(transaction.error || new Error("Impossible de supprimer les photos."));
+      });
+      db.close();
+    }
 
     async function loadLakeLevel() {
       const level = document.getElementById("lake-level");
@@ -399,13 +602,19 @@
       localStorage.setItem(TRIP_STORAGE_KEY, JSON.stringify(trips.slice(0, 100)));
     }
 
-    function renderTrips() {
+    async function renderTrips() {
+      clearObjectUrls(tripPhotoUrls);
       tripList.replaceChildren();
-      loadTrips().forEach(trip => {
+      const trips = loadTrips();
+      const photosByTrip = await Promise.all(trips.map(async trip => {
+        if (!Array.isArray(trip.photos) || !trip.photos.length) return [];
+        try { return await readTripPhotos(trip.id); } catch { return []; }
+      }));
+      trips.forEach((trip, index) => {
         const entry = document.createElement("article");
         entry.className = "trip-entry";
         const heading = document.createElement("p");
-        heading.textContent = `${new Date(trip.date).toLocaleString("fr-CH")} · ${trip.species} · ${trip.place}`;
+        heading.textContent = `${new Date(trip.date).toLocaleString("fr-CH")} · ${trip.species} · ${trip.place} · Pêcheur : ${trip.angler || "non précisé"}`;
         entry.append(heading);
         const details = [trip.technique && `Technique : ${trip.technique}`, trip.animation && `Animation : ${trip.animation}`, trip.lure && `Leurre : ${trip.lure}`, Number.isFinite(Number(trip.catches)) && `Prises : ${trip.catches}`, trip.waterTemperature && `Eau : ${trip.waterTemperature} °C`, trip.depth && `Fond : ${trip.depth} m`, trip.fishDepth && `Poissons : ${trip.fishDepth} m`, trip.sonarFrequency && `Sondeur : ${trip.sonarFrequency}`, trip.result && `Notes : ${trip.result}`].filter(Boolean);
         if (details.length) {
@@ -413,12 +622,31 @@
           detail.textContent = details.join(" · ");
           entry.append(detail);
         }
+        const tripPhotos = photosByTrip[index];
+        if (tripPhotos.length) {
+          const photoGrid = document.createElement("div");
+          photoGrid.className = "trip-photos";
+          tripPhotos.forEach(photo => {
+            const card = document.createElement("div");
+            card.className = "photo-card";
+            const image = document.createElement("img");
+            image.alt = `Photo de ${photo.category.toLocaleLowerCase("fr")}`;
+            image.src = URL.createObjectURL(photo.blob);
+            tripPhotoUrls.add(image.src);
+            const caption = document.createElement("p");
+            caption.textContent = photo.category;
+            card.append(image, caption);
+            photoGrid.append(card);
+          });
+          entry.append(photoGrid);
+        }
         const remove = document.createElement("button");
         remove.type = "button";
         remove.textContent = "Supprimer cette sortie";
-        remove.addEventListener("click", () => {
+        remove.addEventListener("click", async () => {
           saveTrips(loadTrips().filter(item => item.id !== trip.id));
-          renderTrips();
+          try { await deleteTripPhotos(trip.id); } catch { /* Le carnet reste supprimé même si le navigateur ne nettoie pas les images. */ }
+          await renderTrips();
         });
         entry.append(remove);
         tripList.append(entry);
@@ -465,18 +693,56 @@
         .sort((a, b) => (b.successfulOutings / b.outings) - (a.successfulOutings / a.outings) || b.catches - a.catches || b.outings - a.outings);
     }
 
-    function conditionsAreSimilar(past, current) {
+    function conditionsAreSimilar(past, current, pastFishing, currentFishing) {
       if (!past || !current) return false;
       const checks = [
-        [past.airTemperature, current.airTemperature, 7],
-        [past.windSpeed, current.windSpeed, 10],
-        [past.pressure, current.pressure, 10],
-        [past.cloudCover, current.cloudCover, 35]
+        [past.airTemperature, current.airTemperature, 6],
+        [past.windSpeed, current.windSpeed, 8],
+        [past.pressure, current.pressure, 8],
+        [past.cloudCover, current.cloudCover, 30],
+        [past.precipitation, current.precipitation, 2],
+        [past.pressureTrend, current.pressureTrend, 3]
       ];
       const available = checks.filter(([a, b]) => Number.isFinite(Number(a)) && Number.isFinite(Number(b)));
       if (available.length < 2) return false;
       if (available.some(([a, b, tolerance]) => Math.abs(Number(a) - Number(b)) > tolerance)) return false;
+      if (pastFishing && currentFishing) {
+        const pastWater = Number(pastFishing.waterTemperature);
+        const currentWater = Number(currentFishing.waterTemperature);
+        if (Number.isFinite(pastWater) && Number.isFinite(currentWater) && Math.abs(pastWater - currentWater) > 3) return false;
+        if (pastFishing.waterClarity && currentFishing.waterClarity && pastFishing.waterClarity !== currentFishing.waterClarity) return false;
+        const pastFishDepth = Number(pastFishing.fishDepth);
+        const currentFishDepth = Number(currentFishing.fishDepth);
+        if (Number.isFinite(pastFishDepth) && Number.isFinite(currentFishDepth) && Math.abs(pastFishDepth - currentFishDepth) > 4) return false;
+      }
       return true;
+    }
+
+    function rankDepthOptions(records) {
+      const groups = new Map();
+      records.forEach(trip => {
+        const depth = Number(trip.fishDepth);
+        if (!Number.isFinite(depth) || depth <= 0) return;
+        const lower = Math.floor(depth / 2) * 2;
+        const key = `${lower}-${lower + 2}`;
+        if (!groups.has(key)) groups.set(key, { name: `${lower}–${lower + 2} m`, outings: 0, successfulOutings: 0, catches: 0 });
+        const group = groups.get(key);
+        group.outings += 1;
+        const catches = Number(trip.catches);
+        if (catches > 0) {
+          group.successfulOutings += 1;
+          group.catches += catches;
+        }
+      });
+      return [...groups.values()].filter(group => group.successfulOutings > 0)
+        .sort((a, b) => (b.successfulOutings / b.outings) - (a.successfulOutings / a.outings) || b.catches - a.catches);
+    }
+
+    function describeBestDepth(records) {
+      const ranked = rankDepthOptions(records);
+      if (!ranked.length) return "Profondeur des poissons : renseigne la profondeur observée au sondeur lors des prochaines sorties.";
+      const best = ranked[0];
+      return `Profondeur des poissons à retenter : ${best.name} (${best.successfulOutings}/${best.outings} sorties avec prise).`;
     }
 
     function describeBest(records, field, label) {
@@ -502,7 +768,15 @@
 
       const successful = recorded.filter(trip => Number(trip.catches) > 0);
       const totalCatches = successful.reduce((sum, trip) => sum + Number(trip.catches), 0);
-      const similar = currentWeatherSnapshot ? recorded.filter(trip => conditionsAreSimilar(trip.weather, currentWeatherSnapshot)) : [];
+      const currentFishing = {
+        waterTemperature: fishingInputs[0].value,
+        sonarDepth: fishingInputs[1].value,
+        fishDepth: fishingInputs[2].value,
+        sonarFrequency: fishingInputs[3].value,
+        waterClarity: fishingInputs[4].value
+      };
+      const hasFishingContext = Object.values(currentFishing).some(value => value !== "");
+      const similar = currentWeatherSnapshot ? recorded.filter(trip => conditionsAreSimilar(trip.weather, currentWeatherSnapshot, trip.fishingContext || trip, hasFishingContext ? currentFishing : null)) : [];
       const similarHasCatch = similar.some(trip => Number(trip.catches) > 0);
       const recommendationRecords = similarHasCatch ? similar : recorded;
       const conditionsLabel = similarHasCatch
@@ -524,7 +798,8 @@
         describeBest(recommendationRecords, "place", "Spot à retenter"),
         describeBest(recommendationRecords, "animation", "Animation à privilégier"),
         describeBest(recommendationRecords, "technique", "Technique à privilégier"),
-        describeBest(recommendationRecords, "lure", "Leurre à retenter")
+        describeBest(recommendationRecords, "lure", "Leurre à retenter"),
+        describeBestDepth(recommendationRecords)
       ];
       statsResults.append(makeStatsCard(similarHasCatch ? "Pistes pour aujourd’hui · météo proche" : "Pistes pour aujourd’hui · tendance générale", recommendations));
       if (recorded.length < 3) {
@@ -534,13 +809,20 @@
       }
     }
 
-    document.getElementById("trip-form").addEventListener("submit", event => {
+    document.getElementById("trip-form").addEventListener("submit", async event => {
       event.preventDefault();
       const selectedCity = findCity(select.value);
       if (!tripPlace.value.trim() && selectedCity) tripPlace.value = selectedCity.label || selectedCity.name;
+      const angler = tripAngler.value === "__new__" ? newAngler.value.trim() : tripAngler.value;
+      if (!angler) {
+        newAngler.focus();
+        document.getElementById("status").textContent = "Indique le nom du nouveau pêcheur.";
+        return;
+      }
       const trip = {
-        id: globalThis.crypto && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
+        id: makeId(),
         date: tripDate.value,
+        angler,
         place: tripPlace.value.trim(),
         species: currentSpeciesLabel(),
         technique: tripTechnique.value,
@@ -552,13 +834,28 @@
         depth: fishingInputs[1].value,
         fishDepth: fishingInputs[2].value,
         sonarFrequency: fishingInputs[3].value,
-        weather: currentWeatherSnapshot ? { ...currentWeatherSnapshot } : null
+        waterClarity: fishingInputs[4].value,
+        fishingContext: {
+          waterTemperature: fishingInputs[0].value,
+          sonarDepth: fishingInputs[1].value,
+          fishDepth: fishingInputs[2].value,
+          sonarFrequency: fishingInputs[3].value,
+          waterClarity: fishingInputs[4].value
+        },
+        weather: currentWeatherSnapshot ? { ...currentWeatherSnapshot } : null,
+        photos: queuedPhotos.map(photo => ({ id: photo.id, category: photo.category }))
       };
       const trips = loadTrips();
       trips.unshift(trip);
+      const saveButton = document.getElementById("save-trip");
+      saveButton.disabled = true;
       try {
+        await persistTripPhotos(trip.id, queuedPhotos);
         saveTrips(trips);
-        renderTrips();
+        await renderTrips();
+        queuedPhotos = [];
+        renderPhotoQueue();
+        photoStatus.textContent = "Les photos sont enregistrées avec la sortie sur cet appareil.";
         tripTechnique.value = "";
         tripAnimation.value = "";
         tripLure.value = "";
@@ -566,8 +863,11 @@
         tripResult.value = "";
         tripDate.value = localDateTimeValue(new Date());
         document.getElementById("status").textContent = "Sortie enregistrée dans ce navigateur.";
-      } catch {
-        document.getElementById("status").textContent = "Impossible d’enregistrer la sortie dans le navigateur.";
+      } catch (error) {
+        try { await deleteTripPhotos(trip.id); } catch { /* Aucun enregistrement photo exploitable n’est gardé. */ }
+        document.getElementById("status").textContent = error.message || "Impossible d’enregistrer la sortie dans le navigateur.";
+      } finally {
+        saveButton.disabled = false;
       }
     });
 
