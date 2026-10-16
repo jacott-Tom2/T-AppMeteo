@@ -14,9 +14,10 @@
     header { margin-bottom: 16px; }
     h1 { margin: 0; color: #087873; font-size: 1.9rem; line-height: 1.15; }
     .subtitle { margin: 7px 0 0; color: #4c5c58; }
-    .panel, .weather { background: white; border: 1px solid #e6e0d1; border-radius: 16px; padding: 18px; box-shadow: 0 6px 20px #17232b12; }
+    .panel, .weather { background: white; border: 2px solid #087873; border-radius: 16px; padding: 18px; box-shadow: 0 7px 22px #17232b18; }
     .panel { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
-    .accordion { min-width: 0; border: 1px solid #e6e0d1; border-radius: 13px; background: #fff; overflow: clip; }
+    .accordion { min-width: 0; border: 1.5px solid #aebfb8; border-radius: 13px; background: #fff; overflow: clip; transition: border-color .18s ease, box-shadow .18s ease; }
+    .accordion[open] { border-color: #087873; box-shadow: 0 0 0 2px #08787320; }
     .accordion > summary { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 13px 15px; color: #087873; font-weight: 700; cursor: pointer; list-style: none; touch-action: manipulation; }
     .accordion > summary::-webkit-details-marker { display: none; }
     .accordion > summary::after { content: "+"; margin-left: auto; font-size: 1.2rem; }
@@ -34,7 +35,9 @@
     .custom-entry-controls button { width: auto; min-width: 112px; min-height: 46px; padding: 10px 13px; background: #087873; color: #fff; }
     .city-add-button { background: #087873; }
     label { display: block; font-weight: 650; margin-bottom: 7px; }
-    select, input, button { width: 100%; min-height: 48px; border: 1px solid #beb9aa; border-radius: 10px; padding: 11px 13px; font: inherit; font-size: 16px; background: white; }
+    select, input, button { width: 100%; min-height: 48px; border: 1.5px solid #a9b2a7; border-radius: 10px; padding: 11px 13px; font: inherit; font-size: 16px; background: white; }
+    select, input, textarea { box-shadow: inset 0 1px 2px #17232b0a; }
+    select:hover, input:hover, textarea:hover { border-color: #607f75; }
     button { border: 0; background: #087873; color: white; font-weight: 650; cursor: pointer; }
     button:focus, select:focus, input:focus { outline: 3px solid #83bfb2; outline-offset: 2px; }
     button:focus:not(:focus-visible), select:focus:not(:focus-visible), input:focus:not(:focus-visible) { outline: none; }
@@ -43,14 +46,14 @@
     .add-row { display: grid; gap: 9px; }
     .location-actions { display: grid; gap: 9px; }
     .location-actions button { background: #e5f0ed; color: #087873; }
-    .fishing-panel { display: grid; gap: 12px; padding: 14px; border: 1px solid #e6e0d1; border-radius: 12px; background: #fbf7ed; }
+    .fishing-panel { display: grid; gap: 12px; padding: 14px; border: 1.5px solid #b8c8bf; border-left: 4px solid #087873; border-radius: 12px; background: #fbf7ed; }
     .fishing-panel h2 { margin: 0; font-size: 1.1rem; color: #087873; }
     .fishing-panel p { margin: 0; color: #4c5c58; line-height: 1.4; }
     .fishing-fields { display: grid; gap: 9px; }
     .fishing-fields label { margin-bottom: 4px; }
     .fishing-fields input, .fishing-fields select { min-height: 46px; }
     .metric-note { color: #4c5c58; font-size: .88rem; }
-    .extra-panel { display: grid; gap: 12px; padding: 14px; border: 1px solid #e6e0d1; border-radius: 12px; background: #fff; }
+    .extra-panel { display: grid; gap: 12px; padding: 14px; border: 1.5px solid #b8c8bf; border-left: 4px solid #c95545; border-radius: 12px; background: #fff; }
     .extra-panel h2 { margin: 0; font-size: 1.1rem; color: #087873; }
     .extra-panel p { margin: 0; line-height: 1.45; }
     .extra-panel a { color: #087873; }
@@ -66,6 +69,21 @@
     .photo-card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 7px; }
     .photo-card p { margin: 5px 0; font-size: .82rem; overflow-wrap: anywhere; }
     .photo-card button { min-height: 38px; padding: 7px; background: #e5f0ed; color: #087873; font-size: .88rem; }
+    label[for="city-select"]::before { content: "📍"; }
+    label[for="new-city"]::before { content: "➕"; }
+    label[for="water-temperature"]::before { content: "🌡️"; }
+    label[for="sonar-depth"]::before { content: "📏"; }
+    label[for="fish-depth"]::before { content: "🐟"; }
+    label[for="sonar-frequency"]::before { content: "📡"; }
+    label[for="water-clarity"]::before { content: "💧"; }
+    label[for="target-species"]::before { content: "🎯"; }
+    label[for="bait-name"]::before { content: "🪝"; }
+    label[for="gear-category"]::before { content: "🧰"; }
+    label[for="trip-date"]::before { content: "🗓️"; }
+    label[for="trip-angler"]::before { content: "🎣"; }
+    label[for="trip-place"]::before { content: "🗺️"; }
+    label[for="trip-photo-category"]::before { content: "📷"; }
+    label[for]::before { display: inline-block; margin-right: 7px; font-size: 1rem; }
     .file-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
     .new-angler[hidden] { display: none; }
     .brand-logo { display: block; width: min(100%, 280px); max-width: 100%; max-height: 280px; height: auto; object-fit: contain; overflow: clip; margin: 0 auto 10px; }
@@ -84,7 +102,7 @@
     .bait-card button { grid-column: 1 / -1; min-height: 40px; background: #e5f0ed; color: #087873; }
     .gear-grid { display: grid; gap: 10px; }
     .gear-fields { display: grid; gap: 9px; }
-    .gear-card { padding: 12px; border-radius: 10px; background: #f8f5ed; }
+    .gear-card { padding: 12px; border: 1px solid #d5d4c8; border-radius: 10px; background: #f8f5ed; }
     .gear-card h3 { margin: 0 0 5px; color: #087873; }
     .gear-card p { margin: 0 0 8px; font-size: .9rem; }
     .gear-card button { min-height: 42px; background: #e5f0ed; color: #087873; }
@@ -93,10 +111,10 @@
     .record-entry p { margin: 3px 0; }
     .threshold-grid { display: grid; gap: 8px; margin: 10px 0; }
     #stats-results { display: grid; gap: 9px; }
-    .stats-card { padding: 12px; border-radius: 10px; background: #f8f5ed; overflow-wrap: anywhere; }
+    .stats-card { padding: 12px; border: 1px solid #d5d4c8; border-radius: 10px; background: #f8f5ed; overflow-wrap: anywhere; }
     .stats-card p { margin: 0 0 6px; }
     .stats-card p:last-child { margin-bottom: 0; }
-    .trip-entry { padding: 12px; border-radius: 10px; background: #f8f5ed; overflow-wrap: anywhere; }
+    .trip-entry { padding: 12px; border: 1px solid #d5d4c8; border-radius: 10px; background: #f8f5ed; overflow-wrap: anywhere; }
     .trip-entry p { margin: 0 0 5px; }
     .trip-entry button { margin-top: 7px; min-height: 42px; background: #e5f0ed; color: #087873; }
     #trip-list:empty::after { content: "Aucune sortie enregistrée pour le moment."; color: #566761; }
