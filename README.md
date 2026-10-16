@@ -6,6 +6,8 @@ La version pêche en lac est disponible dans [T-AppMeteo V2](https://jacott-tom2
 
 La [T-AppMeteo V3](https://jacott-tom2.github.io/T-AppMeteo/v3/index.html) ajoute des liens vers les sources météo et pêche de Yvonand/Neuchâtel, avec ouverture de la webcam à la demande.
 
+La V3 permet aussi d’ajouter aux sorties des photos du leurre, du poisson ou des deux ensemble, en les attribuant à Jarod, Thomas ou à un pêcheur ajouté. Les statistiques proposent des pistes de spot, technique, leurre, profondeur repérée et animation selon les sorties et les conditions météo enregistrées. Les photos et le carnet restent sur l’appareil.
+
 Application météo légère, en français, conçue pour Yverdon-les-Bains (1400), Yvonand et les localités suisses ajoutées par l’utilisateur.
 
 ## Fonctionnalités prévues
