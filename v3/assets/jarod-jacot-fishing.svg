@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 420" role="img" aria-labelledby="title desc">
+  <title id="title">Jarod Jacot Fishing</title>
+  <desc id="desc">Un grand brochet stylisé devant des vagues, dans les couleurs turquoise, crème, anthracite et rouge du bateau.</desc>
+  <defs>
+    <linearGradient id="water" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#21aaa5"/>
+      <stop offset="1" stop-color="#087873"/>
+    </linearGradient>
+    <linearGradient id="fish" x1="0" x2="0.95" y1="0" y2="0.8">
+      <stop offset="0" stop-color="#e4d9bf"/>
+      <stop offset="0.52" stop-color="#f8f0df"/>
+      <stop offset="1" stop-color="#b8c9b7"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(18 16)">
+    <path d="M34 209C53 114 132 43 231 28c99-15 178 24 223 99-50-25-91-30-135-18 42 17 74 44 92 79-61-25-121-27-188-8-71 21-119 54-161 105-42-14-70-38-88-76 30 7 52 7 73 0-14-11-24-24-31-40 13 5 25 7 38 6Z" fill="#17232b" stroke="#f1e8d5" stroke-width="8" stroke-linejoin="round"/>
+    <path d="M70 222c52-48 106-72 167-76 70-5 123 12 177 48-61 2-102 15-148 43-55 34-93 66-130 107-39-16-66-39-82-72 27 6 50 4 70-5-20-10-36-25-47-45Z" fill="url(#fish)"/>
+    <path d="m235 148 52-51 20 69M320 158l45-53 18 83M183 191l-32-37-4 62M262 236l-15 71 58-48M338 213l22 74 29-68" fill="#087873" stroke="#17232b" stroke-width="9" stroke-linejoin="round"/>
+    <path d="M58 219c34 7 61 4 86-8m-88 38c38 10 70 8 105-8m62-22c-25 27-43 57-57 94m84-91c-13 25-22 51-27 79m74-92c-6 20-8 41-8 62" fill="none" stroke="#087873" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="113" cy="160" r="15" fill="#e95b53" stroke="#17232b" stroke-width="7"/>
+    <circle cx="118" cy="157" r="5" fill="#fff8e7"/>
+    <path d="M37 286c58 30 133 41 230 34 90-7 164-28 223-62" fill="none" stroke="url(#water)" stroke-width="16" stroke-linecap="round"/>
+    <path d="M64 325c55 22 124 31 205 26 80-5 144-20 193-44" fill="none" stroke="#e95b53" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" font-weight="800">
+    <text x="525" y="165" fill="#17232b" font-size="72" letter-spacing="3">JAROD JACOT</text>
+    <path d="M528 190h406" stroke="#e95b53" stroke-width="8" stroke-linecap="round"/>
+    <text x="526" y="278" fill="#087873" font-size="86" letter-spacing="12">FISHING</text>
+    <text x="532" y="337" fill="#6c777b" font-size="25" letter-spacing="7">LAC DE NEUCHÂTEL</text>
+  </g>
+</svg>
