@@ -1,0 +1,1902 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b3d91">
+  <meta name="description" content="Prévisions, observations, carnet et statistiques de pêche au lac de Neuchâtel.">
+  <title>T-AppMeteo V4 — Carnet de pêche</title>
+  <style>
+    :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 16px; color: #142033; background: #f3f7fb; }
+    * { box-sizing: border-box; min-width: 0; }
+    body { margin: 0; min-height: 100vh; }
+    main { width: calc(100% - 24px); max-width: 620px; margin: 0 auto; padding: 18px 0 28px; padding-top: calc(18px + env(safe-area-inset-top, 0px)); padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px)); }
+    header { margin-bottom: 16px; }
+    h1 { margin: 0; color: #0b3d91; font-size: 1.9rem; line-height: 1.15; }
+    .subtitle { margin: 7px 0 0; color: #536174; }
+    .panel, .weather { background: white; border: 1px solid #dce5ef; border-radius: 16px; padding: 18px; box-shadow: 0 6px 20px #173a5e0a; }
+    .panel { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+    .accordion { min-width: 0; border: 1px solid #dce5ef; border-radius: 13px; background: #fff; overflow: clip; }
+    .accordion > summary { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 13px 15px; color: #0b3d91; font-weight: 700; cursor: pointer; list-style: none; touch-action: manipulation; }
+    .accordion > summary::-webkit-details-marker { display: none; }
+    .accordion > summary::after { content: "+"; margin-left: auto; font-size: 1.2rem; }
+    .accordion[open] > summary::after { content: "−"; }
+    .accordion[open] > summary { border-bottom: 1px solid #dce5ef; }
+    .accordion-body { display: grid; gap: 12px; padding: 12px; min-width: 0; }
+    .accordion-body > * { min-width: 0; }
+    .inner-accordion { margin: 10px 0; border: 1px solid #dce5ef; border-radius: 10px; background: #fff; }
+    .inner-accordion > summary { padding: 11px 12px; color: #0b3d91; font-weight: 650; cursor: pointer; }
+    .inner-accordion[open] > summary { border-bottom: 1px solid #dce5ef; }
+    .inner-accordion > div { padding: 10px; display: grid; gap: 9px; }
+    label { display: block; font-weight: 650; margin-bottom: 7px; }
+    select, input, button { width: 100%; min-height: 48px; border: 1px solid #b8c5d5; border-radius: 10px; padding: 11px 13px; font: inherit; font-size: 16px; background: white; }
+    button { border: 0; background: #0b3d91; color: white; font-weight: 650; cursor: pointer; }
+    button:focus, select:focus, input:focus { outline: 3px solid #84baff; outline-offset: 2px; }
+    button:focus:not(:focus-visible), select:focus:not(:focus-visible), input:focus:not(:focus-visible) { outline: none; }
+    button:disabled { opacity: .65; cursor: wait; }
+    button, select { touch-action: manipulation; }
+    .add-row { display: grid; gap: 9px; }
+    .location-actions { display: grid; gap: 9px; }
+    .location-actions button { background: #e7effa; color: #0b3d91; }
+    .fishing-panel { display: grid; gap: 12px; padding: 14px; border: 1px solid #dce5ef; border-radius: 12px; background: #f8fafc; }
+    .fishing-panel h2 { margin: 0; font-size: 1.1rem; color: #0b3d91; }
+    .fishing-panel p { margin: 0; color: #536174; line-height: 1.4; }
+    .fishing-fields { display: grid; gap: 9px; }
+    .fishing-fields label { margin-bottom: 4px; }
+    .fishing-fields input, .fishing-fields select { min-height: 46px; }
+    .metric-note { color: #536174; font-size: .88rem; }
+    .extra-panel { display: grid; gap: 12px; padding: 14px; border: 1px solid #dce5ef; border-radius: 12px; background: #fff; }
+    .extra-panel h2 { margin: 0; font-size: 1.1rem; color: #0b3d91; }
+    .extra-panel p { margin: 0; line-height: 1.45; }
+    .extra-panel a { color: #0b3d91; }
+    .source-links { display: grid; gap: 8px; }
+    .source-link { display: flex; align-items: center; min-height: 48px; padding: 11px 13px; border-radius: 10px; background: #e7effa; color: #0b3d91; font-weight: 650; text-decoration: none; }
+    .source-link:focus-visible { outline: 3px solid #84baff; outline-offset: 2px; }
+    .logbook-fields { display: grid; gap: 9px; }
+    .logbook-fields label { margin-bottom: 4px; }
+    .logbook-list { display: grid; gap: 9px; }
+    .photo-actions { display: grid; gap: 8px; }
+    .photo-queue, .trip-photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 8px; }
+    .photo-card { min-width: 0; padding: 7px; border-radius: 10px; background: #f4f7fb; }
+    .photo-card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 7px; }
+    .photo-card p { margin: 5px 0; font-size: .82rem; overflow-wrap: anywhere; }
+    .photo-card button { min-height: 38px; padding: 7px; background: #e7effa; color: #0b3d91; font-size: .88rem; }
+    .file-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+    .new-angler[hidden] { display: none; }
+    .brand-logo { display: block; width: min(100%, 280px); max-width: 100%; max-height: 280px; height: auto; object-fit: contain; overflow: clip; margin: 0 auto 10px; }
+    .bait-fields { display: grid; gap: 9px; }
+    .bait-fields label { margin-bottom: 4px; }
+    .species-check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .species-check { display: flex; align-items: center; gap: 8px; margin: 0; padding: 10px; border: 1px solid #dce5ef; border-radius: 9px; font-weight: 500; }
+    .species-check input { width: 20px; min-height: 20px; margin: 0; padding: 0; }
+    textarea { width: 100%; min-height: 84px; border: 1px solid #b8c5d5; border-radius: 10px; padding: 11px 13px; font: inherit; font-size: 16px; resize: vertical; }
+    .bait-list { display: grid; gap: 10px; }
+    .bait-card { display: grid; grid-template-columns: 100px 1fr; gap: 11px; padding: 10px; border-radius: 10px; background: #f4f7fb; }
+    .bait-card img, .bait-no-photo { width: 100px; height: 100px; border-radius: 8px; object-fit: cover; background: #e1e8ee; }
+    .bait-no-photo { display: grid; place-items: center; color: #687785; text-align: center; font-size: .8rem; }
+    .bait-card h3 { margin: 0 0 5px; color: #0b3d91; font-size: 1rem; }
+    .bait-card p { margin: 0 0 5px; font-size: .88rem; line-height: 1.35; }
+    .bait-card button { grid-column: 1 / -1; min-height: 40px; background: #e7effa; color: #0b3d91; }
+    .gear-grid { display: grid; gap: 10px; }
+    .gear-fields { display: grid; gap: 9px; }
+    .gear-card { padding: 12px; border-radius: 10px; background: #f4f7fb; }
+    .gear-card h3 { margin: 0 0 5px; color: #0b3d91; }
+    .gear-card p { margin: 0 0 8px; font-size: .9rem; }
+    .gear-card button { min-height: 42px; background: #e7effa; color: #0b3d91; }
+    .sync-fields { display: grid; gap: 9px; }
+    .catch-entry, .record-entry { padding: 10px; margin: 7px 0; border-radius: 9px; background: #f4f7fb; }
+    .record-entry p { margin: 3px 0; }
+    .threshold-grid { display: grid; gap: 8px; margin: 10px 0; }
+    #stats-results { display: grid; gap: 9px; }
+    .stats-card { padding: 12px; border-radius: 10px; background: #f4f7fb; overflow-wrap: anywhere; }
+    .stats-card p { margin: 0 0 6px; }
+    .stats-card p:last-child { margin-bottom: 0; }
+    .trip-entry { padding: 12px; border-radius: 10px; background: #f4f7fb; overflow-wrap: anywhere; }
+    .trip-entry p { margin: 0 0 5px; }
+    .trip-entry button { margin-top: 7px; min-height: 42px; background: #e7effa; color: #0b3d91; }
+    #trip-list:empty::after { content: "Aucune sortie enregistrée pour le moment."; color: #64748b; }
+    .gps-proposal { border: 1px solid #a9c8ee; border-radius: 12px; padding: 14px; background: #f3f8ff; }
+    .gps-proposal[hidden] { display: none; }
+    .gps-proposal p { margin: 0 0 10px; }
+    .proposal-actions { display: grid; gap: 8px; }
+    .proposal-actions .secondary { background: #e7effa; color: #0b3d91; }
+    .privacy-note { margin: -5px 0 0; color: #536174; font-size: .875rem; line-height: 1.45; }
+    #status { min-height: 1.4em; margin: 0; color: #536174; font-size: .94rem; }
+    .weather { margin-top: 16px; }
+    .weather[hidden] { display: none; }
+    .weather h2 { margin: 0 0 3px; font-size: 1.25rem; }
+    #updated { margin: 0 0 14px; color: #64748b; font-size: .9rem; }
+    .current { display: flex; align-items: center; gap: 14px; margin-bottom: 15px; }
+    #icon { font-size: 2.8rem; line-height: 1; }
+    #temperature { font-size: 2.8rem; font-weight: 750; letter-spacing: -.04em; }
+    #condition { color: #536174; }
+    dl { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    dl div { background: #f4f7fb; border-radius: 10px; padding: 12px; }
+    dt { color: #64748b; font-size: .85rem; }
+    dd { margin: 3px 0 0; font-weight: 650; }
+    .refresh { margin-top: 14px; min-height: 48px; background: #e7effa; color: #0b3d91; }
+    footer { padding: 18px 4px 0; text-align: center; color: #718096; font-size: .82rem; }
+    @supports (min-height: 100dvh) { body { min-height: 100dvh; } }
+    @media (min-width: 520px) { .add-row { grid-template-columns: 1fr 160px; } .location-actions { grid-template-columns: 1fr 1fr; } h1 { font-size: 2.2rem; } }
+    @media (min-width: 520px) { .proposal-actions { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 360px) { main { width: calc(100% - 20px); } .panel, .weather { padding: 14px; border-radius: 13px; } .panel { gap: 11px; } dl { grid-template-columns: 1fr; gap: 8px; } dl div { padding: 10px; } }
+    @media (max-height: 500px) and (orientation: landscape) { main { padding-top: calc(10px + env(safe-area-inset-top, 0px)); } header { margin-bottom: 10px; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <img class="brand-logo" src="assets/jarod-jacot-fishing.svg" alt="Écusson Jarod Jacot Fishing : brochet, ligne et vagues en turquoise, crème, anthracite et rouge">
+      <h1>🎣 T-AppMeteo V4</h1>
+      <p class="subtitle">Prévisions, observations et carnet de pêche — les rubriques restent compactes tant que tu ne les ouvres pas.</p>
+    </header>
+
+    <section class="panel v4-layout" aria-label="Sections de l’application">
+      <details class="accordion" data-section="place" open>
+        <summary>📍 Lieu pour la météo et les prévisions</summary>
+        <div class="accordion-body">
+      <div>
+        <label for="city-select">Ville</label>
+        <select id="city-select" aria-describedby="status"></select>
+      </div>
+      <form id="add-form">
+        <label for="new-city">Rechercher / ajouter une ville suisse</label>
+        <div class="add-row">
+          <input id="new-city" name="city" type="text" maxlength="80" placeholder="Ex. Lausanne" autocomplete="address-level2" required>
+          <button id="add-button" type="submit">Ajouter</button>
+        </div>
+      </form>
+      <div class="location-actions" aria-label="Localiser une ville">
+        <button id="gps-button" type="button">📍 Utiliser ma position GPS</button>
+        <button id="network-button" type="button">📶 Localiser par réseau (approx.)</button>
+      </div>
+      <section id="gps-proposal" class="gps-proposal" aria-live="polite" hidden>
+        <p><strong>Lieu trouvé :</strong> <span id="gps-proposal-name"></span></p>
+        <p>Veux-tu utiliser cette ville pour afficher la météo ?</p>
+        <div class="proposal-actions">
+          <button id="gps-accept" type="button">Utiliser cette ville</button>
+          <button id="gps-cancel" class="secondary" type="button">Annuler</button>
+        </div>
+      </section>
+      <p class="privacy-note">Le GPS demande l’autorisation du téléphone. Ses coordonnées sont conservées dans ce navigateur, envoyées à OpenStreetMap pour trouver la localité, puis à Open-Meteo pour la météo. La localisation réseau est moins précise : ipapi.co reçoit votre adresse IP pour estimer votre ville.</p>
+      <p id="status" role="status" aria-live="polite"></p>
+      <section class="weather" id="weather-card" aria-live="polite" hidden>
+        <h2 id="place-name"></h2>
+        <p id="updated"></p>
+        <div class="current">
+          <span id="icon" aria-hidden="true">🌤️</span>
+          <div><div id="temperature"></div><div id="condition"></div></div>
+        </div>
+        <dl>
+          <div><dt>Ressenti</dt><dd id="feels-like"></dd></div>
+          <div><dt>Humidité</dt><dd id="humidity"></dd></div>
+          <div><dt>Vent</dt><dd id="wind"></dd></div>
+          <div><dt>Rafales</dt><dd id="gusts"></dd></div>
+          <div><dt>Précipitations</dt><dd id="rain"></dd></div>
+          <div><dt>Couverture nuageuse</dt><dd id="cloud-cover"></dd></div>
+          <div><dt>Pression</dt><dd id="pressure"></dd></div>
+          <div><dt>Évolution sur 3 h</dt><dd id="pressure-trend"></dd></div>
+          <div><dt>Soleil</dt><dd id="sun-times"></dd></div>
+        </dl>
+        <button id="refresh-button" class="refresh" type="button">Actualiser la météo</button>
+      </section>
+      <p class="metric-note">Choisis d’abord ta ville ou ton lieu de pêche ; la météo se charge automatiquement. Tu peux aussi ajouter une localité ou utiliser le GPS/réseau.</p>
+      </div>
+      </details>
+      <details class="accordion" data-section="conditions">
+        <summary>🌦️ Conditions météorologiques et observations</summary>
+        <div class="accordion-body">
+      <section class="fishing-panel" aria-labelledby="fishing-title">
+        <h2 id="fishing-title">Paramètres pêche en lac</h2>
+        <div>
+          <label for="target-species">Espèce recherchée</label>
+          <select id="target-species">
+            <option value="brochet">Brochet</option>
+            <option value="perche">Perche</option>
+            <option value="silure">Silure</option>
+            <option value="coregone">Corégone</option>
+          </select>
+        </div>
+        <p id="species-guidance" aria-live="polite"></p>
+        <div class="fishing-fields">
+          <div>
+            <label for="water-temperature">Température de l’eau (si connue, °C)</label>
+            <input id="water-temperature" type="number" inputmode="decimal" min="0" max="35" step="0.1" placeholder="À mesurer sur place">
+          </div>
+          <div>
+            <label for="sonar-depth">Profondeur sous le bateau affichée au sondeur (m)</label>
+            <input id="sonar-depth" type="number" inputmode="decimal" min="0" max="500" step="0.5" placeholder="Optionnel">
+          </div>
+          <div>
+            <label for="fish-depth">Profondeur des poissons repérée (m)</label>
+            <input id="fish-depth" type="number" inputmode="decimal" min="0" max="500" step="0.5" placeholder="Optionnel">
+          </div>
+          <div>
+            <label for="sonar-frequency">Fréquence utilisée</label>
+            <select id="sonar-frequency">
+              <option value="">Non renseignée</option>
+              <option value="200 kHz">200 kHz</option>
+              <option value="800 kHz">800 kHz</option>
+              <option value="200 + 800 kHz">200 + 800 kHz</option>
+            </select>
+          </div>
+          <div>
+            <label for="water-clarity">Clarté de l’eau (observation)</label>
+            <select id="water-clarity">
+              <option value="">Non renseignée</option>
+              <option value="claire">Claire</option>
+              <option value="legerement-trouble">Légèrement trouble</option>
+              <option value="trouble">Trouble</option>
+            </select>
+          </div>
+        </div>
+        <p class="metric-note">Profil : Lowrance Hook 5 HDI. Exemple visible sur ta photo : 14,6 m sous le bateau et 20,3 °C. Saisie manuelle : le navigateur ne lit pas automatiquement l’écran du sondeur.</p>
+      </section>
+      </div>
+      </details>
+      <details class="accordion" data-section="techniques">
+        <summary>🎣 Techniques de pêche et matériel</summary>
+        <div class="accordion-body">
+      <section class="extra-panel" aria-labelledby="bait-library-title">
+        <h2 id="bait-library-title">Bibliothèque de leurres</h2>
+        <p>Photographie chaque leurre et renseigne ses caractéristiques pour le retrouver facilement au bord du lac.</p>
+        <label for="bait-filter">Filtrer par poisson recherché</label>
+        <select id="bait-filter">
+          <option value="all">Tous les poissons</option>
+          <option value="brochet">Brochet</option>
+          <option value="perche">Perche</option>
+          <option value="silure">Silure</option>
+          <option value="coregone">Corégone</option>
+        </select>
+        <label for="bait-sort">Trier la bibliothèque</label>
+        <select id="bait-sort">
+          <option value="name">Nom</option>
+          <option value="manufacturer">Fabricant</option>
+          <option value="weight">Poids</option>
+          <option value="depth">Profondeur d’utilisation</option>
+        </select>
+        <form id="bait-form">
+          <div class="bait-fields">
+            <div>
+              <label for="bait-name">Nom du leurre</label>
+              <input id="bait-name" type="text" maxlength="100" placeholder="Ex. shad, crankbait…" required>
+            </div>
+            <div>
+              <label for="bait-manufacturer">Fabricant / marque</label>
+              <input id="bait-manufacturer" type="text" maxlength="80" placeholder="Ex. marque indiquée sur l’emballage">
+            </div>
+            <div>
+              <label for="bait-size">Taille (cm)</label>
+              <input id="bait-size" type="number" inputmode="decimal" min="0" max="200" step="0.1" placeholder="Optionnel">
+            </div>
+            <div>
+              <label for="bait-weight">Poids (g)</label>
+              <input id="bait-weight" type="number" inputmode="decimal" min="0" max="10000" step="0.1" placeholder="Optionnel">
+            </div>
+            <div>
+              <label>Profondeur d’utilisation (m)</label>
+              <div class="add-row">
+                <input id="bait-depth-min" type="number" inputmode="decimal" min="0" max="500" step="0.5" placeholder="De (m)" aria-label="Profondeur minimale en mètres">
+                <input id="bait-depth-max" type="number" inputmode="decimal" min="0" max="500" step="0.5" placeholder="À (m)" aria-label="Profondeur maximale en mètres">
+              </div>
+            </div>
+            <div>
+              <label for="bait-animation">Animation conseillée</label>
+              <textarea id="bait-animation" maxlength="300" placeholder="Ex. récupération lente, pauses, tirées…"></textarea>
+            </div>
+            <div>
+              <label>Poisson(s) recherché(s)</label>
+              <div class="species-check-grid">
+                <label class="species-check"><input type="checkbox" name="bait-species" value="brochet"> Brochet</label>
+                <label class="species-check"><input type="checkbox" name="bait-species" value="perche"> Perche</label>
+                <label class="species-check"><input type="checkbox" name="bait-species" value="silure"> Silure</label>
+                <label class="species-check"><input type="checkbox" name="bait-species" value="coregone"> Corégone</label>
+              </div>
+            </div>
+            <div>
+              <label>Photo du leurre (facultative)</label>
+              <div class="photo-actions">
+                <button id="bait-take-photo" type="button">📷 Photographier le leurre</button>
+                <button id="bait-choose-photo" type="button" class="refresh">🖼️ Choisir une photo existante</button>
+              </div>
+              <input id="bait-camera-photo" class="file-input" type="file" accept="image/*" capture="environment" aria-hidden="true" tabindex="-1">
+              <input id="bait-gallery-photo" class="file-input" type="file" accept="image/*" aria-hidden="true" tabindex="-1">
+              <p id="bait-photo-status" class="metric-note" aria-live="polite">Les photos restent sur cet appareil.</p>
+              <div id="bait-photo-preview" class="photo-queue"></div>
+            </div>
+          </div>
+          <button id="save-bait" type="submit">Ajouter à la bibliothèque</button>
+        </form>
+        <datalist id="bait-options"></datalist>
+        <div id="bait-list" class="bait-list" aria-live="polite"></div>
+        <p class="metric-note">Les informations sont celles que tu saisis. Vérifie la profondeur annoncée par le fabricant : elle dépend du montage et de la récupération.</p>
+      </section>
+      <section class="extra-panel" aria-labelledby="gear-title">
+        <h2 id="gear-title">Matériel de pêche</h2>
+        <p>Note le matériel emporté et associe-le à chaque sortie pour retrouver ce qui a été utilisé.</p>
+        <form id="gear-form">
+          <div class="gear-fields">
+            <div>
+              <label for="gear-category">Catégorie</label>
+              <select id="gear-category">
+                <option value="Canne">Canne</option><option value="Moulinet">Moulinet</option>
+                <option value="Tresse">Tresse</option><option value="Fil nylon">Fil nylon</option>
+                <option value="Aucune ligne">Aucune ligne</option><option value="Hameçon">Hameçon</option>
+                <option value="Appât">Appât</option>
+              </select>
+            </div>
+            <div><label for="gear-name">Nom / modèle</label><input id="gear-name" maxlength="100" required placeholder="Ex. canne verticale 2,10 m"></div>
+            <div><label for="gear-maker">Marque</label><input id="gear-maker" maxlength="80" placeholder="Facultatif"></div>
+            <div><label for="gear-spec">Taille, puissance ou poids</label><input id="gear-spec" maxlength="100" placeholder="Ex. 10–30 g, taille 3000, 0,18 mm"></div>
+            <div><label for="gear-notes">Notes</label><input id="gear-notes" maxlength="180" placeholder="Montage, résistance, usage…"></div>
+          </div>
+          <button type="submit">Ajouter au matériel</button>
+        </form>
+        <div id="gear-list" class="gear-grid" aria-live="polite"></div>
+      </section>
+      </div>
+      </details>
+      <details class="accordion" data-section="sync">
+        <summary>🔄 Synchronisation entre appareils</summary>
+        <div class="accordion-body">
+      <section class="extra-panel" aria-labelledby="sync-title">
+        <h2 id="sync-title">Synchronisation du carnet et des photos</h2>
+        <p>Configure une adresse HTTPS de serveur privé. L’application synchronisera les sorties, les fiches de leurres, le matériel et les photos dès qu’une connexion est disponible. Le serveur peut être joignable par Wi‑Fi ou via Tailscale sur le réseau mobile.</p>
+        <form id="sync-form">
+          <div class="sync-fields">
+            <div><label for="sync-url">Adresse HTTPS du serveur de synchronisation</label><input id="sync-url" type="url" inputmode="url" placeholder="https://mon-serveur.example/api/sync" autocomplete="url"></div>
+            <div><label for="sync-token">Jeton privé du serveur</label><input id="sync-token" type="password" autocomplete="off" placeholder="Jeton configuré sur le serveur"></div>
+          </div>
+          <button id="sync-save" type="submit">Enregistrer et synchroniser</button>
+          <button id="sync-now" type="button" class="refresh">Synchroniser maintenant</button>
+        </form>
+        <p id="sync-status" role="status" aria-live="polite">Synchronisation non configurée. Les données ne quittent pas cet appareil tant qu’une adresse n’est pas renseignée.</p>
+        <p class="metric-note">Les appareils doivent utiliser le même serveur et le même jeton. Le serveur proposé dans le dépôt s’installe sur un ordinateur ou NAS privé ; l’accès distant peut passer par Tailscale. GitHub Pages seul ne synchronise pas les données. La connexion au serveur est désactivée jusqu’à ta configuration.</p>
+      </section>
+      </div>
+      </details>
+      <details class="accordion" data-section="conditions-local">
+        <summary>🌊 Observations du lac et sources locales</summary>
+        <div class="accordion-body">
+      <section class="extra-panel" aria-labelledby="moon-title">
+        <h2 id="moon-title">Phase de lune</h2>
+        <p id="moon-phase" aria-live="polite">Calcul…</p>
+        <p class="metric-note">Indication astronomique ; elle ne garantit pas l’activité des poissons.</p>
+      </section>
+      <section class="extra-panel" aria-labelledby="lake-title">
+        <h2 id="lake-title">Niveau du lac de Neuchâtel</h2>
+        <p id="lake-level" role="status" aria-live="polite">Recherche de la dernière mesure officielle…</p>
+        <p class="metric-note">Station OFEV de Grandson. La mesure peut avoir un léger délai.</p>
+        <a href="https://www.hydrodaten.admin.ch/fr/seen-und-fluesse/stations" target="_blank" rel="noreferrer">Consulter les mesures hydrologiques de l’OFEV</a>
+      </section>
+      <section class="extra-panel" aria-labelledby="sources-title">
+        <h2 id="sources-title">Sources météo et pêche complémentaires</h2>
+        <p>Les prévisions Open-Meteo et les mesures disponibles dans l’application restent visibles au-dessus. Ces liens ouvrent des avis externes pour comparaison.</p>
+        <div class="source-links">
+          <a class="source-link" href="https://www.yvbeach.com/yvmeteo.htm" target="_blank" rel="noopener noreferrer">🌡️ Mesures locales YvBeach — Yvonand</a>
+          <a class="source-link" href="https://meteonews.ch/fr/Meteo/G2660529/Grandson" target="_blank" rel="noopener noreferrer">🌦️ Prévisions MeteoNews — Grandson</a>
+          <a class="source-link" href="https://www.accuweather.com/fr/ch/neuchatel/991/fishing-weather/991" target="_blank" rel="noopener noreferrer">🎣 Avis pêche AccuWeather — Neuchâtel</a>
+          <a class="source-link" href="https://windy.app/fr/fishing/spot/8173463/Neuchatel" target="_blank" rel="noopener noreferrer">🐟 Indice de mordant Windy.app — Neuchâtel</a>
+          <a class="source-link" href="https://portyvonand.ch/webcam/" target="_blank" rel="noopener noreferrer">📹 Ouvrir la webcam du port d’Yvonand (à la demande)</a>
+        </div>
+        <p class="metric-note">AccuWeather et Windy.app donnent des indications générales, pas une prédiction garantie. Le point Windy sélectionné est Neuchâtel ; Yvonand est indiqué comme spot voisin. Les sources s’ouvrent seulement si tu les sélectionnes, ce qui évite de charger la webcam et les pages externes au démarrage.</p>
+      </section>
+      </div>
+      </details>
+      <details class="accordion" data-section="session">
+        <summary>📝 Fin de session</summary>
+        <div class="accordion-body">
+      <section class="extra-panel" aria-labelledby="logbook-title">
+        <h2 id="logbook-title">Carnet de sortie</h2>
+        <form id="trip-form">
+          <div class="logbook-fields">
+            <div>
+              <label for="trip-date">Date et heure</label>
+              <input id="trip-date" type="datetime-local" required>
+            </div>
+            <div>
+              <label for="trip-angler">Pêcheur</label>
+              <select id="trip-angler">
+                <option value="Jarod">Jarod</option>
+                <option value="Thomas">Thomas</option>
+                <option value="__new__">Nouveau pêcheur…</option>
+              </select>
+              <input id="new-angler" class="new-angler" type="text" maxlength="60" placeholder="Nom du pêcheur" aria-label="Nom du nouveau pêcheur" hidden>
+            </div>
+            <div>
+              <label for="trip-place">Lieu ou poste</label>
+              <input id="trip-place" type="text" maxlength="100" placeholder="Ex. Yvonand, rive nord" required>
+            </div>
+            <div>
+              <label for="trip-technique">Technique</label>
+              <select id="trip-technique">
+                <option value="">Non renseignée</option>
+                <option value="Lancer-ramener">Lancer-ramener</option>
+                <option value="Pêche verticale">Pêche verticale</option>
+                <option value="Drop shot">Drop shot</option>
+                <option value="Montage posé">Montage posé</option>
+                <option value="Jerkbait">Jerkbait</option>
+                <option value="Autre">Autre</option>
+              </select>
+            </div>
+            <div>
+              <label for="trip-animation">Animation</label>
+              <input id="trip-animation" type="text" maxlength="100" placeholder="Ex. récupération lente avec pauses">
+            </div>
+            <div>
+              <label for="trip-lure">Leurre</label>
+              <input id="trip-lure" type="text" maxlength="100" list="bait-options" placeholder="Choisir dans la bibliothèque ou saisir un leurre">
+            </div>
+            <div>
+              <label>Matériel utilisé</label>
+              <div id="trip-gear-options" class="species-check-grid" aria-live="polite"></div>
+            </div>
+            <div>
+              <label for="trip-catches">Poissons pris pendant cette sortie</label>
+              <input id="trip-catches" type="number" inputmode="numeric" min="0" max="99" step="1" value="0" required>
+            </div>
+            <details class="inner-accordion">
+              <summary>🐟 Poissons pris pendant cette session</summary>
+              <div>
+              <label>Ajouter chaque poisson pour les cumuls et records</label>
+              <div class="add-row">
+                <select id="caught-species" aria-label="Espèce du poisson">
+                  <option value="Brochet">Brochet</option><option value="Perche">Perche</option>
+                  <option value="Silure">Silure</option><option value="Corégone">Corégone</option>
+                </select>
+                <input id="caught-length" type="number" inputmode="decimal" min="1" max="300" step="0.5" placeholder="Longueur cm" aria-label="Longueur du poisson en centimètres">
+                <input id="caught-weight" type="number" inputmode="decimal" min="0" max="500" step="0.01" placeholder="Poids kg" aria-label="Poids du poisson en kilogrammes">
+              </div>
+              <button id="add-caught-fish" type="button" class="refresh">Ajouter ce poisson</button>
+              <p class="metric-note">Saisis la longueur et le poids mesurés. Les centimètres ne sont pas estimés pour les anciennes sorties.</p>
+              <div id="caught-fish-list" aria-live="polite"></div>
+              </div>
+            </details>
+            <div>
+              <label for="trip-result">Résultat / notes</label>
+              <input id="trip-result" type="text" maxlength="240" placeholder="Ex. bancs à 8 m, fond rocheux">
+            </div>
+            <div>
+              <label for="trip-photo-category">Catégorie de la photo</label>
+              <select id="trip-photo-category">
+                <option value="Leurre">Leurre</option>
+                <option value="Poisson">Poisson</option>
+                <option value="Leurre et poisson">Leurre et poisson ensemble</option>
+              </select>
+            </div>
+            <div>
+              <label>Photos de cette sortie (6 maximum)</label>
+              <div class="photo-actions">
+                <button id="take-photo" type="button">📷 Prendre une photo</button>
+                <button id="choose-photo" type="button" class="refresh">🖼️ Choisir une photo existante</button>
+              </div>
+              <input id="camera-photos" class="file-input" type="file" accept="image/*" capture="environment" multiple aria-hidden="true" tabindex="-1">
+              <input id="gallery-photos" class="file-input" type="file" accept="image/*" multiple aria-hidden="true" tabindex="-1">
+              <p id="photo-status" class="metric-note" aria-live="polite">Les images sont réduites puis conservées sur cet appareil.</p>
+              <div id="photo-queue" class="photo-queue" aria-live="polite"></div>
+            </div>
+          </div>
+          <button id="save-trip" type="submit">Enregistrer la sortie</button>
+        </form>
+        <div id="trip-list" class="logbook-list" aria-live="polite"></div>
+      </section>
+      </div>
+      </details>
+      <details class="accordion" data-section="records">
+        <summary>🏆 Records personnels par sorte de poisson et pêcheur</summary>
+        <div class="accordion-body">
+          <section class="extra-panel" aria-labelledby="trophy-title">
+            <h2 id="trophy-title">Records personnels par espèce et pêcheur</h2>
+            <h3>Coupes et poissons d’or</h3>
+            <p>La coupe revient au premier poisson enregistré de chaque espèce. Le poisson d’or atteint le seuil du défi défini ci-dessous; ces seuils sont personnalisables et ne sont pas des normes officielles.</p>
+            <form id="gold-threshold-form">
+              <div class="threshold-grid">
+                <div><label for="gold-brochet">Seuil Brochet (cm)</label><input id="gold-brochet" type="number" min="1" max="300" step="1" value="100"></div>
+                <div><label for="gold-perche">Seuil Perche (cm)</label><input id="gold-perche" type="number" min="1" max="200" step="1" value="40"></div>
+                <div><label for="gold-silure">Seuil Silure (cm)</label><input id="gold-silure" type="number" min="1" max="350" step="1" value="150"></div>
+                <div><label for="gold-coregone">Seuil Corégone (cm)</label><input id="gold-coregone" type="number" min="1" max="100" step="1" value="50"></div>
+              </div>
+              <button type="submit" class="refresh">Enregistrer les seuils</button>
+            </form>
+            <div id="trophy-results" aria-live="polite"></div>
+          </section>
+        </div>
+      </details>
+      <details class="accordion" data-section="advice">
+        <summary>📊 Résumé, conseil et statistiques</summary>
+        <div class="accordion-body">
+          <section class="extra-panel" aria-labelledby="stats-title">
+          <h2 id="stats-title">Résumé statistique et conseil du jour</h2>
+          <div id="stats-results" aria-live="polite"></div>
+        <p class="metric-note">Les pistes de spot, technique, leurre, animation et profondeur se basent sur les sorties de l’espèce choisie, la météo proche et les observations renseignées. Ce sont des tendances, pas une garantie de prise.</p>
+          </section>
+        </div>
+      </details>
+        <p class="metric-note">Le carnet et les photos sont conservés sur cet appareil, puis synchronisés entre appareils si un serveur privé a été configuré.</p>
+    </section>
+
+    <footer>Données météo : Open-Meteo · Géocodage : <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">© OpenStreetMap contributors</a> · Application en développement</footer>
+  </main>
+
+  <script>
+    "use strict";
+
+    const STORAGE_KEY = "t-appmeteo-v2-cities-v1";
+    const initialCities = [
+      { name: "Yverdon-les-Bains", label: "Yverdon-les-Bains (1400)" },
+      { name: "Yvonand", label: "Yvonand" }
+    ];
+    const select = document.getElementById("city-select");
+    const status = document.getElementById("status");
+    const weatherCard = document.getElementById("weather-card");
+    const addButton = document.getElementById("add-button");
+    const gpsButton = document.getElementById("gps-button");
+    const networkButton = document.getElementById("network-button");
+    const gpsProposal = document.getElementById("gps-proposal");
+    const gpsProposalName = document.getElementById("gps-proposal-name");
+    const gpsAcceptButton = document.getElementById("gps-accept");
+    const gpsCancelButton = document.getElementById("gps-cancel");
+    let pendingGpsCity = null;
+    const targetSpecies = document.getElementById("target-species");
+    const speciesGuidance = document.getElementById("species-guidance");
+    const fishingInputs = ["water-temperature", "sonar-depth", "fish-depth", "sonar-frequency", "water-clarity"].map(id => document.getElementById(id));
+    const tripDate = document.getElementById("trip-date");
+    const tripAngler = document.getElementById("trip-angler");
+    const newAngler = document.getElementById("new-angler");
+    const tripPlace = document.getElementById("trip-place");
+    const tripTechnique = document.getElementById("trip-technique");
+    const tripAnimation = document.getElementById("trip-animation");
+    const tripLure = document.getElementById("trip-lure");
+    const tripCatches = document.getElementById("trip-catches");
+    const tripResult = document.getElementById("trip-result");
+    const tripPhotoCategory = document.getElementById("trip-photo-category");
+    const cameraPhotos = document.getElementById("camera-photos");
+    const galleryPhotos = document.getElementById("gallery-photos");
+    const photoQueueElement = document.getElementById("photo-queue");
+    const photoStatus = document.getElementById("photo-status");
+    const tripList = document.getElementById("trip-list");
+    const statsResults = document.getElementById("stats-results");
+    const caughtSpeciesInput = document.getElementById("caught-species");
+    const caughtLengthInput = document.getElementById("caught-length");
+    const caughtWeightInput = document.getElementById("caught-weight");
+    const caughtFishList = document.getElementById("caught-fish-list");
+    const GOLD_THRESHOLD_STORAGE_KEY = "t-appmeteo-v3-gold-thresholds";
+    let pendingFish = [];
+    const baitForm = document.getElementById("bait-form");
+    const baitListElement = document.getElementById("bait-list");
+    const baitFilter = document.getElementById("bait-filter");
+    const baitSort = document.getElementById("bait-sort");
+    const baitCameraPhoto = document.getElementById("bait-camera-photo");
+    const baitGalleryPhoto = document.getElementById("bait-gallery-photo");
+    const baitPhotoPreview = document.getElementById("bait-photo-preview");
+    const baitPhotoStatus = document.getElementById("bait-photo-status");
+    const baitOptions = document.getElementById("bait-options");
+    const gearForm = document.getElementById("gear-form");
+    const gearList = document.getElementById("gear-list");
+    const tripGearOptions = document.getElementById("trip-gear-options");
+    const GEAR_STORAGE_KEY = "t-appmeteo-v3-gear-v1";
+    const SYNC_SETTINGS_KEY = "t-appmeteo-v3-sync-settings";
+    const TRIP_STORAGE_KEY = "t-appmeteo-v2-trips";
+    const PHOTO_DB_NAME = "t-appmeteo-v3-photos";
+    const PHOTO_STORE_NAME = "trip-photos";
+    const MAX_TRIP_PHOTOS = 6;
+    let queuedPhotos = [];
+    const tripPhotoUrls = new Set();
+    const queuePhotoUrls = new Set();
+    const baitPhotoUrls = new Set();
+    const baitPreviewUrls = new Set();
+    let pendingBaitPhoto = null;
+    let baitRenderToken = 0;
+    let tripPlaceEdited = false;
+    let currentWeatherSnapshot = null;
+
+    const fishingNotes = {
+      brochet: "À relever : température de l’eau, profondeur du poste, végétation et structures proches.",
+      perche: "À relever : bancs repérés au sondeur, profondeur active, température et clarté de l’eau.",
+      silure: "À relever : température de l’eau, profondeur, structure du fond et heure de sortie.",
+      coregone: "À relever : température de l’eau et profondeur des bancs ou de la thermocline au sondeur."
+    };
+
+    function restoreFishingSettings() {
+      try {
+        const settings = JSON.parse(localStorage.getItem("t-appmeteo-v2-fishing") || "{}");
+        if (settings.species) targetSpecies.value = settings.species;
+        fishingInputs.forEach(input => {
+          if (settings[input.id] !== undefined) input.value = settings[input.id];
+        });
+      } catch { /* Réglages absents ou invalides : valeurs par défaut. */ }
+    }
+
+    function saveFishingSettings() {
+      const settings = { species: targetSpecies.value };
+      fishingInputs.forEach(input => { settings[input.id] = input.value; });
+      try { localStorage.setItem("t-appmeteo-v2-fishing", JSON.stringify(settings)); } catch { /* Stockage local indisponible. */ }
+    }
+
+    function updateSpeciesGuidance() {
+      speciesGuidance.textContent = fishingNotes[targetSpecies.value] || fishingNotes.brochet;
+      saveFishingSettings();
+      renderFishingAdvice();
+    }
+
+    restoreFishingSettings();
+    caughtSpeciesInput.value = targetSpecies.options[targetSpecies.selectedIndex].textContent;
+    targetSpecies.addEventListener("change", updateSpeciesGuidance);
+    targetSpecies.addEventListener("change", () => { caughtSpeciesInput.value = targetSpecies.options[targetSpecies.selectedIndex].textContent; });
+    fishingInputs.forEach(input => input.addEventListener("change", () => {
+      saveFishingSettings();
+      renderFishingAdvice();
+    }));
+    updateSpeciesGuidance();
+
+    function localDateTimeValue(date) {
+      const offset = date.getTimezoneOffset() * 60000;
+      return new Date(date.getTime() - offset).toISOString().slice(0, 16);
+    }
+
+    function moonInformation(date) {
+      const synodicMonth = 29.530588853;
+      const referenceNewMoon = Date.UTC(2000, 0, 6, 18, 14);
+      const age = ((date.getTime() - referenceNewMoon) / 86400000 % synodicMonth + synodicMonth) % synodicMonth;
+      const fraction = age / synodicMonth;
+      const phaseNames = ["Nouvelle lune", "Premier croissant", "Premier quartier", "Lune gibbeuse croissante", "Pleine lune", "Lune gibbeuse décroissante", "Dernier quartier", "Dernier croissant"];
+      const phaseIndex = Math.floor((fraction * 8 + 0.5) % 8);
+      const illumination = Math.round((1 - Math.cos(fraction * 2 * Math.PI)) * 50);
+      document.getElementById("moon-phase").textContent = `${phaseNames[phaseIndex]} · éclairage approximatif : ${illumination} %`;
+    }
+
+    moonInformation(new Date());
+    tripDate.value = localDateTimeValue(new Date());
+    tripPlace.addEventListener("input", () => { tripPlaceEdited = true; });
+    tripAngler.addEventListener("change", () => {
+      const needsName = tripAngler.value === "__new__";
+      newAngler.hidden = !needsName;
+      newAngler.required = needsName;
+      if (needsName) newAngler.focus();
+    });
+
+    function makeId() {
+      return globalThis.crypto && crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function openPhotoDatabase() {
+      return new Promise((resolve, reject) => {
+        if (!globalThis.indexedDB) {
+          reject(new Error("Le stockage de photos n’est pas disponible dans ce navigateur."));
+          return;
+        }
+        const request = indexedDB.open(PHOTO_DB_NAME, 1);
+        request.onupgradeneeded = () => {
+          const db = request.result;
+          if (!db.objectStoreNames.contains(PHOTO_STORE_NAME)) {
+            const store = db.createObjectStore(PHOTO_STORE_NAME, { keyPath: "id" });
+            store.createIndex("tripId", "tripId", { unique: false });
+          }
+        };
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error || new Error("Impossible d’ouvrir le stockage des photos."));
+      });
+    }
+
+    function resizePhoto(file) {
+      return new Promise((resolve, reject) => {
+        if (!file.type.startsWith("image/")) {
+          reject(new Error("Choisis un fichier image."));
+          return;
+        }
+        const sourceUrl = URL.createObjectURL(file);
+        const image = new Image();
+        image.onload = () => {
+          URL.revokeObjectURL(sourceUrl);
+          try {
+            const scale = Math.min(1, 1440 / Math.max(image.naturalWidth, image.naturalHeight));
+            const canvas = document.createElement("canvas");
+            canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+            canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+            const context = canvas.getContext("2d");
+            if (!context) throw new Error("Préparation photo indisponible sur cet appareil.");
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error("Impossible de préparer cette photo.")), "image/jpeg", 0.78);
+          } catch (error) {
+            reject(error);
+          }
+        };
+        image.onerror = () => {
+          URL.revokeObjectURL(sourceUrl);
+          reject(new Error("Cette image ne peut pas être ouverte."));
+        };
+        image.src = sourceUrl;
+      });
+    }
+
+    function clearObjectUrls(urls) {
+      urls.forEach(url => URL.revokeObjectURL(url));
+      urls.clear();
+    }
+
+    function renderPhotoQueue() {
+      clearObjectUrls(queuePhotoUrls);
+      photoQueueElement.replaceChildren();
+      queuedPhotos.forEach((photo, index) => {
+        const card = document.createElement("div");
+        card.className = "photo-card";
+        const image = document.createElement("img");
+        image.alt = `Aperçu photo : ${photo.category}`;
+        image.src = URL.createObjectURL(photo.blob);
+        queuePhotoUrls.add(image.src);
+        const caption = document.createElement("p");
+        caption.textContent = photo.category;
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.textContent = "Retirer";
+        remove.addEventListener("click", () => {
+          queuedPhotos.splice(index, 1);
+          renderPhotoQueue();
+        });
+        card.append(image, caption, remove);
+        photoQueueElement.append(card);
+      });
+    }
+
+    async function queueSelectedPhotos(input) {
+      const files = Array.from(input.files || []);
+      input.value = "";
+      if (!files.length) return;
+      if (queuedPhotos.length + files.length > MAX_TRIP_PHOTOS) {
+        photoStatus.textContent = `Maximum ${MAX_TRIP_PHOTOS} photos par sortie.`;
+        return;
+      }
+      photoStatus.textContent = "Préparation des photos…";
+      try {
+        for (const file of files) {
+          const blob = await resizePhoto(file);
+          queuedPhotos.push({ id: makeId(), category: tripPhotoCategory.value, blob });
+        }
+        photoStatus.textContent = `${queuedPhotos.length} photo${queuedPhotos.length > 1 ? "s" : ""} prête${queuedPhotos.length > 1 ? "s" : ""} à enregistrer.`;
+        renderPhotoQueue();
+      } catch (error) {
+        photoStatus.textContent = error.message || "La photo n’a pas pu être ajoutée.";
+      }
+    }
+
+    document.getElementById("take-photo").addEventListener("click", () => cameraPhotos.click());
+    document.getElementById("choose-photo").addEventListener("click", () => galleryPhotos.click());
+    cameraPhotos.addEventListener("change", () => queueSelectedPhotos(cameraPhotos));
+    galleryPhotos.addEventListener("change", () => queueSelectedPhotos(galleryPhotos));
+
+    async function persistTripPhotos(tripId, photos) {
+      if (!photos.length) return;
+      const db = await openPhotoDatabase();
+      await new Promise((resolve, reject) => {
+        const transaction = db.transaction(PHOTO_STORE_NAME, "readwrite");
+        const store = transaction.objectStore(PHOTO_STORE_NAME);
+        photos.forEach(photo => store.put({ id: photo.id, tripId, category: photo.category, blob: photo.blob }));
+        transaction.oncomplete = resolve;
+        transaction.onerror = () => reject(transaction.error || new Error("Les photos n’ont pas été enregistrées."));
+        transaction.onabort = () => reject(transaction.error || new Error("Enregistrement des photos interrompu."));
+      });
+      db.close();
+    }
+
+    async function readTripPhotosForTrips(trips) {
+      if (!trips.some(trip => Array.isArray(trip.photos) && trip.photos.length)) return trips.map(() => []);
+      const db = await openPhotoDatabase();
+      const photosByTrip = trips.map(() => []);
+      try {
+        await new Promise((resolve, reject) => {
+          const transaction = db.transaction(PHOTO_STORE_NAME, "readonly");
+          const store = transaction.objectStore(PHOTO_STORE_NAME);
+          const requests = [];
+          trips.forEach((trip, index) => {
+            (Array.isArray(trip.photos) ? trip.photos : []).forEach(metadata => {
+              if (!metadata || !metadata.id) return;
+              const request = store.get(metadata.id);
+              request.onsuccess = () => {
+                if (request.result) photosByTrip[index].push({ ...request.result, category: metadata.category || request.result.category });
+              };
+              requests.push(request);
+            });
+          });
+          transaction.oncomplete = resolve;
+          transaction.onerror = () => reject(transaction.error || new Error("Photos indisponibles."));
+          transaction.onabort = () => reject(transaction.error || new Error("Photos indisponibles."));
+          if (!requests.length) resolve();
+        });
+      } finally {
+        db.close();
+      }
+      return photosByTrip;
+    }
+
+    async function deleteTripPhotos(tripId) {
+      const db = await openPhotoDatabase();
+      await new Promise((resolve, reject) => {
+        const transaction = db.transaction(PHOTO_STORE_NAME, "readwrite");
+        const store = transaction.objectStore(PHOTO_STORE_NAME);
+        const request = store.index("tripId").getAllKeys(tripId);
+        request.onsuccess = () => request.result.forEach(key => store.delete(key));
+        request.onerror = () => reject(request.error || new Error("Impossible de supprimer les photos."));
+        transaction.oncomplete = resolve;
+        transaction.onerror = () => reject(transaction.error || new Error("Impossible de supprimer les photos."));
+      });
+      db.close();
+    }
+
+    const baitSpeciesNames = { brochet: "Brochet", perche: "Perche", silure: "Silure", coregone: "Corégone" };
+    const BAIT_STORAGE_KEY = "t-appmeteo-v3-baits-v1";
+
+    function loadBaits() {
+      try {
+        const items = JSON.parse(localStorage.getItem(BAIT_STORAGE_KEY) || "[]");
+        return Array.isArray(items) ? items.filter(item => item && typeof item.id === "string" && typeof item.name === "string" && !item.deletedAt) : [];
+      } catch { return []; }
+    }
+
+    function saveBaits(items) {
+      localStorage.setItem(BAIT_STORAGE_KEY, JSON.stringify(items.slice(0, 300)));
+    }
+
+    function loadGear() {
+      try { const rows = JSON.parse(localStorage.getItem(GEAR_STORAGE_KEY) || "[]"); return Array.isArray(rows) ? rows.filter(row => row && typeof row.id === "string" && !row.deletedAt) : []; }
+      catch { return []; }
+    }
+
+    function saveGear(rows) { localStorage.setItem(GEAR_STORAGE_KEY, JSON.stringify(rows.slice(0, 300))); }
+
+    function renderGear() {
+      gearList.replaceChildren();
+      tripGearOptions.replaceChildren();
+      const rows = loadGear();
+      if (!rows.length) {
+        const empty = document.createElement("p"); empty.className = "metric-note"; empty.textContent = "Aucun matériel enregistré pour le moment."; gearList.append(empty);
+        const hint = document.createElement("span"); hint.className = "metric-note"; hint.textContent = "Ajoute du matériel pour pouvoir le sélectionner sur une sortie."; tripGearOptions.append(hint);
+        return;
+      }
+      rows.forEach(item => {
+        const card = document.createElement("article"); card.className = "gear-card";
+        const title = document.createElement("h3"); title.textContent = `${item.category} · ${item.name}`;
+        const detail = document.createElement("p"); detail.textContent = [item.maker, item.spec, item.notes].filter(Boolean).join(" · ") || "Aucun détail";
+        const remove = document.createElement("button"); remove.type = "button"; remove.textContent = "Retirer";
+        remove.addEventListener("click", () => { const all = JSON.parse(localStorage.getItem(GEAR_STORAGE_KEY) || "[]"); const row = all.find(value => value.id === item.id); if (row) { row.deletedAt = new Date().toISOString(); row.updatedAt = row.deletedAt; localStorage.setItem(GEAR_STORAGE_KEY, JSON.stringify(all)); } renderGear(); performSync(); });
+        card.append(title, detail, remove); gearList.append(card);
+        const label = document.createElement("label"); label.className = "species-check";
+        const check = document.createElement("input"); check.type = "checkbox"; check.name = "trip-gear"; check.value = item.id;
+        label.append(check, document.createTextNode(` ${item.category} : ${item.name}`)); tripGearOptions.append(label);
+      });
+    }
+
+    gearForm.addEventListener("submit", event => {
+      event.preventDefault();
+      const row = { id: makeId(), updatedAt: new Date().toISOString(), category: document.getElementById("gear-category").value, name: document.getElementById("gear-name").value.trim(), maker: document.getElementById("gear-maker").value.trim(), spec: document.getElementById("gear-spec").value.trim(), notes: document.getElementById("gear-notes").value.trim() };
+      const all = JSON.parse(localStorage.getItem(GEAR_STORAGE_KEY) || "[]"); saveGear([row, ...all]); gearForm.reset(); renderGear(); performSync();
+    });
+    renderGear();
+
+    function renderBaits() {
+      const renderToken = ++baitRenderToken;
+      clearObjectUrls(baitPhotoUrls);
+      baitListElement.replaceChildren();
+      const filter = baitFilter.value;
+      const sort = baitSort.value;
+      const baits = loadBaits().filter(item => filter === "all" || (item.species || []).includes(filter));
+      baits.sort((a, b) => {
+        if (sort === "weight" || sort === "depth") {
+          const field = sort === "weight" ? "weight" : "depthMin";
+          return (Number(a[field]) || Number.POSITIVE_INFINITY) - (Number(b[field]) || Number.POSITIVE_INFINITY) || a.name.localeCompare(b.name, "fr");
+        }
+        const field = sort === "manufacturer" ? "manufacturer" : "name";
+        return String(a[field] || "").localeCompare(String(b[field] || ""), "fr") || a.name.localeCompare(b.name, "fr");
+      });
+      baitOptions.replaceChildren();
+      loadBaits().forEach(item => {
+        const option = document.createElement("option");
+        option.value = item.name;
+        baitOptions.append(option);
+      });
+      if (!baits.length) {
+        const empty = document.createElement("p");
+        empty.className = "metric-note";
+        empty.textContent = filter === "all" ? "La bibliothèque est vide. Ajoute un leurre pour commencer." : `Aucun leurre enregistré pour le ${baitSpeciesNames[filter] || "poisson choisi"}.`;
+        baitListElement.append(empty);
+        return;
+      }
+      const photoRows = baits.map(item => ({ photos: item.photoId ? [{ id: item.photoId, category: "Leurre" }] : [] }));
+      readTripPhotosForTrips(photoRows).then(photosByBait => {
+        if (renderToken !== baitRenderToken) return;
+        baits.forEach((bait, index) => {
+          const card = document.createElement("article");
+          card.className = "bait-card";
+          const photo = photosByBait[index][0];
+          if (photo) {
+            const image = document.createElement("img");
+            image.alt = `Photo du leurre ${bait.name}`;
+            image.src = URL.createObjectURL(photo.blob);
+            baitPhotoUrls.add(image.src);
+            card.append(image);
+          } else {
+            const placeholder = document.createElement("div");
+            placeholder.className = "bait-no-photo";
+            placeholder.textContent = "Photo à ajouter";
+            card.append(placeholder);
+          }
+          const details = document.createElement("div");
+          const heading = document.createElement("h3");
+          heading.textContent = bait.name;
+          details.append(heading);
+          const depth = bait.depthMin !== "" && bait.depthMin != null && bait.depthMax !== "" && bait.depthMax != null
+            ? `${bait.depthMin}–${bait.depthMax} m`
+            : bait.depthMin !== "" && bait.depthMin != null ? `Dès ${bait.depthMin} m`
+            : bait.depthMax !== "" && bait.depthMax != null ? `Jusqu’à ${bait.depthMax} m` : "Non précisée";
+          const lines = [
+            bait.manufacturer && `Fabricant : ${bait.manufacturer}`,
+            (bait.size || bait.weight) && `Taille / poids : ${bait.size ? `${bait.size} cm` : "—"} / ${bait.weight ? `${bait.weight} g` : "—"}`,
+            `Profondeur : ${depth}`,
+            bait.animation && `Animation : ${bait.animation}`,
+            `Cible : ${(bait.species || []).map(key => baitSpeciesNames[key] || key).join(", ") || "Non précisée"}`
+          ].filter(Boolean);
+          lines.forEach(line => {
+            const paragraph = document.createElement("p");
+            paragraph.textContent = line;
+            details.append(paragraph);
+          });
+          card.append(details);
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.textContent = "Retirer de la bibliothèque";
+          remove.addEventListener("click", async () => {
+            const all = JSON.parse(localStorage.getItem(BAIT_STORAGE_KEY) || "[]");
+            const row = all.find(item => item.id === bait.id);
+            if (row) { row.deletedAt = new Date().toISOString(); row.updatedAt = row.deletedAt; localStorage.setItem(BAIT_STORAGE_KEY, JSON.stringify(all)); }
+            if (bait.photoId) {
+              try { await deleteTripPhotos(`bait:${bait.id}`); } catch { /* La fiche est retirée même si le stockage image est indisponible. */ }
+            }
+            renderBaits();
+            performSync();
+          });
+          card.append(remove);
+          baitListElement.append(card);
+        });
+      }).catch(() => {
+        if (renderToken !== baitRenderToken) return;
+        const message = document.createElement("p");
+        message.className = "metric-note";
+        message.textContent = "Les fiches sont enregistrées, mais leurs photos ne peuvent pas être affichées sur cet appareil.";
+        baitListElement.append(message);
+      });
+    }
+
+    async function chooseBaitPhoto(input) {
+      const file = input.files && input.files[0];
+      input.value = "";
+      if (!file) return;
+      baitPhotoStatus.textContent = "Préparation de la photo…";
+      try {
+        const blob = await resizePhoto(file);
+        pendingBaitPhoto = { id: makeId(), category: "Leurre", blob };
+        clearObjectUrls(baitPreviewUrls);
+        baitPhotoPreview.replaceChildren();
+        const image = document.createElement("img");
+        image.alt = "Aperçu du leurre à ajouter";
+        image.src = URL.createObjectURL(blob);
+        baitPreviewUrls.add(image.src);
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.textContent = "Retirer la photo";
+        remove.addEventListener("click", () => {
+          pendingBaitPhoto = null;
+          clearObjectUrls(baitPreviewUrls);
+          baitPhotoPreview.replaceChildren();
+          baitPhotoStatus.textContent = "Photo facultative ; aucune photo sélectionnée.";
+        });
+        const card = document.createElement("div");
+        card.className = "photo-card";
+        card.append(image, remove);
+        baitPhotoPreview.append(card);
+        baitPhotoStatus.textContent = "Photo prête à enregistrer dans la bibliothèque.";
+      } catch (error) {
+        baitPhotoStatus.textContent = error.message || "La photo n’a pas pu être ajoutée.";
+      }
+    }
+
+    document.getElementById("bait-take-photo").addEventListener("click", () => baitCameraPhoto.click());
+    document.getElementById("bait-choose-photo").addEventListener("click", () => baitGalleryPhoto.click());
+    baitCameraPhoto.addEventListener("change", () => chooseBaitPhoto(baitCameraPhoto));
+    baitGalleryPhoto.addEventListener("change", () => chooseBaitPhoto(baitGalleryPhoto));
+    baitFilter.addEventListener("change", renderBaits);
+    baitSort.addEventListener("change", renderBaits);
+    baitForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const species = Array.from(baitForm.querySelectorAll('input[name="bait-species"]:checked')).map(input => input.value);
+      const name = document.getElementById("bait-name").value.trim();
+      if (!species.length) {
+        baitPhotoStatus.textContent = "Choisis au moins un poisson recherché.";
+        baitForm.querySelector('input[name="bait-species"]')?.focus();
+        return;
+      }
+      const depthMin = document.getElementById("bait-depth-min").value;
+      const depthMax = document.getElementById("bait-depth-max").value;
+      if (depthMin !== "" && depthMax !== "" && Number(depthMin) > Number(depthMax)) {
+        baitPhotoStatus.textContent = "La profondeur ‘De’ doit être inférieure ou égale à ‘À’.";
+        return;
+      }
+      const bait = {
+        id: makeId(),
+        updatedAt: new Date().toISOString(),
+        name,
+        manufacturer: document.getElementById("bait-manufacturer").value.trim(),
+        size: document.getElementById("bait-size").value,
+        weight: document.getElementById("bait-weight").value,
+        depthMin,
+        depthMax,
+        animation: document.getElementById("bait-animation").value.trim(),
+        species,
+        photoId: pendingBaitPhoto?.id || ""
+      };
+      const saveButton = document.getElementById("save-bait");
+      saveButton.disabled = true;
+      try {
+        if (pendingBaitPhoto) await persistTripPhotos(`bait:${bait.id}`, [pendingBaitPhoto]);
+        const allBaits = JSON.parse(localStorage.getItem(BAIT_STORAGE_KEY) || "[]");
+        saveBaits([bait, ...allBaits]);
+        baitForm.reset();
+        pendingBaitPhoto = null;
+        clearObjectUrls(baitPreviewUrls);
+        baitPhotoPreview.replaceChildren();
+        baitPhotoStatus.textContent = "Leurre ajouté à la bibliothèque sur cet appareil.";
+        renderBaits();
+        performSync();
+      } catch (error) {
+        if (bait.photoId) {
+          try { await deleteTripPhotos(`bait:${bait.id}`); } catch { /* Nettoyage au mieux après un échec local. */ }
+        }
+        baitPhotoStatus.textContent = error.message || "Impossible d’enregistrer ce leurre dans le navigateur.";
+      } finally {
+        saveButton.disabled = false;
+      }
+    });
+    renderBaits();
+
+    async function loadLakeLevel() {
+      const level = document.getElementById("lake-level");
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 12000);
+      const from = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const to = new Date().toISOString();
+      const query = `query LakeLevel($from: AWSDateTime!, $to: AWSDateTime!) {
+        water { observations { data_1hour_mean(where: {
+          station: { no: { _eq: "2154" } },
+          parameterName: { _eq: "W" },
+          timestamp: { _gte: $from, _lt: $to }
+        }) { timestamp value unitSymbol } } }
+      }`;
+      try {
+        const response = await fetch("https://data.bafu.admin.ch/api", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query, variables: { from, to } }),
+          signal: controller.signal
+        });
+        if (!response.ok) throw new Error("Service hydrologique indisponible.");
+        const payload = await response.json();
+        if (payload.errors) throw new Error("La mesure hydrologique n’a pas pu être lue.");
+        const readings = payload.data?.water?.observations?.data_1hour_mean || [];
+        const latest = readings.filter(item => Number.isFinite(Number(item.value))).sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp))[0];
+        if (!latest) {
+          level.textContent = "Pas de mesure récente disponible à la station de Grandson.";
+          return;
+        }
+        const measuredAt = new Date(latest.timestamp).toLocaleString("fr-CH", { dateStyle: "short", timeStyle: "short" });
+        level.textContent = `${Number(latest.value).toFixed(2)} ${latest.unitSymbol || "m ü.M."} · mesure horaire du ${measuredAt}`;
+      } catch (error) {
+        level.textContent = error.name === "AbortError"
+          ? "La consultation de la mesure du lac a dépassé le délai."
+          : "Niveau indisponible pour le moment ; consulte le lien OFEV.";
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+    loadLakeLevel();
+
+    function loadTrips() {
+      try {
+        const trips = JSON.parse(localStorage.getItem(TRIP_STORAGE_KEY) || "[]");
+        return Array.isArray(trips) ? trips.filter(trip => trip && typeof trip.id === "string" && !trip.deletedAt) : [];
+      } catch { return []; }
+    }
+
+    function saveTrips(trips) {
+      localStorage.setItem(TRIP_STORAGE_KEY, JSON.stringify(trips.slice(0, 100)));
+    }
+
+    function renderPendingFish() {
+      caughtFishList.replaceChildren();
+      pendingFish.forEach((fish, index) => {
+        const row = document.createElement("div"); row.className = "catch-entry";
+        const description = document.createElement("span");
+        description.textContent = `${fish.species} · ${fish.lengthCm} cm${fish.weightKg ? ` · ${fish.weightKg} kg` : " · poids non renseigné"}`;
+        const remove = document.createElement("button"); remove.type = "button"; remove.className = "refresh"; remove.textContent = "Retirer";
+        remove.addEventListener("click", () => { pendingFish.splice(index, 1); tripCatches.value = String(Math.max(0, Number(tripCatches.value) - 1)); renderPendingFish(); });
+        row.append(description, remove); caughtFishList.append(row);
+      });
+    }
+
+    document.getElementById("add-caught-fish").addEventListener("click", () => {
+      const lengthCm = Number(caughtLengthInput.value);
+      if (!Number.isFinite(lengthCm) || lengthCm < 1 || lengthCm > 300) { caughtLengthInput.focus(); document.getElementById("status").textContent = "Indique la longueur mesurée du poisson en centimètres."; return; }
+      const weightKg = caughtWeightInput.value === "" ? "" : Number(caughtWeightInput.value);
+      if (weightKg !== "" && (!Number.isFinite(weightKg) || weightKg < 0 || weightKg > 500)) { caughtWeightInput.focus(); document.getElementById("status").textContent = "Indique un poids valide en kilogrammes."; return; }
+      pendingFish.push({ id: makeId(), species: caughtSpeciesInput.value, lengthCm, weightKg });
+      tripCatches.value = String(Math.max(Number(tripCatches.value) || 0, pendingFish.length));
+      caughtLengthInput.value = ""; caughtWeightInput.value = ""; renderPendingFish();
+    });
+
+    async function renderTrips() {
+      clearObjectUrls(tripPhotoUrls);
+      tripList.replaceChildren();
+      const trips = loadTrips();
+      let photosByTrip = trips.map(() => []);
+      try { photosByTrip = await readTripPhotosForTrips(trips); } catch { /* Les sorties restent consultables si le stockage photo est indisponible. */ }
+      trips.forEach((trip, index) => {
+        const entry = document.createElement("article");
+        entry.className = "trip-entry";
+        const heading = document.createElement("p");
+        heading.textContent = `${new Date(trip.date).toLocaleString("fr-CH")} · ${trip.species} · ${trip.place} · Pêcheur : ${trip.angler || "non précisé"}`;
+        entry.append(heading);
+        const gearNames = (trip.gear || []).map(id => loadGear().find(item => item.id === id)).filter(Boolean).map(item => `${item.category} : ${item.name}`);
+        const details = [trip.technique && `Technique : ${trip.technique}`, trip.animation && `Animation : ${trip.animation}`, trip.lure && `Leurre : ${trip.lure}`, gearNames.length && `Matériel : ${gearNames.join(", ")}`, Number.isFinite(Number(trip.catches)) && `Prises : ${trip.catches}`, trip.waterTemperature && `Eau : ${trip.waterTemperature} °C`, trip.depth && `Fond : ${trip.depth} m`, trip.fishDepth && `Poissons : ${trip.fishDepth} m`, trip.sonarFrequency && `Sondeur : ${trip.sonarFrequency}`, trip.result && `Notes : ${trip.result}`].filter(Boolean);
+        if (details.length) {
+          const detail = document.createElement("p");
+          detail.textContent = details.join(" · ");
+          entry.append(detail);
+        }
+        const tripPhotos = photosByTrip[index];
+        if (tripPhotos.length) {
+          const photoGrid = document.createElement("div");
+          photoGrid.className = "trip-photos";
+          tripPhotos.forEach(photo => {
+            const card = document.createElement("div");
+            card.className = "photo-card";
+            const image = document.createElement("img");
+            image.alt = `Photo de ${photo.category.toLocaleLowerCase("fr")}`;
+            image.src = URL.createObjectURL(photo.blob);
+            tripPhotoUrls.add(image.src);
+            const caption = document.createElement("p");
+            caption.textContent = photo.category;
+            card.append(image, caption);
+            photoGrid.append(card);
+          });
+          entry.append(photoGrid);
+        }
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.textContent = "Supprimer cette sortie";
+        remove.addEventListener("click", async () => {
+          const allTrips = JSON.parse(localStorage.getItem(TRIP_STORAGE_KEY) || "[]");
+          const removed = allTrips.find(item => item.id === trip.id);
+          if (removed) { removed.deletedAt = new Date().toISOString(); removed.updatedAt = removed.deletedAt; saveTrips(allTrips); }
+          try { await deleteTripPhotos(trip.id); } catch { /* Le carnet reste supprimé même si le navigateur ne nettoie pas les images. */ }
+          await renderTrips(); performSync();
+        });
+        entry.append(remove);
+        tripList.append(entry);
+      });
+      renderFishingAdvice();
+    }
+
+    function currentSpeciesLabel() {
+      return targetSpecies.options[targetSpecies.selectedIndex].textContent;
+    }
+
+    function loadGoldThresholds() {
+      const defaults = { Brochet: 100, Perche: 40, Silure: 150, Corégone: 50 };
+      try { return { ...defaults, ...JSON.parse(localStorage.getItem(GOLD_THRESHOLD_STORAGE_KEY) || "{}") }; } catch { return defaults; }
+    }
+
+    const goldThresholdFields = { Brochet: "gold-brochet", Perche: "gold-perche", Silure: "gold-silure", Corégone: "gold-coregone" };
+    const existingThresholds = loadGoldThresholds();
+    Object.entries(goldThresholdFields).forEach(([species, id]) => { document.getElementById(id).value = existingThresholds[species]; });
+    document.getElementById("gold-threshold-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const values = Object.fromEntries(Object.entries(goldThresholdFields).map(([species, id]) => [species, Number(document.getElementById(id).value)]));
+      localStorage.setItem(GOLD_THRESHOLD_STORAGE_KEY, JSON.stringify(values));
+      renderFishingAdvice();
+    });
+
+    function renderTrophyStats() {
+      const target = document.getElementById("trophy-results"); target.replaceChildren();
+      const trips = loadTrips();
+      const fish = trips.flatMap(trip => (Array.isArray(trip.fishDetails) ? trip.fishDetails : []).map(item => ({ ...item, angler: trip.angler || "Non précisé", place: trip.place || "Lieu non précisé", date: trip.date, tripId: trip.id })).filter(item => Number.isFinite(Number(item.lengthCm)) && Number(item.lengthCm) > 0));
+      if (!fish.length) {
+        const note = document.createElement("p"); note.className = "metric-note"; note.textContent = "Ajoute les poissons un par un avec leur longueur pour afficher les coupes, cumuls et records. Les anciennes sorties sans mesures restent intactes."; target.append(note); return;
+      }
+      const addGroup = (title, rows) => {
+        const heading = document.createElement("h4"); heading.textContent = title; target.append(heading);
+        if (!rows.length) { const note = document.createElement("p"); note.textContent = "Aucun poisson enregistré ici."; target.append(note); return; }
+        rows.forEach(text => { const row = document.createElement("div"); row.className = "record-entry"; const p = document.createElement("p"); p.textContent = text; row.append(p); target.append(row); });
+      };
+      const dateLabel = row => row.date ? new Date(row.date).toLocaleDateString("fr-CH") : "Date inconnue";
+      const byAngler = new Map(); const bySpecies = new Map(); const byPair = new Map();
+      fish.forEach(row => {
+        const length = Number(row.lengthCm);
+        byAngler.set(row.angler, (byAngler.get(row.angler) || 0) + length);
+        bySpecies.set(row.species, (bySpecies.get(row.species) || 0) + length);
+        const key = `${row.angler}\u0000${row.species}`;
+        if (!byPair.has(key) || length > Number(byPair.get(key).lengthCm)) byPair.set(key, row);
+      });
+      addGroup("Centimètres cumulés par pêcheur", [...byAngler].sort((a,b) => b[1]-a[1]).map(([name, cm]) => `${name} : ${cm.toLocaleString("fr-CH")} cm (${fish.filter(row => row.angler === name).length} poissons)`));
+      addGroup("Centimètres cumulés par espèce", [...bySpecies].sort((a,b) => b[1]-a[1]).map(([name, cm]) => `${name} : ${cm.toLocaleString("fr-CH")} cm (${fish.filter(row => row.species === name).length} poissons)`));
+      const firstBySpecies = new Map();
+      [...fish].sort((a,b) => new Date(a.date || 0) - new Date(b.date || 0)).forEach(row => { if (!firstBySpecies.has(row.species)) firstBySpecies.set(row.species, row); });
+      addGroup("🏆 Coupe du premier poisson par espèce", [...firstBySpecies.values()].map(row => `${row.species} : ${row.angler} · ${row.lengthCm} cm · ${dateLabel(row)} · ${row.place}`));
+      const thresholds = loadGoldThresholds();
+      const gold = fish.filter(row => Number(row.lengthCm) >= Number(thresholds[row.species])).sort((a,b) => Number(b.lengthCm)-Number(a.lengthCm));
+      addGroup("🐟 Poissons d’or — seuil atteint", gold.map(row => `${row.species} : ${row.angler} · ${row.lengthCm} cm (seuil ${thresholds[row.species]} cm) · ${dateLabel(row)} · ${row.place}`));
+      const recordRows = [...byPair.values()].sort((a,b) => a.species.localeCompare(b.species, "fr") || b.lengthCm-a.lengthCm || a.angler.localeCompare(b.angler, "fr"));
+      addGroup("Record de chaque pêcheur par espèce", recordRows.map(row => `${row.angler} — ${row.species} : ${row.lengthCm} cm${row.weightKg !== "" && row.weightKg != null ? ` · ${row.weightKg} kg` : " · poids non renseigné"} · ${dateLabel(row)} · ${row.place}`));
+    }
+
+    function makeStatsCard(title, lines) {
+      const card = document.createElement("article");
+      card.className = "stats-card";
+      const heading = document.createElement("p");
+      const strong = document.createElement("strong");
+      strong.textContent = title;
+      heading.append(strong);
+      card.append(heading);
+      lines.forEach(line => {
+        const paragraph = document.createElement("p");
+        paragraph.textContent = line;
+        card.append(paragraph);
+      });
+      return card;
+    }
+
+    function rankFishingOptions(records, field) {
+      const groups = new Map();
+      records.forEach(trip => {
+        const name = String(trip[field] || "").trim();
+        if (!name) return;
+        const key = name.toLocaleLowerCase("fr");
+        if (!groups.has(key)) groups.set(key, { name, outings: 0, successfulOutings: 0, catches: 0 });
+        const group = groups.get(key);
+        group.outings += 1;
+        const count = Number(trip.catches);
+        if (count > 0) {
+          group.successfulOutings += 1;
+          group.catches += count;
+        }
+      });
+      return [...groups.values()].filter(group => group.successfulOutings > 0)
+        .sort((a, b) => (b.successfulOutings / b.outings) - (a.successfulOutings / a.outings) || b.catches - a.catches || b.outings - a.outings);
+    }
+
+    function conditionsAreSimilar(past, current, pastFishing, currentFishing) {
+      if (!past || !current) return false;
+      const isKnownNumber = value => value !== "" && value !== null && value !== undefined && Number.isFinite(Number(value));
+      const checks = [
+        [past.airTemperature, current.airTemperature, 6],
+        [past.windSpeed, current.windSpeed, 8],
+        [past.pressure, current.pressure, 8],
+        [past.cloudCover, current.cloudCover, 30],
+        [past.precipitation, current.precipitation, 2],
+        [past.pressureTrend, current.pressureTrend, 3]
+      ];
+      const available = checks.filter(([a, b]) => isKnownNumber(a) && isKnownNumber(b));
+      if (available.length < 2) return false;
+      if (available.some(([a, b, tolerance]) => Math.abs(Number(a) - Number(b)) > tolerance)) return false;
+      if (pastFishing && currentFishing) {
+        const pastWater = Number(pastFishing.waterTemperature);
+        const currentWater = Number(currentFishing.waterTemperature);
+        if (isKnownNumber(pastFishing.waterTemperature) && isKnownNumber(currentFishing.waterTemperature) && Math.abs(pastWater - currentWater) > 3) return false;
+        if (pastFishing.waterClarity && currentFishing.waterClarity && pastFishing.waterClarity !== currentFishing.waterClarity) return false;
+        const pastFishDepth = Number(pastFishing.fishDepth);
+        const currentFishDepth = Number(currentFishing.fishDepth);
+        if (isKnownNumber(pastFishing.fishDepth) && isKnownNumber(currentFishing.fishDepth) && Math.abs(pastFishDepth - currentFishDepth) > 4) return false;
+      }
+      return true;
+    }
+
+    function rankDepthOptions(records) {
+      const groups = new Map();
+      records.forEach(trip => {
+        const depth = Number(trip.fishDepth);
+        if (!Number.isFinite(depth) || depth <= 0) return;
+        const lower = Math.floor(depth / 2) * 2;
+        const key = `${lower}-${lower + 2}`;
+        if (!groups.has(key)) groups.set(key, { name: `${lower}–${lower + 2} m`, outings: 0, successfulOutings: 0, catches: 0 });
+        const group = groups.get(key);
+        group.outings += 1;
+        const catches = Number(trip.catches);
+        if (catches > 0) {
+          group.successfulOutings += 1;
+          group.catches += catches;
+        }
+      });
+      return [...groups.values()].filter(group => group.successfulOutings > 0)
+        .sort((a, b) => (b.successfulOutings / b.outings) - (a.successfulOutings / a.outings) || b.catches - a.catches);
+    }
+
+    function describeBestDepth(records) {
+      const ranked = rankDepthOptions(records);
+      if (!ranked.length) return "Profondeur des poissons : renseigne la profondeur observée au sondeur lors des prochaines sorties.";
+      const best = ranked[0];
+      return `Profondeur des poissons à retenter : ${best.name} (${best.successfulOutings}/${best.outings} sorties avec prise).`;
+    }
+
+    function describeBest(records, field, label) {
+      const ranked = rankFishingOptions(records, field);
+      if (!ranked.length) return `${label} : pas encore assez de prises renseignées.`;
+      const best = ranked[0];
+      return `${label} : ${best.name} (${best.successfulOutings}/${best.outings} sorties avec prise, ${best.catches} poisson${best.catches > 1 ? "s" : ""}).`;
+    }
+
+    function renderFishingAdvice() {
+      if (!statsResults) return;
+      statsResults.replaceChildren();
+      renderTrophyStats();
+      const species = currentSpeciesLabel();
+      const speciesTrips = loadTrips().filter(trip => trip.species === species);
+      const recorded = speciesTrips.filter(trip => Number.isInteger(Number(trip.catches)) && Number(trip.catches) >= 0);
+      if (!recorded.length) {
+        statsResults.append(makeStatsCard("Conseil pour " + species, [
+          "Aucune prise structurée n’est encore enregistrée pour cette espèce.",
+          "Après chaque sortie, indique le spot, la technique, l’animation, le leurre et le nombre de prises pour alimenter les statistiques."
+        ]));
+        return;
+      }
+
+      const successful = recorded.filter(trip => Number(trip.catches) > 0);
+      const totalCatches = successful.reduce((sum, trip) => sum + Number(trip.catches), 0);
+      const currentFishing = {
+        waterTemperature: fishingInputs[0].value,
+        sonarDepth: fishingInputs[1].value,
+        fishDepth: fishingInputs[2].value,
+        sonarFrequency: fishingInputs[3].value,
+        waterClarity: fishingInputs[4].value
+      };
+      const hasFishingContext = Object.values(currentFishing).some(value => value !== "");
+      const similar = currentWeatherSnapshot ? recorded.filter(trip => conditionsAreSimilar(trip.weather, currentWeatherSnapshot, trip.fishingContext || trip, hasFishingContext ? currentFishing : null)) : [];
+      const similarHasCatch = similar.some(trip => Number(trip.catches) > 0);
+      const recommendationRecords = similarHasCatch ? similar : recorded;
+      const conditionsLabel = similarHasCatch
+        ? `${similar.length} sortie${similar.length > 1 ? "s" : ""} avec une météo proche de celle d’aujourd’hui.`
+        : "Pas de prise enregistrée sous une météo comparable ; conseil calculé sur toutes les sorties de cette espèce.";
+      statsResults.append(makeStatsCard("Historique · " + species, [
+        `${recorded.length} sortie${recorded.length > 1 ? "s" : ""} avec résultat renseigné · ${successful.length} sortie${successful.length > 1 ? "s" : ""} avec prise · ${totalCatches} poisson${totalCatches > 1 ? "s" : ""} au total.`,
+        conditionsLabel
+      ]));
+
+      if (!successful.length) {
+        statsResults.append(makeStatsCard("Tendance actuelle", [
+          "Aucune prise n’est encore enregistrée pour cette espèce. Les statistiques afficheront les meilleures options après les premières prises."
+        ]));
+        return;
+      }
+
+      const recommendations = [
+        describeBest(recommendationRecords, "place", "Spot à retenter"),
+        describeBest(recommendationRecords, "animation", "Animation à privilégier"),
+        describeBest(recommendationRecords, "technique", "Technique à privilégier"),
+        describeBest(recommendationRecords, "lure", "Leurre à retenter"),
+        describeBestDepth(recommendationRecords)
+      ];
+      statsResults.append(makeStatsCard(similarHasCatch ? "Pistes pour aujourd’hui · météo proche" : "Pistes pour aujourd’hui · tendance générale", recommendations));
+      if (recorded.length < 3) {
+        statsResults.append(makeStatsCard("Historique encore court", [
+          "Il y a peu de sorties comparables. Ces pistes sont provisoires et gagneront en fiabilité avec davantage de résultats renseignés."
+        ]));
+      }
+    }
+
+    document.getElementById("trip-form").addEventListener("submit", async event => {
+      event.preventDefault();
+      const selectedCity = findCity(select.value);
+      if (!tripPlace.value.trim() && selectedCity) tripPlace.value = selectedCity.label || selectedCity.name;
+      const angler = tripAngler.value === "__new__" ? newAngler.value.trim() : tripAngler.value;
+      if (!angler) {
+        newAngler.focus();
+        document.getElementById("status").textContent = "Indique le nom du nouveau pêcheur.";
+        return;
+      }
+      const trip = {
+        id: makeId(),
+        updatedAt: new Date().toISOString(),
+        date: tripDate.value,
+        angler,
+        place: tripPlace.value.trim(),
+        species: currentSpeciesLabel(),
+        technique: tripTechnique.value,
+        animation: tripAnimation.value.trim(),
+        lure: tripLure.value.trim(),
+        catches: Math.max(Number(tripCatches.value) || 0, pendingFish.length),
+        fishDetails: pendingFish.map(fish => ({ ...fish })),
+        result: tripResult.value.trim(),
+        waterTemperature: fishingInputs[0].value,
+        depth: fishingInputs[1].value,
+        fishDepth: fishingInputs[2].value,
+        sonarFrequency: fishingInputs[3].value,
+        waterClarity: fishingInputs[4].value,
+        fishingContext: {
+          waterTemperature: fishingInputs[0].value,
+          sonarDepth: fishingInputs[1].value,
+          fishDepth: fishingInputs[2].value,
+          sonarFrequency: fishingInputs[3].value,
+          waterClarity: fishingInputs[4].value
+        },
+        weather: currentWeatherSnapshot ? { ...currentWeatherSnapshot } : null,
+        photos: queuedPhotos.map(photo => ({ id: photo.id, category: photo.category }))
+      };
+      trip.gear = Array.from(tripGearOptions.querySelectorAll('input[name="trip-gear"]:checked')).map(input => input.value);
+      const trips = JSON.parse(localStorage.getItem(TRIP_STORAGE_KEY) || "[]");
+      trips.unshift(trip);
+      const saveButton = document.getElementById("save-trip");
+      saveButton.disabled = true;
+      try {
+        await persistTripPhotos(trip.id, queuedPhotos);
+        saveTrips(trips);
+        await renderTrips();
+        queuedPhotos = [];
+        pendingFish = [];
+        renderPendingFish();
+        renderPhotoQueue();
+        photoStatus.textContent = "Les photos sont enregistrées avec la sortie sur cet appareil.";
+        tripTechnique.value = "";
+        tripAnimation.value = "";
+        tripLure.value = "";
+        tripCatches.value = "0";
+        tripResult.value = "";
+        tripDate.value = localDateTimeValue(new Date());
+        document.getElementById("status").textContent = "Sortie enregistrée dans ce navigateur.";
+        performSync();
+      } catch (error) {
+        try { await deleteTripPhotos(trip.id); } catch { /* Aucun enregistrement photo exploitable n’est gardé. */ }
+        document.getElementById("status").textContent = error.message || "Impossible d’enregistrer la sortie dans le navigateur.";
+      } finally {
+        saveButton.disabled = false;
+      }
+    });
+
+    renderTrips();
+    let cities = loadCities();
+
+    function loadCities() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        const known = new Set(initialCities.map(city => city.name.toLocaleLowerCase("fr")));
+        return [...initialCities, ...stored.filter(city => {
+          if (!city || typeof city.name !== "string" || known.has(city.name.toLocaleLowerCase("fr"))) return false;
+          known.add(city.name.toLocaleLowerCase("fr"));
+          return Number.isFinite(city.latitude) && Number.isFinite(city.longitude);
+        })];
+      } catch {
+        return [...initialCities];
+      }
+    }
+
+    function saveCities() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cities.slice(initialCities.length)));
+    }
+
+    function renderCities(selectedName) {
+      select.replaceChildren();
+      cities.forEach(city => {
+        const option = document.createElement("option");
+        option.value = city.name;
+        option.textContent = city.label || city.name;
+        select.append(option);
+      });
+      if (selectedName) select.value = selectedName;
+    }
+
+    async function fetchJson(url, params) {
+      const query = new URLSearchParams(params);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 12000);
+      try {
+        const response = await fetch(url + "?" + query, { signal: controller.signal, cache: "no-store" });
+        if (!response.ok) throw new Error("Le service externe est momentanément indisponible.");
+        return await response.json();
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    function findCity(name) {
+      return cities.find(city => city.name === name);
+    }
+
+    function addOrUpdateLocatedCity(city) {
+      const existing = cities.find(item => item.name.toLocaleLowerCase("fr") === city.name.toLocaleLowerCase("fr"));
+      if (existing) {
+        if (cities.indexOf(existing) < initialCities.length) {
+          renderCities(existing.name);
+          return existing;
+        }
+        existing.latitude = city.latitude;
+        existing.longitude = city.longitude;
+        existing.label = city.label;
+        saveCities();
+        renderCities(existing.name);
+        return existing;
+      }
+      cities.push(city);
+      saveCities();
+      renderCities(city.name);
+      return city;
+    }
+
+    function setLocationButtonsDisabled(disabled) {
+      gpsButton.disabled = disabled;
+      networkButton.disabled = disabled;
+    }
+
+    async function findLocality(latitude, longitude) {
+      const result = await fetchJson("https://nominatim.openstreetmap.org/reverse", {
+        lat: latitude,
+        lon: longitude,
+        format: "jsonv2",
+        addressdetails: 1,
+        "accept-language": "fr"
+      });
+      const address = result.address || {};
+      const locality = address.city || address.town || address.village || address.municipality || address.hamlet || address.suburb;
+      if (!locality) throw new Error("La position GPS est trouvée, mais aucune localité n’a été identifiée à proximité.");
+      const area = [address.state, address.country].filter(value => value && value !== locality).join(", ");
+      return {
+        name: locality,
+        label: area ? `${locality} (${area})` : locality,
+        latitude,
+        longitude
+      };
+    }
+
+    gpsButton.addEventListener("click", () => {
+      gpsProposal.hidden = true;
+      pendingGpsCity = null;
+      if (!navigator.geolocation) {
+        status.textContent = "La géolocalisation GPS n’est pas disponible dans ce navigateur.";
+        return;
+      }
+      setLocationButtonsDisabled(true);
+      status.textContent = "Demande de position GPS… Autorise l’accès à la position si le téléphone le demande.";
+      navigator.geolocation.getCurrentPosition(async position => {
+        try {
+          status.textContent = "Recherche de la localité correspondant à votre position…";
+          pendingGpsCity = await findLocality(position.coords.latitude, position.coords.longitude);
+          gpsProposalName.textContent = pendingGpsCity.label;
+          gpsProposal.hidden = false;
+          status.textContent = "Vérifie la localité proposée, puis confirme pour afficher sa météo.";
+          gpsAcceptButton.focus();
+        } catch (error) {
+          status.textContent = error.name === "AbortError"
+            ? "La recherche de localité a dépassé le délai. Réessaie quand le réseau sera meilleur."
+            : (error.message || "Impossible de trouver la localité pour cette position.");
+        } finally {
+          setLocationButtonsDisabled(false);
+        }
+      }, error => {
+        const messages = {
+          1: "Accès GPS refusé. Autorise la localisation dans les réglages du navigateur pour réessayer.",
+          2: "Position GPS indisponible. Vérifie que la localisation est activée sur le téléphone.",
+          3: "La recherche GPS a dépassé le délai. Réessaie dans un endroit avec une meilleure réception."
+        };
+        status.textContent = messages[error.code] || "Impossible d’obtenir la position GPS.";
+        setLocationButtonsDisabled(false);
+      }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
+    });
+
+    gpsAcceptButton.addEventListener("click", async () => {
+      if (!pendingGpsCity) return;
+      gpsAcceptButton.disabled = true;
+      gpsCancelButton.disabled = true;
+      const city = addOrUpdateLocatedCity(pendingGpsCity);
+      pendingGpsCity = null;
+      gpsProposal.hidden = true;
+      try {
+        await loadWeather();
+      } finally {
+        gpsAcceptButton.disabled = false;
+        gpsCancelButton.disabled = false;
+      }
+    });
+
+    gpsCancelButton.addEventListener("click", () => {
+      pendingGpsCity = null;
+      gpsProposal.hidden = true;
+      status.textContent = "Sélection GPS annulée.";
+      gpsButton.focus();
+    });
+
+    networkButton.addEventListener("click", async () => {
+      setLocationButtonsDisabled(true);
+      status.textContent = "Estimation de la ville à partir de la connexion…";
+      try {
+        const location = await fetchJson("https://ipapi.co/json/", {});
+        if (!location.city || !Number.isFinite(Number(location.latitude)) || !Number.isFinite(Number(location.longitude))) {
+          throw new Error("La ville n’a pas pu être déterminée à partir du réseau.");
+        }
+        const area = [location.region, location.country_name].filter(Boolean).join(", ");
+        const city = {
+          name: `Réseau: ${location.city}${area ? `, ${area}` : ""}`,
+          label: `${location.city}${area ? ` (${area})` : ""} — réseau, approx.`,
+          latitude: Number(location.latitude),
+          longitude: Number(location.longitude)
+        };
+        addOrUpdateLocatedCity(city);
+        const loaded = await loadWeather();
+        if (loaded) status.textContent = "Ville estimée par le réseau. La position peut être imprécise.";
+      } catch (error) {
+        status.textContent = error.name === "AbortError"
+          ? "Connexion lente : l’estimation réseau a dépassé le délai. Réessaie."
+          : (error.message || "Impossible d’estimer la ville via le réseau. Vérifie la connexion Internet.");
+      } finally {
+        setLocationButtonsDisabled(false);
+      }
+    });
+
+    async function coordinatesFor(city) {
+      if (Number.isFinite(city.latitude) && Number.isFinite(city.longitude)) return city;
+      const data = await fetchJson("https://geocoding-api.open-meteo.com/v1/search", {
+        name: city.name,
+        count: 5,
+        language: "fr",
+        countryCode: "CH",
+        format: "json"
+      });
+      const results = data.results || [];
+      const found = results.find(item => item.name.toLocaleLowerCase("fr") === city.name.toLocaleLowerCase("fr")) || results[0];
+      if (!found) throw new Error("Ville suisse introuvable. Vérifie l’orthographe et réessaie.");
+      city.latitude = found.latitude;
+      city.longitude = found.longitude;
+      city.label = city.name;
+      return city;
+    }
+
+    function weatherDescription(code) {
+      const descriptions = {
+        0: ["Ciel dégagé", "☀️"], 1: ["Principalement dégagé", "🌤️"],
+        2: ["Partiellement nuageux", "⛅"], 3: ["Couvert", "☁️"],
+        45: ["Brouillard", "🌫️"], 48: ["Brouillard givrant", "🌫️"],
+        51: ["Bruine légère", "🌦️"], 53: ["Bruine modérée", "🌦️"],
+        55: ["Bruine forte", "🌧️"], 56: ["Bruine verglaçante", "🌧️"],
+        57: ["Bruine verglaçante forte", "🌧️"], 61: ["Pluie faible", "🌧️"],
+        63: ["Pluie modérée", "🌧️"], 65: ["Pluie forte", "🌧️"],
+        66: ["Pluie verglaçante", "🌧️"], 67: ["Pluie verglaçante forte", "🌧️"],
+        71: ["Neige faible", "🌨️"], 73: ["Neige modérée", "🌨️"],
+        75: ["Neige forte", "❄️"], 77: ["Grains de neige", "🌨️"],
+        80: ["Averses faibles", "🌦️"], 81: ["Averses modérées", "🌧️"],
+        82: ["Averses violentes", "⛈️"], 85: ["Averses de neige", "🌨️"],
+        86: ["Averses de neige fortes", "❄️"], 95: ["Orage", "⛈️"],
+        96: ["Orage avec grêle", "⛈️"], 99: ["Orage avec forte grêle", "⛈️"]
+      };
+      return descriptions[code] || ["Conditions météo", "🌡️"];
+    }
+
+    function windDirection(degrees) {
+      const directions = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
+      return directions[Math.round(degrees / 45) % 8];
+    }
+
+    function showWeather(city, forecast) {
+      const current = forecast.current;
+      const units = forecast.current_units || {};
+      const [description, icon] = weatherDescription(current.weather_code);
+      document.getElementById("place-name").textContent = city.label || city.name;
+      document.getElementById("updated").textContent = "Mis à jour : " + new Date(current.time).toLocaleString("fr-CH");
+      document.getElementById("icon").textContent = icon;
+      document.getElementById("temperature").textContent = Math.round(current.temperature_2m) + (units.temperature_2m || "°C");
+      document.getElementById("condition").textContent = description;
+      document.getElementById("feels-like").textContent = Math.round(current.apparent_temperature) + (units.apparent_temperature || "°C");
+      document.getElementById("humidity").textContent = current.relative_humidity_2m + (units.relative_humidity_2m || "%");
+      document.getElementById("wind").textContent = Math.round(current.wind_speed_10m) + " " + (units.wind_speed_10m || "km/h") + " " + windDirection(current.wind_direction_10m);
+      document.getElementById("gusts").textContent = Math.round(current.wind_gusts_10m) + " " + (units.wind_gusts_10m || "km/h");
+      document.getElementById("rain").textContent = current.precipitation + " " + (units.precipitation || "mm");
+      document.getElementById("cloud-cover").textContent = current.cloud_cover + (units.cloud_cover || "%");
+      document.getElementById("pressure").textContent = Math.round(current.surface_pressure) + " " + (units.surface_pressure || "hPa");
+      const hourly = forecast.hourly || {};
+      const currentHour = (hourly.time || []).findIndex(time => time.slice(0, 14) === current.time.slice(0, 14));
+      const previousPressure = currentHour >= 3 ? hourly.surface_pressure[currentHour - 3] : null;
+      const pressureChange = Number.isFinite(previousPressure) ? current.surface_pressure - previousPressure : null;
+      document.getElementById("pressure-trend").textContent = pressureChange === null
+        ? "Indisponible"
+        : `${pressureChange > 0 ? "+" : ""}${pressureChange.toFixed(1)} hPa`;
+      currentWeatherSnapshot = {
+        airTemperature: Number(current.temperature_2m),
+        windSpeed: Number(current.wind_speed_10m),
+        pressure: Number(current.surface_pressure),
+        cloudCover: Number(current.cloud_cover),
+        precipitation: Number(current.precipitation),
+        pressureTrend: pressureChange
+      };
+      renderFishingAdvice();
+      const daily = forecast.daily || {};
+      const sunrise = daily.sunrise && daily.sunrise[0] ? new Date(daily.sunrise[0]).toLocaleTimeString("fr-CH", { hour: "2-digit", minute: "2-digit" }) : "—";
+      const sunset = daily.sunset && daily.sunset[0] ? new Date(daily.sunset[0]).toLocaleTimeString("fr-CH", { hour: "2-digit", minute: "2-digit" }) : "—";
+      document.getElementById("sun-times").textContent = `${sunrise} / ${sunset}`;
+      weatherCard.hidden = false;
+    }
+
+    async function loadWeather() {
+      const city = findCity(select.value);
+      if (!city) return;
+      const cacheKey = "t-appmeteo-v2-weather-" + city.name;
+      try {
+        const cached = JSON.parse(sessionStorage.getItem(cacheKey) || "null");
+        if (cached) showWeather(city, cached.forecast || { current: cached.current, current_units: cached.units });
+      } catch { /* Cache invalide : on récupère les dernières données. */ }
+
+      status.textContent = "Récupération de la météo…";
+      try {
+        const location = await coordinatesFor(city);
+        const data = await fetchJson("https://api.open-meteo.com/v1/forecast", {
+          latitude: location.latitude,
+          longitude: location.longitude,
+          current: "temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover,surface_pressure",
+          hourly: "surface_pressure,wind_gusts_10m,cloud_cover",
+          daily: "sunrise,sunset",
+          temperature_unit: "celsius",
+          wind_speed_unit: "kmh",
+          timezone: "auto"
+        });
+        showWeather(city, data);
+        sessionStorage.setItem(cacheKey, JSON.stringify({ forecast: data }));
+        if (cities.indexOf(city) >= initialCities.length) saveCities();
+        status.textContent = "Météo mise à jour.";
+        return true;
+      } catch (error) {
+        status.textContent = error.name === "AbortError"
+          ? "Connexion lente : délai dépassé. Réessaie quand le réseau sera meilleur."
+          : (error.message || "Impossible de récupérer la météo. Vérifie la connexion et réessaie.");
+        return false;
+      }
+    }
+
+    document.getElementById("add-form").addEventListener("submit", async event => {
+      event.preventDefault();
+      const name = document.getElementById("new-city").value.trim();
+      if (!name) return;
+      const existing = cities.find(city => city.name.toLocaleLowerCase("fr") === name.toLocaleLowerCase("fr"));
+      if (existing) {
+        renderCities(existing.name);
+        document.getElementById("new-city").value = "";
+        await loadWeather();
+        return;
+      }
+
+      addButton.disabled = true;
+      status.textContent = "Recherche de la ville…";
+      try {
+        const city = await coordinatesFor({ name, label: name });
+        cities.push(city);
+        saveCities();
+        renderCities(city.name);
+        document.getElementById("new-city").value = "";
+        await loadWeather();
+      } catch (error) {
+        status.textContent = error.name === "AbortError"
+          ? "Connexion lente : la recherche a dépassé le délai. Réessaie."
+          : (error.message || "Ville introuvable. Vérifie l’orthographe.");
+      } finally {
+        addButton.disabled = false;
+      }
+    });
+
+    select.addEventListener("change", () => {
+      if (!tripPlaceEdited) {
+        const city = findCity(select.value);
+        if (city) tripPlace.value = city.label || city.name;
+      }
+      loadWeather();
+    });
+    document.getElementById("refresh-button").addEventListener("click", loadWeather);
+    renderCities();
+    const initialSelectedCity = findCity(select.value);
+    if (initialSelectedCity) tripPlace.value = initialSelectedCity.label || initialSelectedCity.name;
+    loadWeather();
+    function syncSetting() {
+      try { return JSON.parse(localStorage.getItem(SYNC_SETTINGS_KEY) || "{}"); } catch { return {}; }
+    }
+    const syncUrlInput = document.getElementById("sync-url");
+    const syncTokenInput = document.getElementById("sync-token");
+    const syncStatus = document.getElementById("sync-status");
+    const savedSyncSettings = syncSetting();
+    syncUrlInput.value = savedSyncSettings.url || "";
+    syncTokenInput.value = savedSyncSettings.token || "";
+    let syncRunning = false;
+
+    function allStoredRows(key) {
+      try { const rows = JSON.parse(localStorage.getItem(key) || "[]"); return Array.isArray(rows) ? rows : []; } catch { return []; }
+    }
+    function newerRows(localRows, remoteRows) {
+      const merged = new Map();
+      [...localRows, ...remoteRows].forEach(row => {
+        if (!row || typeof row.id !== "string") return;
+        const current = merged.get(row.id);
+        const timestamp = value => Date.parse(value.updatedAt || value.date || "1970-01-01T00:00:00Z") || 0;
+        if (!current || timestamp(row) >= timestamp(current)) merged.set(row.id, { ...row, updatedAt: row.updatedAt || row.date || "1970-01-01T00:00:00Z" });
+      });
+      return Array.from(merged.values());
+    }
+    function blobAsDataUrl(blob) {
+      return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = () => reject(new Error("Lecture d’une photo impossible.")); reader.readAsDataURL(blob); });
+    }
+    function blobFromDataUrl(value) {
+      const [meta, payload] = String(value).split(",", 2);
+      const mime = (meta.match(/^data:([^;]+)/) || [])[1] || "image/jpeg";
+      const binary = atob(payload || ""); const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return new Blob([bytes], { type: mime });
+    }
+    async function readAllPhotos() {
+      const db = await openPhotoDatabase();
+      try { return await new Promise((resolve, reject) => { const tx = db.transaction(PHOTO_STORE_NAME, "readonly"); const request = tx.objectStore(PHOTO_STORE_NAME).getAll(); request.onsuccess = () => resolve(request.result || []); request.onerror = () => reject(request.error); }); }
+      finally { db.close(); }
+    }
+    async function replaceAllPhotos(rows) {
+      const db = await openPhotoDatabase();
+      try { await new Promise((resolve, reject) => { const tx = db.transaction(PHOTO_STORE_NAME, "readwrite"); const store = tx.objectStore(PHOTO_STORE_NAME); store.clear(); rows.forEach(row => store.put({ id: row.id, tripId: row.tripId, category: row.category, blob: row.blob })); tx.oncomplete = resolve; tx.onerror = () => reject(tx.error); tx.onabort = () => reject(tx.error); }); }
+      finally { db.close(); }
+    }
+    async function performSync() {
+      const settings = syncSetting();
+      if (!settings.url || !settings.token || !navigator.onLine || syncRunning) return;
+      let endpoint;
+      try { endpoint = new URL(settings.url); if (endpoint.protocol !== "https:") throw new Error("L’adresse doit commencer par https:// pour protéger les données et fonctionner depuis GitHub Pages."); }
+      catch (error) { syncStatus.textContent = error.message || "Adresse de synchronisation invalide."; return; }
+      syncRunning = true; syncStatus.textContent = "Synchronisation du carnet, du matériel et des photos…";
+      try {
+        const trips = allStoredRows(TRIP_STORAGE_KEY);
+        const baits = allStoredRows(BAIT_STORAGE_KEY);
+        const gear = allStoredRows(GEAR_STORAGE_KEY);
+        const activeTripIds = new Set(trips.filter(row => !row.deletedAt).map(row => row.id));
+        const activeBaitPhotoIds = new Set(baits.filter(row => !row.deletedAt && row.photoId).map(row => row.photoId));
+        const photos = (await readAllPhotos()).filter(photo => activeTripIds.has(photo.tripId) || activeBaitPhotoIds.has(photo.id));
+        const photosPayload = await Promise.all(photos.map(async photo => ({ id: photo.id, tripId: photo.tripId, category: photo.category, data: await blobAsDataUrl(photo.blob) })));
+        const localBundle = { trips, baits, gear, photos: photosPayload };
+        const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 60000);
+        let response;
+        try { response = await fetch(settings.url, { method: "PUT", headers: { "Authorization": `Bearer ${settings.token}`, "Content-Type": "application/json" }, body: JSON.stringify(localBundle), signal: controller.signal }); }
+        finally { clearTimeout(timeout); }
+        if (!response.ok) throw new Error(response.status === 401 ? "Jeton refusé par le serveur." : `Serveur de synchronisation : erreur ${response.status}.`);
+        const remote = await response.json();
+        const mergedTrips = newerRows(trips, remote.trips || []);
+        const mergedBaits = newerRows(baits, remote.baits || []);
+        const mergedGear = newerRows(gear, remote.gear || []);
+        localStorage.setItem(TRIP_STORAGE_KEY, JSON.stringify(mergedTrips));
+        localStorage.setItem(BAIT_STORAGE_KEY, JSON.stringify(mergedBaits));
+        localStorage.setItem(GEAR_STORAGE_KEY, JSON.stringify(mergedGear));
+        const mergedActiveTripIds = new Set(mergedTrips.filter(row => !row.deletedAt).map(row => row.id));
+        const mergedBaitPhotoIds = new Set(mergedBaits.filter(row => !row.deletedAt && row.photoId).map(row => row.photoId));
+        const allPhotoRows = new Map();
+        [...photosPayload, ...(remote.photos || [])].forEach(photo => { if (photo && photo.id && photo.data) allPhotoRows.set(photo.id, photo); });
+        const livePhotos = Array.from(allPhotoRows.values()).filter(photo => mergedActiveTripIds.has(photo.tripId) || mergedBaitPhotoIds.has(photo.id));
+        await replaceAllPhotos(livePhotos.map(photo => ({ id: photo.id, tripId: photo.tripId, category: photo.category, blob: blobFromDataUrl(photo.data) })));
+        syncStatus.textContent = `Synchronisé à ${new Date().toLocaleTimeString("fr-CH", { hour: "2-digit", minute: "2-digit" })} · ${mergedTrips.filter(row => !row.deletedAt).length} sorties · ${livePhotos.length} photos.`;
+        await renderTrips(); renderBaits(); renderGear();
+      } catch (error) {
+        syncStatus.textContent = `${error.message || "Serveur indisponible."} Les données locales sont conservées et seront réessayées quand le réseau sera accessible.`;
+      } finally { syncRunning = false; }
+    }
+    document.getElementById("sync-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const url = syncUrlInput.value.trim(); const token = syncTokenInput.value.trim();
+      if (!url || !token) { syncStatus.textContent = "Indique l’adresse HTTPS et le jeton pour activer la synchronisation."; return; }
+      localStorage.setItem(SYNC_SETTINGS_KEY, JSON.stringify({ url, token }));
+      syncStatus.textContent = "Configuration enregistrée sur cet appareil."; performSync();
+    });
+    document.getElementById("sync-now").addEventListener("click", performSync);
+    window.addEventListener("online", performSync);
+    window.addEventListener("focus", performSync);
+    if (savedSyncSettings.url && savedSyncSettings.token) performSync();
+    setInterval(performSync, 120000);
+
+    document.querySelectorAll("details[data-section]").forEach(section => {
+      const key = `t-appmeteo-v4-section-${section.dataset.section}`;
+      try { const saved = localStorage.getItem(key); if (saved !== null) section.open = saved === "open"; } catch { /* Sections restent utilisables sans stockage local. */ }
+      section.addEventListener("toggle", () => { try { localStorage.setItem(key, section.open ? "open" : "closed"); } catch { /* Préférence facultative. */ } });
+    });
+
+  </script>
+</body>
+</html>
