@@ -8,6 +8,8 @@ V3 est une copie indépendante de la V2, adaptée à la pêche à l’arrêt sur
 - Bibliothèque de leurres avec photo, nom, fabricant, taille, poids, profondeur, animation et espèces ciblées (brochet, perche, silure, corégone).
 - Inventaire : canne, moulinet, tresse, fil nylon, aucune ligne, hameçon et appât. Le matériel peut être sélectionné dans chaque sortie.
 - Carnet avec pêcheur (Jarod, Thomas ou nom ajouté), lieu, prises, météo, observations du sondeur, notes et photos prises sur le moment ou choisies dans la photothèque.
+- Détail des prises par espèce, longueur en centimètres et poids en kilogrammes, lié à chaque sortie.
+- Cumuls de centimètres par pêcheur et par espèce, coupe du premier poisson enregistré par espèce, poissons d’or selon des seuils modifiables, et record de chaque pêcheur par espèce avec taille, poids, date et lieu.
 - Catégories photo : leurre, poisson, ou leurre et poisson ensemble.
 - Statistiques par espèce et pistes de spot, technique, animation, leurre et profondeur, fondées sur les sorties enregistrées. Elles ne garantissent pas une prise.
 
