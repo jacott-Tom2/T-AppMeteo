@@ -8,6 +8,8 @@ La [T-AppMeteo V3](https://jacott-tom2.github.io/T-AppMeteo/v3/index.html) ajout
 
 La V3 permet aussi d’ajouter aux sorties des photos du leurre, du poisson ou des deux ensemble, en les attribuant à Jarod, Thomas ou à un pêcheur ajouté. Les statistiques proposent des pistes de spot, technique, leurre, profondeur repérée et animation selon les sorties et les conditions météo enregistrées. Les photos et le carnet restent sur l’appareil.
 
+La V3 inclut maintenant le logo vectoriel Jarod Jacot Fishing, aux couleurs du bateau, et une bibliothèque de leurres avec photos, marque, taille, poids, profondeur d’utilisation, animation et espèces recherchées. Les fiches peuvent être filtrées par espèce et triées par nom, fabricant, poids ou profondeur.
+
 Application météo légère, en français, conçue pour Yverdon-les-Bains (1400), Yvonand et les localités suisses ajoutées par l’utilisateur.
 
 ## Fonctionnalités prévues
