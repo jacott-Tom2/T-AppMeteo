@@ -22,6 +22,12 @@ Les statistiques classent les résultats par espèce et proposent des pistes pou
 
 Le choix ou la recherche de ville, le GPS et la localisation réseau sont regroupés en haut de l’application, avant la météo et le carnet.
 
+## Logo et bibliothèque de leurres
+
+Le logo vectoriel « Jarod Jacot Fishing » reprend le turquoise, le crème, l’anthracite et le rouge visibles sur le bateau. La bibliothèque permet d’ajouter une photo prise sur le moment ou choisie dans la photothèque, puis de noter le nom, le fabricant, la taille, le poids, la profondeur d’utilisation, l’animation et les espèces ciblées. Elle peut être filtrée par espèce et triée par nom, fabricant, poids ou profondeur.
+
+Les fiches et images de la bibliothèque sont conservées dans le navigateur de l’appareil. Aucune fiche de leurre n’est préremplie : les photos fournies représentent le bateau et une sortie, pas les modèles de leurres.
+
 ## Lancer en local
 
 ```bash
