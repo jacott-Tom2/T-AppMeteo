@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 760" role="img" aria-labelledby="title desc">
+  <title id="title">Jarod Jacot Fishing</title>
+  <desc id="desc">Écusson original de pêche sportive : brochet stylisé, ligne, vagues et couleurs turquoise, crème, anthracite et rouge du bateau.</desc>
+  <defs>
+    <linearGradient id="water" x1="0" y1="0" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#29c5bd"/>
+      <stop offset="1" stop-color="#087873"/>
+    </linearGradient>
+    <linearGradient id="fish" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff8e8"/>
+      <stop offset="0.6" stop-color="#e5dcc6"/>
+      <stop offset="1" stop-color="#aabbb0"/>
+    </linearGradient>
+    <clipPath id="badge-clip"><circle cx="380" cy="380" r="348"/></clipPath>
+  </defs>
+  <circle cx="380" cy="380" r="367" fill="#17232b" stroke="#f1e8d5" stroke-width="12"/>
+  <circle cx="380" cy="380" r="347" fill="none" stroke="#119b95" stroke-width="7"/>
+  <g clip-path="url(#badge-clip)">
+    <path d="M104 190h552" stroke="#e95b53" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="112" cy="190" r="8" fill="#e95b53"/>
+    <circle cx="648" cy="190" r="8" fill="#e95b53"/>
+    <text x="380" y="157" text-anchor="middle" fill="#f7efde" font-family="Arial, Helvetica, sans-serif" font-size="51" font-weight="900" letter-spacing="5">JAROD JACOT</text>
+    <path d="M170 205C282 219 431 217 578 197" fill="none" stroke="#f1e8d5" stroke-width="4" stroke-linecap="round" opacity=".7"/>
+    <path d="M177 207c69 2 138 4 208 2 61-2 124-6 185-15" fill="none" stroke="#f1e8d5" stroke-width="2" stroke-dasharray="5 8" opacity=".85"/>
+    <path d="M591 192c12 15 15 29 9 40-6 10-19 14-31 7" fill="none" stroke="#e95b53" stroke-width="7" stroke-linecap="round"/>
+    <path d="M152 355 91 304l15 51-16 50 64-43Z" fill="#087873" stroke="#17232b" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M147 354c46-65 139-99 257-96 78 2 137 20 178 52l84-15-35 52 36 30-86-7c-52 59-136 96-244 97-88 0-155-28-190-78Z" fill="url(#fish)" stroke="#17232b" stroke-width="12" stroke-linejoin="round"/>
+    <path d="m221 286 28-45 56 39m74-23 33-44 50 54m-197 171 34 48 39-54m92 44 29 44 28-67" fill="#087873" stroke="#17232b" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M183 357c43 5 76 1 112-14m-100 44c52 8 93 3 139-16m25-71c-29 28-52 63-68 104m112-99c-22 27-38 58-49 94m108-82c-15 22-26 47-33 72" fill="none" stroke="#718b80" stroke-width="8" stroke-linecap="round" opacity=".75"/>
+    <path d="M174 379c57 32 118 46 185 42 43-2 83-13 119-31" fill="none" stroke="#fff8e8" stroke-width="8" stroke-linecap="round" opacity=".75"/>
+    <circle cx="532" cy="306" r="13" fill="#e95b53" stroke="#17232b" stroke-width="6"/>
+    <circle cx="536" cy="302" r="4" fill="#fff8e8"/>
+    <path d="M124 446c73 36 157 55 252 54 97-1 185-23 260-67" fill="none" stroke="url(#water)" stroke-width="17" stroke-linecap="round"/>
+    <path d="M151 475c64 28 138 42 221 41 83-1 157-16 222-46" fill="none" stroke="#f1e8d5" stroke-width="7" stroke-linecap="round"/>
+    <path d="M213 503c58 17 117 25 177 24 63-1 120-10 174-27" fill="none" stroke="#e95b53" stroke-width="8" stroke-linecap="round"/>
+    <path d="M275 535h210" stroke="#f1e8d5" stroke-width="3" opacity=".8"/>
+    <text x="380" y="624" text-anchor="middle" fill="#29c5bd" font-family="Arial, Helvetica, sans-serif" font-size="88" font-weight="900" letter-spacing="10">FISHING</text>
+    <text x="380" y="675" text-anchor="middle" fill="#f7efde" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="700" letter-spacing="7">LAC DE NEUCHÂTEL</text>
+  </g>
+</svg>
