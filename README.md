@@ -6,14 +6,18 @@ La version pêche en lac est disponible dans [T-AppMeteo V2](https://jacott-tom2
 
 La [T-AppMeteo V3](https://jacott-tom2.github.io/T-AppMeteo/v3/index.html) ajoute des liens vers les sources météo et pêche de Yvonand/Neuchâtel, avec ouverture de la webcam à la demande.
 
-La V3 permet aussi d’ajouter aux sorties des photos du leurre, du poisson ou des deux ensemble, en les attribuant à Jarod, Thomas ou à un pêcheur ajouté. Les statistiques proposent des pistes de spot, technique, leurre, profondeur repérée et animation selon les sorties et les conditions météo enregistrées. Les photos et le carnet restent sur l’appareil.
+La V3 permet aussi d’ajouter aux sorties des photos du leurre, du poisson ou des deux ensemble, en les attribuant à Jarod, Thomas ou à un pêcheur ajouté. Les statistiques proposent des pistes de spot, technique, leurre, profondeur repérée et animation selon les sorties et les conditions météo enregistrées. Les photos et le carnet restent sur l’appareil jusqu’à la configuration facultative du serveur privé de synchronisation.
 
-La V3 inclut maintenant le logo vectoriel Jarod Jacot Fishing, aux couleurs du bateau, et une bibliothèque de leurres avec photos, marque, taille, poids, profondeur d’utilisation, animation et espèces recherchées. Les fiches peuvent être filtrées par espèce et triées par nom, fabricant, poids ou profondeur.
+La V3 inclut le logo vectoriel Jarod Jacot Fishing aux couleurs du bateau, une bibliothèque de leurres avec photos et un inventaire de matériel (canne, moulinet, tresse, fil nylon, aucune ligne, hameçon et appât), sélectionnable dans chaque sortie.
+
+Le carnet peut enregistrer chaque poisson avec son espèce, sa longueur et son poids. Les statistiques cumulent les centimètres par pêcheur ou espèce, attribuent une coupe au premier poisson de chaque espèce et affichent les poissons d’or selon des seuils modifiables ainsi que les records des pêcheurs avec date et lieu.
 
 Application météo légère, en français, conçue pour Yverdon-les-Bains (1400), Yvonand et les localités suisses ajoutées par l’utilisateur.
 
-## Fonctionnalités prévues
+## Fonctionnalités
 
+- Le carnet enregistre chaque poisson avec espèce, longueur et poids. Les statistiques cumulent les centimètres par pêcheur ou espèce, attribuent une coupe au premier poisson de chaque espèce, affichent les poissons d’or selon des seuils modifiables et donnent le record de chaque pêcheur avec date et lieu.
+- Une synchronisation facultative par serveur privé HTTPS propage le carnet, les leurres, le matériel et les photos entre appareils lorsque le réseau est disponible. Voir [la documentation V3](v3/README.md).
 - Yverdon-les-Bains et Yvonand apparaissent en tête du menu déroulant.
 - La météo de la ville choisie s’affiche automatiquement juste sous le menu.
 - Un champ permet de rechercher et d’ajouter une ville suisse.
