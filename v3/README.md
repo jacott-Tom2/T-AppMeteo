@@ -14,7 +14,13 @@ Les liens tiers sont ouverts à la demande. La météo principale affichée par 
 
 ## Carnet et statistiques
 
-Le carnet enregistre l’espèce, le spot, le nombre de prises, la technique, l’animation, le leurre, les notes et la météo disponible au moment de la sortie. Les statistiques classent les résultats par espèce et proposent des pistes selon les sorties enregistrées et les conditions météo comparables. Les résultats restent dans le stockage local du navigateur et ne sont pas synchronisés entre appareils.
+Le carnet enregistre le pêcheur (Jarod, Thomas ou un nom ajouté), l’espèce, le spot, le nombre de prises, la technique, l’animation, le leurre, les observations au sondeur, les notes et la météo disponible au moment de la sortie.
+
+Les photos peuvent être prises avec l’appareil photo ou choisies dans la photothèque. Chaque photo est classée comme **leurre**, **poisson** ou **leurre et poisson ensemble**. Les images sont réduites et conservées dans le stockage local de ce navigateur ; elles ne sont pas téléversées.
+
+Les statistiques classent les résultats par espèce et proposent des pistes pour le spot, la technique, le leurre, l’animation et la profondeur des poissons repérés. Elles favorisent les sorties avec météo proche et prennent aussi en compte, lorsque les valeurs ont été notées, la température et la clarté de l’eau ainsi que la profondeur des poissons. Les indications reposent sur les sorties enregistrées : elles restent provisoires avec peu de données et ne garantissent pas une prise. Les données du carnet et les photos ne sont pas synchronisées entre appareils.
+
+Le choix ou la recherche de ville, le GPS et la localisation réseau sont regroupés en haut de l’application, avant la météo et le carnet.
 
 ## Lancer en local
 
