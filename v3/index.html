@@ -51,6 +51,20 @@
     .photo-card button { min-height: 38px; padding: 7px; background: #e7effa; color: #0b3d91; font-size: .88rem; }
     .file-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
     .new-angler[hidden] { display: none; }
+    .brand-logo { display: block; width: min(100%, 390px); height: auto; margin: 0 auto 10px; }
+    .bait-fields { display: grid; gap: 9px; }
+    .bait-fields label { margin-bottom: 4px; }
+    .species-check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .species-check { display: flex; align-items: center; gap: 8px; margin: 0; padding: 10px; border: 1px solid #dce5ef; border-radius: 9px; font-weight: 500; }
+    .species-check input { width: 20px; min-height: 20px; margin: 0; padding: 0; }
+    textarea { width: 100%; min-height: 84px; border: 1px solid #b8c5d5; border-radius: 10px; padding: 11px 13px; font: inherit; font-size: 16px; resize: vertical; }
+    .bait-list { display: grid; gap: 10px; }
+    .bait-card { display: grid; grid-template-columns: 100px 1fr; gap: 11px; padding: 10px; border-radius: 10px; background: #f4f7fb; }
+    .bait-card img, .bait-no-photo { width: 100px; height: 100px; border-radius: 8px; object-fit: cover; background: #e1e8ee; }
+    .bait-no-photo { display: grid; place-items: center; color: #687785; text-align: center; font-size: .8rem; }
+    .bait-card h3 { margin: 0 0 5px; color: #0b3d91; font-size: 1rem; }
+    .bait-card p { margin: 0 0 5px; font-size: .88rem; line-height: 1.35; }
+    .bait-card button { grid-column: 1 / -1; min-height: 40px; background: #e7effa; color: #0b3d91; }
     #stats-results { display: grid; gap: 9px; }
     .stats-card { padding: 12px; border-radius: 10px; background: #f4f7fb; overflow-wrap: anywhere; }
     .stats-card p { margin: 0 0 6px; }
@@ -91,6 +105,7 @@
 <body>
   <main>
     <header>
+      <img class="brand-logo" src="assets/jarod-jacot-fishing.svg" alt="Logo Jarod Jacot Fishing, avec un grand brochet et les couleurs du bateau">
       <h1>🎣 T-AppMeteo V3</h1>
       <p class="subtitle">Météo et observations utiles pour la pêche en lac, avec avis externes à consulter à la demande.</p>
     </header>
@@ -189,6 +204,80 @@
         </div>
         <p class="metric-note">Profil : Lowrance Hook 5 HDI. Exemple visible sur ta photo : 14,6 m sous le bateau et 20,3 °C. Saisie manuelle : le navigateur ne lit pas automatiquement l’écran du sondeur.</p>
       </section>
+      <section class="extra-panel" aria-labelledby="bait-library-title">
+        <h2 id="bait-library-title">Bibliothèque de leurres</h2>
+        <p>Photographie chaque leurre et renseigne ses caractéristiques pour le retrouver facilement au bord du lac.</p>
+        <label for="bait-filter">Filtrer par poisson recherché</label>
+        <select id="bait-filter">
+          <option value="all">Tous les poissons</option>
+          <option value="brochet">Brochet</option>
+          <option value="perche">Perche</option>
+          <option value="silure">Silure</option>
+          <option value="coregone">Corégone</option>
+        </select>
+        <label for="bait-sort">Trier la bibliothèque</label>
+        <select id="bait-sort">
+          <option value="name">Nom</option>
+          <option value="manufacturer">Fabricant</option>
+          <option value="weight">Poids</option>
+          <option value="depth">Profondeur d’utilisation</option>
+        </select>
+        <form id="bait-form">
+          <div class="bait-fields">
+            <div>
+              <label for="bait-name">Nom du leurre</label>
+              <input id="bait-name" type="text" maxlength="100" placeholder="Ex. shad, crankbait…" required>
+            </div>
+            <div>
+              <label for="bait-manufacturer">Fabricant / marque</label>
+              <input id="bait-manufacturer" type="text" maxlength="80" placeholder="Ex. marque indiquée sur l’emballage">
+            </div>
+            <div>
+              <label for="bait-size">Taille (cm)</label>
+              <input id="bait-size" type="number" inputmode="decimal" min="0" max="200" step="0.1" placeholder="Optionnel">
+            </div>
+            <div>
+              <label for="bait-weight">Poids (g)</label>
+              <input id="bait-weight" type="number" inputmode="decimal" min="0" max="10000" step="0.1" placeholder="Optionnel">
+            </div>
+            <div>
+              <label>Profondeur d’utilisation (m)</label>
+              <div class="add-row">
+                <input id="bait-depth-min" type="number" inputmode="decimal" min="0" max="500" step="0.5" placeholder="De (m)" aria-label="Profondeur minimale en mètres">
+                <input id="bait-depth-max" type="number" inputmode="decimal" min="0" max="500" step="0.5" placeholder="À (m)" aria-label="Profondeur maximale en mètres">
+              </div>
+            </div>
+            <div>
+              <label for="bait-animation">Animation conseillée</label>
+              <textarea id="bait-animation" maxlength="300" placeholder="Ex. récupération lente, pauses, tirées…"></textarea>
+            </div>
+            <div>
+              <label>Poisson(s) recherché(s)</label>
+              <div class="species-check-grid">
+                <label class="species-check"><input type="checkbox" name="bait-species" value="brochet"> Brochet</label>
+                <label class="species-check"><input type="checkbox" name="bait-species" value="perche"> Perche</label>
+                <label class="species-check"><input type="checkbox" name="bait-species" value="silure"> Silure</label>
+                <label class="species-check"><input type="checkbox" name="bait-species" value="coregone"> Corégone</label>
+              </div>
+            </div>
+            <div>
+              <label>Photo du leurre (facultative)</label>
+              <div class="photo-actions">
+                <button id="bait-take-photo" type="button">📷 Photographier le leurre</button>
+                <button id="bait-choose-photo" type="button" class="refresh">🖼️ Choisir une photo existante</button>
+              </div>
+              <input id="bait-camera-photo" class="file-input" type="file" accept="image/*" capture="environment" aria-hidden="true" tabindex="-1">
+              <input id="bait-gallery-photo" class="file-input" type="file" accept="image/*" aria-hidden="true" tabindex="-1">
+              <p id="bait-photo-status" class="metric-note" aria-live="polite">Les photos restent sur cet appareil.</p>
+              <div id="bait-photo-preview" class="photo-queue"></div>
+            </div>
+          </div>
+          <button id="save-bait" type="submit">Ajouter à la bibliothèque</button>
+        </form>
+        <datalist id="bait-options"></datalist>
+        <div id="bait-list" class="bait-list" aria-live="polite"></div>
+        <p class="metric-note">Les informations sont celles que tu saisis. Vérifie la profondeur annoncée par le fabricant : elle dépend du montage et de la récupération.</p>
+      </section>
       <section class="extra-panel" aria-labelledby="moon-title">
         <h2 id="moon-title">Phase de lune</h2>
         <p id="moon-phase" aria-live="polite">Calcul…</p>
@@ -251,7 +340,7 @@
             </div>
             <div>
               <label for="trip-lure">Leurre</label>
-              <input id="trip-lure" type="text" maxlength="100" placeholder="Ex. shad, cuillère, leurre souple">
+              <input id="trip-lure" type="text" maxlength="100" list="bait-options" placeholder="Choisir dans la bibliothèque ou saisir un leurre">
             </div>
             <div>
               <label for="trip-catches">Poissons pris pendant cette sortie</label>
@@ -334,6 +423,15 @@
     const photoStatus = document.getElementById("photo-status");
     const tripList = document.getElementById("trip-list");
     const statsResults = document.getElementById("stats-results");
+    const baitForm = document.getElementById("bait-form");
+    const baitListElement = document.getElementById("bait-list");
+    const baitFilter = document.getElementById("bait-filter");
+    const baitSort = document.getElementById("bait-sort");
+    const baitCameraPhoto = document.getElementById("bait-camera-photo");
+    const baitGalleryPhoto = document.getElementById("bait-gallery-photo");
+    const baitPhotoPreview = document.getElementById("bait-photo-preview");
+    const baitPhotoStatus = document.getElementById("bait-photo-status");
+    const baitOptions = document.getElementById("bait-options");
     const TRIP_STORAGE_KEY = "t-appmeteo-v2-trips";
     const PHOTO_DB_NAME = "t-appmeteo-v3-photos";
     const PHOTO_STORE_NAME = "trip-photos";
@@ -341,6 +439,10 @@
     let queuedPhotos = [];
     const tripPhotoUrls = new Set();
     const queuePhotoUrls = new Set();
+    const baitPhotoUrls = new Set();
+    const baitPreviewUrls = new Set();
+    let pendingBaitPhoto = null;
+    let baitRenderToken = 0;
     let tripPlaceEdited = false;
     let currentWeatherSnapshot = null;
 
@@ -573,6 +675,198 @@
       });
       db.close();
     }
+
+    const baitSpeciesNames = { brochet: "Brochet", perche: "Perche", silure: "Silure", coregone: "Corégone" };
+    const BAIT_STORAGE_KEY = "t-appmeteo-v3-baits-v1";
+
+    function loadBaits() {
+      try {
+        const items = JSON.parse(localStorage.getItem(BAIT_STORAGE_KEY) || "[]");
+        return Array.isArray(items) ? items.filter(item => item && typeof item.id === "string" && typeof item.name === "string") : [];
+      } catch { return []; }
+    }
+
+    function saveBaits(items) {
+      localStorage.setItem(BAIT_STORAGE_KEY, JSON.stringify(items.slice(0, 300)));
+    }
+
+    function renderBaits() {
+      const renderToken = ++baitRenderToken;
+      clearObjectUrls(baitPhotoUrls);
+      baitListElement.replaceChildren();
+      const filter = baitFilter.value;
+      const sort = baitSort.value;
+      const baits = loadBaits().filter(item => filter === "all" || (item.species || []).includes(filter));
+      baits.sort((a, b) => {
+        if (sort === "weight" || sort === "depth") {
+          const field = sort === "weight" ? "weight" : "depthMin";
+          return (Number(a[field]) || Number.POSITIVE_INFINITY) - (Number(b[field]) || Number.POSITIVE_INFINITY) || a.name.localeCompare(b.name, "fr");
+        }
+        const field = sort === "manufacturer" ? "manufacturer" : "name";
+        return String(a[field] || "").localeCompare(String(b[field] || ""), "fr") || a.name.localeCompare(b.name, "fr");
+      });
+      baitOptions.replaceChildren();
+      loadBaits().forEach(item => {
+        const option = document.createElement("option");
+        option.value = item.name;
+        baitOptions.append(option);
+      });
+      if (!baits.length) {
+        const empty = document.createElement("p");
+        empty.className = "metric-note";
+        empty.textContent = filter === "all" ? "La bibliothèque est vide. Ajoute un leurre pour commencer." : `Aucun leurre enregistré pour le ${baitSpeciesNames[filter] || "poisson choisi"}.`;
+        baitListElement.append(empty);
+        return;
+      }
+      const photoRows = baits.map(item => ({ photos: item.photoId ? [{ id: item.photoId, category: "Leurre" }] : [] }));
+      readTripPhotosForTrips(photoRows).then(photosByBait => {
+        if (renderToken !== baitRenderToken) return;
+        baits.forEach((bait, index) => {
+          const card = document.createElement("article");
+          card.className = "bait-card";
+          const photo = photosByBait[index][0];
+          if (photo) {
+            const image = document.createElement("img");
+            image.alt = `Photo du leurre ${bait.name}`;
+            image.src = URL.createObjectURL(photo.blob);
+            baitPhotoUrls.add(image.src);
+            card.append(image);
+          } else {
+            const placeholder = document.createElement("div");
+            placeholder.className = "bait-no-photo";
+            placeholder.textContent = "Photo à ajouter";
+            card.append(placeholder);
+          }
+          const details = document.createElement("div");
+          const heading = document.createElement("h3");
+          heading.textContent = bait.name;
+          details.append(heading);
+          const depth = bait.depthMin !== "" && bait.depthMin != null && bait.depthMax !== "" && bait.depthMax != null
+            ? `${bait.depthMin}–${bait.depthMax} m`
+            : bait.depthMin !== "" && bait.depthMin != null ? `Dès ${bait.depthMin} m`
+            : bait.depthMax !== "" && bait.depthMax != null ? `Jusqu’à ${bait.depthMax} m` : "Non précisée";
+          const lines = [
+            bait.manufacturer && `Fabricant : ${bait.manufacturer}`,
+            (bait.size || bait.weight) && `Taille / poids : ${bait.size ? `${bait.size} cm` : "—"} / ${bait.weight ? `${bait.weight} g` : "—"}`,
+            `Profondeur : ${depth}`,
+            bait.animation && `Animation : ${bait.animation}`,
+            `Cible : ${(bait.species || []).map(key => baitSpeciesNames[key] || key).join(", ") || "Non précisée"}`
+          ].filter(Boolean);
+          lines.forEach(line => {
+            const paragraph = document.createElement("p");
+            paragraph.textContent = line;
+            details.append(paragraph);
+          });
+          card.append(details);
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.textContent = "Retirer de la bibliothèque";
+          remove.addEventListener("click", async () => {
+            saveBaits(loadBaits().filter(item => item.id !== bait.id));
+            if (bait.photoId) {
+              try { await deleteTripPhotos(`bait:${bait.id}`); } catch { /* La fiche est retirée même si le stockage image est indisponible. */ }
+            }
+            renderBaits();
+          });
+          card.append(remove);
+          baitListElement.append(card);
+        });
+      }).catch(() => {
+        if (renderToken !== baitRenderToken) return;
+        const message = document.createElement("p");
+        message.className = "metric-note";
+        message.textContent = "Les fiches sont enregistrées, mais leurs photos ne peuvent pas être affichées sur cet appareil.";
+        baitListElement.append(message);
+      });
+    }
+
+    async function chooseBaitPhoto(input) {
+      const file = input.files && input.files[0];
+      input.value = "";
+      if (!file) return;
+      baitPhotoStatus.textContent = "Préparation de la photo…";
+      try {
+        const blob = await resizePhoto(file);
+        pendingBaitPhoto = { id: makeId(), category: "Leurre", blob };
+        clearObjectUrls(baitPreviewUrls);
+        baitPhotoPreview.replaceChildren();
+        const image = document.createElement("img");
+        image.alt = "Aperçu du leurre à ajouter";
+        image.src = URL.createObjectURL(blob);
+        baitPreviewUrls.add(image.src);
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.textContent = "Retirer la photo";
+        remove.addEventListener("click", () => {
+          pendingBaitPhoto = null;
+          clearObjectUrls(baitPreviewUrls);
+          baitPhotoPreview.replaceChildren();
+          baitPhotoStatus.textContent = "Photo facultative ; aucune photo sélectionnée.";
+        });
+        const card = document.createElement("div");
+        card.className = "photo-card";
+        card.append(image, remove);
+        baitPhotoPreview.append(card);
+        baitPhotoStatus.textContent = "Photo prête à enregistrer dans la bibliothèque.";
+      } catch (error) {
+        baitPhotoStatus.textContent = error.message || "La photo n’a pas pu être ajoutée.";
+      }
+    }
+
+    document.getElementById("bait-take-photo").addEventListener("click", () => baitCameraPhoto.click());
+    document.getElementById("bait-choose-photo").addEventListener("click", () => baitGalleryPhoto.click());
+    baitCameraPhoto.addEventListener("change", () => chooseBaitPhoto(baitCameraPhoto));
+    baitGalleryPhoto.addEventListener("change", () => chooseBaitPhoto(baitGalleryPhoto));
+    baitFilter.addEventListener("change", renderBaits);
+    baitSort.addEventListener("change", renderBaits);
+    baitForm.addEventListener("submit", async event => {
+      event.preventDefault();
+      const species = Array.from(baitForm.querySelectorAll('input[name="bait-species"]:checked')).map(input => input.value);
+      const name = document.getElementById("bait-name").value.trim();
+      if (!species.length) {
+        baitPhotoStatus.textContent = "Choisis au moins un poisson recherché.";
+        baitForm.querySelector('input[name="bait-species"]')?.focus();
+        return;
+      }
+      const depthMin = document.getElementById("bait-depth-min").value;
+      const depthMax = document.getElementById("bait-depth-max").value;
+      if (depthMin !== "" && depthMax !== "" && Number(depthMin) > Number(depthMax)) {
+        baitPhotoStatus.textContent = "La profondeur ‘De’ doit être inférieure ou égale à ‘À’.";
+        return;
+      }
+      const bait = {
+        id: makeId(),
+        name,
+        manufacturer: document.getElementById("bait-manufacturer").value.trim(),
+        size: document.getElementById("bait-size").value,
+        weight: document.getElementById("bait-weight").value,
+        depthMin,
+        depthMax,
+        animation: document.getElementById("bait-animation").value.trim(),
+        species,
+        photoId: pendingBaitPhoto?.id || ""
+      };
+      const saveButton = document.getElementById("save-bait");
+      saveButton.disabled = true;
+      try {
+        if (pendingBaitPhoto) await persistTripPhotos(`bait:${bait.id}`, [pendingBaitPhoto]);
+        saveBaits([bait, ...loadBaits()]);
+        baitForm.reset();
+        pendingBaitPhoto = null;
+        clearObjectUrls(baitPreviewUrls);
+        baitPhotoPreview.replaceChildren();
+        baitPhotoStatus.textContent = "Leurre ajouté à la bibliothèque sur cet appareil.";
+        renderBaits();
+      } catch (error) {
+        if (bait.photoId) {
+          try { await deleteTripPhotos(`bait:${bait.id}`); } catch { /* Nettoyage au mieux après un échec local. */ }
+        }
+        baitPhotoStatus.textContent = error.message || "Impossible d’enregistrer ce leurre dans le navigateur.";
+      } finally {
+        saveButton.disabled = false;
+      }
+    });
+    renderBaits();
 
     async function loadLakeLevel() {
       const level = document.getElementById("lake-level");
