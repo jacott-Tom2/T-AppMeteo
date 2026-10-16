@@ -72,6 +72,9 @@
     .gear-card p { margin: 0 0 8px; font-size: .9rem; }
     .gear-card button { min-height: 42px; background: #e7effa; color: #0b3d91; }
     .sync-fields { display: grid; gap: 9px; }
+    .catch-entry, .record-entry { padding: 10px; margin: 7px 0; border-radius: 9px; background: #f4f7fb; }
+    .record-entry p { margin: 3px 0; }
+    .threshold-grid { display: grid; gap: 8px; margin: 10px 0; }
     #stats-results { display: grid; gap: 9px; }
     .stats-card { padding: 12px; border-radius: 10px; background: #f4f7fb; overflow-wrap: anywhere; }
     .stats-card p { margin: 0 0 6px; }
@@ -395,6 +398,20 @@
               <input id="trip-catches" type="number" inputmode="numeric" min="0" max="99" step="1" value="0" required>
             </div>
             <div>
+              <label>Ajouter les poissons un par un (pour records et cumuls)</label>
+              <div class="add-row">
+                <select id="caught-species" aria-label="Espèce du poisson">
+                  <option value="Brochet">Brochet</option><option value="Perche">Perche</option>
+                  <option value="Silure">Silure</option><option value="Corégone">Corégone</option>
+                </select>
+                <input id="caught-length" type="number" inputmode="decimal" min="1" max="300" step="0.5" placeholder="Longueur cm" aria-label="Longueur du poisson en centimètres">
+                <input id="caught-weight" type="number" inputmode="decimal" min="0" max="500" step="0.01" placeholder="Poids kg" aria-label="Poids du poisson en kilogrammes">
+              </div>
+              <button id="add-caught-fish" type="button" class="refresh">Ajouter ce poisson</button>
+              <p class="metric-note">Saisis la longueur et le poids mesurés. Les centimètres ne sont pas estimés pour les anciennes sorties.</p>
+              <div id="caught-fish-list" aria-live="polite"></div>
+            </div>
+            <div>
               <label for="trip-result">Résultat / notes</label>
               <input id="trip-result" type="text" maxlength="240" placeholder="Ex. bancs à 8 m, fond rocheux">
             </div>
@@ -424,6 +441,20 @@
         <section aria-labelledby="stats-title">
           <h2 id="stats-title">Statistiques et conseil du jour</h2>
           <div id="stats-results" aria-live="polite"></div>
+          <section aria-labelledby="trophy-title">
+            <h3 id="trophy-title">Coupes, poissons d’or et records</h3>
+            <p>La coupe revient au premier poisson enregistré de chaque espèce. Le poisson d’or atteint le seuil du défi défini ci-dessous; ces seuils sont personnalisables et ne sont pas des normes officielles.</p>
+            <form id="gold-threshold-form">
+              <div class="threshold-grid">
+                <div><label for="gold-brochet">Seuil Brochet (cm)</label><input id="gold-brochet" type="number" min="1" max="300" step="1" value="100"></div>
+                <div><label for="gold-perche">Seuil Perche (cm)</label><input id="gold-perche" type="number" min="1" max="200" step="1" value="40"></div>
+                <div><label for="gold-silure">Seuil Silure (cm)</label><input id="gold-silure" type="number" min="1" max="350" step="1" value="150"></div>
+                <div><label for="gold-coregone">Seuil Corégone (cm)</label><input id="gold-coregone" type="number" min="1" max="100" step="1" value="50"></div>
+              </div>
+              <button type="submit" class="refresh">Enregistrer les seuils</button>
+            </form>
+            <div id="trophy-results" aria-live="polite"></div>
+          </section>
           <p class="metric-note">Les pistes de spot, technique, leurre, animation et profondeur se basent sur les sorties de l’espèce choisie, la météo proche et les observations renseignées. Ce sont des tendances, pas une garantie de prise.</p>
         </section>
         <p class="metric-note">Le carnet et les photos restent dans le stockage local de cet appareil et de ce navigateur.</p>
@@ -471,6 +502,12 @@
     const photoStatus = document.getElementById("photo-status");
     const tripList = document.getElementById("trip-list");
     const statsResults = document.getElementById("stats-results");
+    const caughtSpeciesInput = document.getElementById("caught-species");
+    const caughtLengthInput = document.getElementById("caught-length");
+    const caughtWeightInput = document.getElementById("caught-weight");
+    const caughtFishList = document.getElementById("caught-fish-list");
+    const GOLD_THRESHOLD_STORAGE_KEY = "t-appmeteo-v3-gold-thresholds";
+    let pendingFish = [];
     const baitForm = document.getElementById("bait-form");
     const baitListElement = document.getElementById("bait-list");
     const baitFilter = document.getElementById("bait-filter");
@@ -529,7 +566,9 @@
     }
 
     restoreFishingSettings();
+    caughtSpeciesInput.value = targetSpecies.options[targetSpecies.selectedIndex].textContent;
     targetSpecies.addEventListener("change", updateSpeciesGuidance);
+    targetSpecies.addEventListener("change", () => { caughtSpeciesInput.value = targetSpecies.options[targetSpecies.selectedIndex].textContent; });
     fishingInputs.forEach(input => input.addEventListener("change", () => {
       saveFishingSettings();
       renderFishingAdvice();
@@ -1015,6 +1054,28 @@
       localStorage.setItem(TRIP_STORAGE_KEY, JSON.stringify(trips.slice(0, 100)));
     }
 
+    function renderPendingFish() {
+      caughtFishList.replaceChildren();
+      pendingFish.forEach((fish, index) => {
+        const row = document.createElement("div"); row.className = "catch-entry";
+        const description = document.createElement("span");
+        description.textContent = `${fish.species} · ${fish.lengthCm} cm${fish.weightKg ? ` · ${fish.weightKg} kg` : " · poids non renseigné"}`;
+        const remove = document.createElement("button"); remove.type = "button"; remove.className = "refresh"; remove.textContent = "Retirer";
+        remove.addEventListener("click", () => { pendingFish.splice(index, 1); tripCatches.value = String(Math.max(0, Number(tripCatches.value) - 1)); renderPendingFish(); });
+        row.append(description, remove); caughtFishList.append(row);
+      });
+    }
+
+    document.getElementById("add-caught-fish").addEventListener("click", () => {
+      const lengthCm = Number(caughtLengthInput.value);
+      if (!Number.isFinite(lengthCm) || lengthCm < 1 || lengthCm > 300) { caughtLengthInput.focus(); document.getElementById("status").textContent = "Indique la longueur mesurée du poisson en centimètres."; return; }
+      const weightKg = caughtWeightInput.value === "" ? "" : Number(caughtWeightInput.value);
+      if (weightKg !== "" && (!Number.isFinite(weightKg) || weightKg < 0 || weightKg > 500)) { caughtWeightInput.focus(); document.getElementById("status").textContent = "Indique un poids valide en kilogrammes."; return; }
+      pendingFish.push({ id: makeId(), species: caughtSpeciesInput.value, lengthCm, weightKg });
+      tripCatches.value = String(Math.max(Number(tripCatches.value) || 0, pendingFish.length));
+      caughtLengthInput.value = ""; caughtWeightInput.value = ""; renderPendingFish();
+    });
+
     async function renderTrips() {
       clearObjectUrls(tripPhotoUrls);
       tripList.replaceChildren();
@@ -1070,6 +1131,54 @@
 
     function currentSpeciesLabel() {
       return targetSpecies.options[targetSpecies.selectedIndex].textContent;
+    }
+
+    function loadGoldThresholds() {
+      const defaults = { Brochet: 100, Perche: 40, Silure: 150, Corégone: 50 };
+      try { return { ...defaults, ...JSON.parse(localStorage.getItem(GOLD_THRESHOLD_STORAGE_KEY) || "{}") }; } catch { return defaults; }
+    }
+
+    const goldThresholdFields = { Brochet: "gold-brochet", Perche: "gold-perche", Silure: "gold-silure", Corégone: "gold-coregone" };
+    const existingThresholds = loadGoldThresholds();
+    Object.entries(goldThresholdFields).forEach(([species, id]) => { document.getElementById(id).value = existingThresholds[species]; });
+    document.getElementById("gold-threshold-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const values = Object.fromEntries(Object.entries(goldThresholdFields).map(([species, id]) => [species, Number(document.getElementById(id).value)]));
+      localStorage.setItem(GOLD_THRESHOLD_STORAGE_KEY, JSON.stringify(values));
+      renderFishingAdvice();
+    });
+
+    function renderTrophyStats() {
+      const target = document.getElementById("trophy-results"); target.replaceChildren();
+      const trips = loadTrips();
+      const fish = trips.flatMap(trip => (Array.isArray(trip.fishDetails) ? trip.fishDetails : []).map(item => ({ ...item, angler: trip.angler || "Non précisé", place: trip.place || "Lieu non précisé", date: trip.date, tripId: trip.id })).filter(item => Number.isFinite(Number(item.lengthCm)) && Number(item.lengthCm) > 0));
+      if (!fish.length) {
+        const note = document.createElement("p"); note.className = "metric-note"; note.textContent = "Ajoute les poissons un par un avec leur longueur pour afficher les coupes, cumuls et records. Les anciennes sorties sans mesures restent intactes."; target.append(note); return;
+      }
+      const addGroup = (title, rows) => {
+        const heading = document.createElement("h4"); heading.textContent = title; target.append(heading);
+        if (!rows.length) { const note = document.createElement("p"); note.textContent = "Aucun poisson enregistré ici."; target.append(note); return; }
+        rows.forEach(text => { const row = document.createElement("div"); row.className = "record-entry"; const p = document.createElement("p"); p.textContent = text; row.append(p); target.append(row); });
+      };
+      const dateLabel = row => row.date ? new Date(row.date).toLocaleDateString("fr-CH") : "Date inconnue";
+      const byAngler = new Map(); const bySpecies = new Map(); const byPair = new Map();
+      fish.forEach(row => {
+        const length = Number(row.lengthCm);
+        byAngler.set(row.angler, (byAngler.get(row.angler) || 0) + length);
+        bySpecies.set(row.species, (bySpecies.get(row.species) || 0) + length);
+        const key = `${row.angler}\u0000${row.species}`;
+        if (!byPair.has(key) || length > Number(byPair.get(key).lengthCm)) byPair.set(key, row);
+      });
+      addGroup("Centimètres cumulés par pêcheur", [...byAngler].sort((a,b) => b[1]-a[1]).map(([name, cm]) => `${name} : ${cm.toLocaleString("fr-CH")} cm (${fish.filter(row => row.angler === name).length} poissons)`));
+      addGroup("Centimètres cumulés par espèce", [...bySpecies].sort((a,b) => b[1]-a[1]).map(([name, cm]) => `${name} : ${cm.toLocaleString("fr-CH")} cm (${fish.filter(row => row.species === name).length} poissons)`));
+      const firstBySpecies = new Map();
+      [...fish].sort((a,b) => new Date(a.date || 0) - new Date(b.date || 0)).forEach(row => { if (!firstBySpecies.has(row.species)) firstBySpecies.set(row.species, row); });
+      addGroup("🏆 Coupe du premier poisson par espèce", [...firstBySpecies.values()].map(row => `${row.species} : ${row.angler} · ${row.lengthCm} cm · ${dateLabel(row)} · ${row.place}`));
+      const thresholds = loadGoldThresholds();
+      const gold = fish.filter(row => Number(row.lengthCm) >= Number(thresholds[row.species])).sort((a,b) => Number(b.lengthCm)-Number(a.lengthCm));
+      addGroup("🐟 Poissons d’or — seuil atteint", gold.map(row => `${row.species} : ${row.angler} · ${row.lengthCm} cm (seuil ${thresholds[row.species]} cm) · ${dateLabel(row)} · ${row.place}`));
+      const recordRows = [...byPair.values()].sort((a,b) => a.species.localeCompare(b.species, "fr") || b.lengthCm-a.lengthCm || a.angler.localeCompare(b.angler, "fr"));
+      addGroup("Record de chaque pêcheur par espèce", recordRows.map(row => `${row.angler} — ${row.species} : ${row.lengthCm} cm${row.weightKg !== "" && row.weightKg != null ? ` · ${row.weightKg} kg` : " · poids non renseigné"} · ${dateLabel(row)} · ${row.place}`));
     }
 
     function makeStatsCard(title, lines) {
@@ -1170,6 +1279,7 @@
     function renderFishingAdvice() {
       if (!statsResults) return;
       statsResults.replaceChildren();
+      renderTrophyStats();
       const species = currentSpeciesLabel();
       const speciesTrips = loadTrips().filter(trip => trip.species === species);
       const recorded = speciesTrips.filter(trip => Number.isInteger(Number(trip.catches)) && Number(trip.catches) >= 0);
@@ -1244,7 +1354,8 @@
         technique: tripTechnique.value,
         animation: tripAnimation.value.trim(),
         lure: tripLure.value.trim(),
-        catches: Number(tripCatches.value),
+        catches: Math.max(Number(tripCatches.value) || 0, pendingFish.length),
+        fishDetails: pendingFish.map(fish => ({ ...fish })),
         result: tripResult.value.trim(),
         waterTemperature: fishingInputs[0].value,
         depth: fishingInputs[1].value,
@@ -1271,6 +1382,8 @@
         saveTrips(trips);
         await renderTrips();
         queuedPhotos = [];
+        pendingFish = [];
+        renderPendingFish();
         renderPhotoQueue();
         photoStatus.textContent = "Les photos sont enregistrées avec la sortie sur cet appareil.";
         tripTechnique.value = "";
