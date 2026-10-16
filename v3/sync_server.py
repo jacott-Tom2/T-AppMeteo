@@ -24,10 +24,31 @@ def load_state() -> dict:
     try:
         state = json.loads(STATE_PATH.read_text(encoding="utf-8"))
         if isinstance(state, dict):
-            return {key: state.get(key, []) for key in ("trips", "baits", "gear", "photos")}
+            result = {key: state.get(key, []) for key in ("trips", "baits", "gear", "photos")}
+            result["customOptions"] = state.get("customOptions", {}) if isinstance(state.get("customOptions", {}), dict) else {}
+            return result
     except (OSError, json.JSONDecodeError):
         pass
-    return {key: [] for key in ("trips", "baits", "gear", "photos")}
+    return {**{key: [] for key in ("trips", "baits", "gear", "photos")}, "customOptions": {}}
+
+
+def merge_custom_options(old: dict, incoming: dict) -> dict:
+    """Merge user-created dropdown labels without accepting non-string values."""
+    merged: dict[str, list[str]] = {}
+    for source in (old, incoming):
+        if not isinstance(source, dict):
+            continue
+        for name, values in source.items():
+            if not isinstance(name, str) or not isinstance(values, list):
+                continue
+            target = merged.setdefault(name, [])
+            known = {value.casefold() for value in target}
+            for value in values:
+                if isinstance(value, str) and value.strip() and value.strip().casefold() not in known:
+                    clean = value.strip()[:100]
+                    target.append(clean)
+                    known.add(clean.casefold())
+    return merged
 
 
 def saved_at(row: dict) -> str:
@@ -115,6 +136,10 @@ class SyncHandler(BaseHTTPRequestHandler):
                     if not isinstance(rows, list):
                         raise ValueError(f"{key} must be an array")
                     state[key] = merge_rows(state[key], rows)
+                options = incoming.get("customOptions", {})
+                if not isinstance(options, dict):
+                    raise ValueError("customOptions must be an object")
+                state["customOptions"] = merge_custom_options(state.get("customOptions", {}), options)
                 active_trips = {row["id"] for row in state["trips"] if not row.get("deletedAt")}
                 active_baits = {row.get("photoId") for row in state["baits"] if not row.get("deletedAt") and row.get("photoId")}
                 state["photos"] = [photo for photo in state["photos"] if photo.get("id") in active_baits or photo.get("tripId") in active_trips]
