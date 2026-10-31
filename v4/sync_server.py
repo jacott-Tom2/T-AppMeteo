@@ -3,14 +3,19 @@
 from __future__ import annotations
 
 import hmac
+import html
 import json
 import os
+import re
 import tempfile
 import threading
 from datetime import datetime, timezone
+from html.parser import HTMLParser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
+from urllib.request import Request, urlopen
+from zoneinfo import ZoneInfo
 
 TOKEN = os.environ.get("TAPPMETEO_SYNC_TOKEN", "")
 STATE_PATH = Path(os.environ.get("TAPPMETEO_SYNC_FILE", "./t-appmeteo-sync.json")).resolve()
@@ -18,6 +23,8 @@ HOST = os.environ.get("TAPPMETEO_SYNC_HOST", "127.0.0.1")
 PORT = int(os.environ.get("TAPPMETEO_SYNC_PORT", "8765"))
 MAX_BODY = 64 * 1024 * 1024
 STATE_LOCK = threading.Lock()
+YVBEACH_URL = "https://www.yvbeach.com/yvmeteo.htm"
+MAX_YVBEACH_BYTES = 1_000_000
 
 
 def load_state() -> dict:
@@ -82,6 +89,54 @@ def persist(state: dict) -> None:
             pass
 
 
+class PlainTextParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.parts: list[str] = []
+
+    def handle_data(self, data: str) -> None:
+        if data.strip():
+            self.parts.append(data.strip())
+
+
+def parse_yvbeach(html_text: str) -> dict:
+    parser = PlainTextParser()
+    parser.feed(html_text)
+    text = re.sub(r"\s+", " ", html.unescape(" ".join(parser.parts)))
+
+    def match(pattern: str, group: int = 1):
+        found = re.search(pattern, text, re.IGNORECASE)
+        return found.group(group).replace(",", ".").strip() if found else None
+
+    report = match(r"RELEVE\s+DU\s+(\d{2}/\d{2}/\d{4})\s+A\s+(\d{1,2}h\d{2})", 0)
+    if not report:
+        raise ValueError("YvBeach n’a pas fourni de date et heure de mesure reconnues.")
+    stamp_match = re.search(r"RELEVE\s+DU\s+(\d{2}/\d{2}/\d{4})\s+A\s+(\d{1,2})h(\d{2})", text, re.IGNORECASE)
+    measured_at = datetime.strptime(
+        f"{stamp_match.group(1)} {stamp_match.group(2)}:{stamp_match.group(3)}", "%d/%m/%Y %H:%M"
+    ).replace(tzinfo=ZoneInfo("Europe/Zurich"))
+    result = {
+        "source": "YvBeach · station d’Yvonand",
+        "sourceUrl": YVBEACH_URL,
+        "measuredAt": measured_at.isoformat(),
+        "pressureMb": match(r"PRESSION\s*:\s*([+-]?\d+(?:[.,]\d+)?)\s*mb"),
+        "pressureTrendMbH": match(r"PRESSION\s*:\s*[+-]?\d+(?:[.,]\d+)?\s*mb\s*([+-]?\d+(?:[.,]\d+)?)\s*mb/h"),
+        "gustKmh": match(r"RAFALE\s+max/1h\s*:\s*([\d.,]+)\s*km/h"),
+        "windKmh": match(r"VENT\s+moy/10min\s*:\s*([\d.,]+)\s*km/h"),
+        "direction": match(r"DIRECTION\s+moy/10min\s*:\s*([A-Z]+)"),
+        "directionDegrees": match(r"DIRECTION\s+moy/10min\s*:\s*[A-Z]+\s*-\s*(\d{1,3})\s*[°º]"),
+        "airTemperatureC": match(r"TEMPERATURE\s*:\s*([+-]?[\d.,]+)\s*[°º]C"),
+        "airTrendCPerH": match(r"TEMPERATURE\s*:\s*[+-]?[\d.,]+\s*[°º]C\s*([+-]?[\d.,]+)\s*[°º]C/h"),
+        "lakeTemperatureC": match(r"TEMP\s+DU\s+LAC\s*:\s*([+-]?[\d.,]+)\s*[°º]C"),
+        "humidityPercent": match(r"HUMIDITE\s*:\s*([\d.,]+)\s*%"),
+        "dewPointC": match(r"POINT\s+DE\s+ROSEE\s*:\s*([+-]?[\d.,]+)\s*[°º]C"),
+        "rainMm": match(r"PLUIE\s+DU\s+JOUR\s*:\s*([\d.,]+)\s*mm"),
+    }
+    if not result["pressureMb"] or not result["airTemperatureC"]:
+        raise ValueError("Le format du relevé YvBeach a changé ou les mesures sont incomplètes.")
+    return result
+
+
 class SyncHandler(BaseHTTPRequestHandler):
     server_version = "T-AppMeteoSync/1.0"
 
@@ -96,7 +151,7 @@ class SyncHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Length", str(len(raw)))
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
-        self.send_header("Access-Control-Allow-Methods", "PUT, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, PUT, OPTIONS")
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(raw)
@@ -105,9 +160,31 @@ class SyncHandler(BaseHTTPRequestHandler):
         self.send_response(204)
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
-        self.send_header("Access-Control-Allow-Methods", "PUT, OPTIONS")
+        self.send_header("Access-Control-Allow-Methods", "GET, PUT, OPTIONS")
         self.send_header("Access-Control-Max-Age", "600")
         self.end_headers()
+
+    def do_GET(self) -> None:
+        if urlparse(self.path).path != "/api/yvbeach":
+            self.send_json(404, {"error": "not found"})
+            return
+        if not TOKEN:
+            self.send_json(503, {"error": "TAPPMETEO_SYNC_TOKEN is not configured"})
+            return
+        supplied = self.headers.get("Authorization", "")
+        if not hmac.compare_digest(supplied, f"Bearer {TOKEN}"):
+            self.send_json(401, {"error": "unauthorized"})
+            return
+        try:
+            request = Request(YVBEACH_URL, headers={"User-Agent": "T-AppMeteo-V4/1.0", "Accept": "text/html"})
+            with urlopen(request, timeout=12) as response:
+                raw = response.read(MAX_YVBEACH_BYTES + 1)
+                charset = response.headers.get_content_charset() or "iso-8859-1"
+            if len(raw) > MAX_YVBEACH_BYTES:
+                raise ValueError("La page YvBeach dépasse la taille autorisée.")
+            self.send_json(200, parse_yvbeach(raw.decode(charset, errors="replace")))
+        except Exception as exc:
+            self.send_json(502, {"error": str(exc)[:240] or "YvBeach est momentanément indisponible."})
 
     def do_PUT(self) -> None:
         if urlparse(self.path).path != "/api/sync":
