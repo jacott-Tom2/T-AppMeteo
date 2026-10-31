@@ -35,18 +35,19 @@ export TAPPMETEO_SYNC_PORT='8765'
 python3 sync_server.py
 ```
 
-Le service attend les requêtes `PUT /api/sync`. Dans l’application, saisis l’URL HTTPS complète, par exemple `https://nom-prive.example/api/sync`, ainsi que le même jeton. Tous les appareils doivent utiliser le même serveur et le même jeton. Le serveur fusionne les fiches par date de modification et conserve les suppressions pour les propager. Son fichier de données `t-appmeteo-sync.json` doit être inclus dans les sauvegardes du serveur.
+Le service attend `PUT /api/sync` pour le carnet et `GET /api/yvbeach` pour récupérer le relevé public de la station. Dans l’application, saisis l’URL HTTPS complète, par exemple `https://nom-prive.example/api/sync`, ainsi que le même jeton. Tous les appareils doivent utiliser le même serveur et le même jeton. Le serveur fusionne les fiches par date de modification et conserve les suppressions pour les propager. Son fichier de données `t-appmeteo-sync.json` doit être inclus dans les sauvegardes du serveur.
 
 Sans serveur configuré, les photos, le carnet et le matériel ne quittent pas le navigateur. La publication GitHub Pages de l’interface ne crée pas le serveur et ne suffit donc pas à synchroniser les appareils.
 
 ## Sources météo et pêche
 
-- **YvBeach, Yvonand** : lien vers les relevés de la station locale.
+- **YvBeach, Yvonand** : relevés automatiques dans V4 (pression et tendance, rafales, vent et direction, température de l’air et du lac, humidité, point de rosée, pluie) avec date/heure du relevé. Comme le site ne permet pas la lecture CORS directe depuis GitHub Pages, l’application passe par le serveur privé V4 configuré : la même adresse HTTPS `/api/sync` fournit aussi `/api/yvbeach`, avec le même jeton. Si le serveur n’est pas configuré ou indisponible, l’application garde la dernière mesure mémorisée et le lien vers la station.
 - **MeteoNews, Grandson** : prévisions de proximité.
 - **AccuWeather, Neuchâtel** et **Windy.app, Neuchâtel** : avis secondaires destinés à la pêche.
 - **Port d’Yvonand** : webcam ouverte à la demande.
+- **Fishing Points, Yverdon** : ouvrir la prévision puis recopier l’indice éventuel et les périodes majeures/mineures dans V4. L’avis consulté est joint à la sortie suivante ; le pêcheur peut signaler si une prise a eu lieu pendant une période active. Les statistiques comparent ensuite les prises notées pendant/hors période par espèce et par pêcheur. La page ne fournit pas d’API publique vérifiée ; la saisie est volontairement manuelle.
 
-Les liens externes s’ouvrent à la demande. L’application ne récupère pas automatiquement les données des sites qui ne fournissent pas d’accès vérifié.
+Les liens externes s’ouvrent à la demande. YvBeach est lu par le serveur V4, car son site ne donne pas d’accès navigateur CORS. Fishing Points reste une saisie manuelle, car aucune API publique vérifiée n’a été trouvée.
 
 ## Lancer en local
 
