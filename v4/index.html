@@ -14,10 +14,9 @@
     header { margin-bottom: 16px; }
     h1 { margin: 0; color: #087873; font-size: 1.9rem; line-height: 1.15; }
     .subtitle { margin: 7px 0 0; color: #4c5c58; }
-    .panel, .weather { background: white; border: 2px solid #087873; border-radius: 16px; padding: 18px; box-shadow: 0 7px 22px #17232b18; }
+    .panel, .weather { background: white; border: 1px solid #e6e0d1; border-radius: 16px; padding: 18px; box-shadow: 0 6px 20px #17232b12; }
     .panel { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
-    .accordion { min-width: 0; border: 1.5px solid #aebfb8; border-radius: 13px; background: #fff; overflow: clip; transition: border-color .18s ease, box-shadow .18s ease; }
-    .accordion[open] { border-color: #087873; box-shadow: 0 0 0 2px #08787320; }
+    .accordion { min-width: 0; border: 1px solid #e6e0d1; border-radius: 13px; background: #fff; overflow: clip; }
     .accordion > summary { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 13px 15px; color: #087873; font-weight: 700; cursor: pointer; list-style: none; touch-action: manipulation; }
     .accordion > summary::-webkit-details-marker { display: none; }
     .accordion > summary::after { content: "+"; margin-left: auto; font-size: 1.2rem; }
@@ -35,9 +34,7 @@
     .custom-entry-controls button { width: auto; min-width: 112px; min-height: 46px; padding: 10px 13px; background: #087873; color: #fff; }
     .city-add-button { background: #087873; }
     label { display: block; font-weight: 650; margin-bottom: 7px; }
-    select, input, button { width: 100%; min-height: 48px; border: 1.5px solid #a9b2a7; border-radius: 10px; padding: 11px 13px; font: inherit; font-size: 16px; background: white; }
-    select, input, textarea { box-shadow: inset 0 1px 2px #17232b0a; }
-    select:hover, input:hover, textarea:hover { border-color: #607f75; }
+    select, input, button { width: 100%; min-height: 48px; border: 1px solid #beb9aa; border-radius: 10px; padding: 11px 13px; font: inherit; font-size: 16px; background: white; }
     button { border: 0; background: #087873; color: white; font-weight: 650; cursor: pointer; }
     button:focus, select:focus, input:focus { outline: 3px solid #83bfb2; outline-offset: 2px; }
     button:focus:not(:focus-visible), select:focus:not(:focus-visible), input:focus:not(:focus-visible) { outline: none; }
@@ -46,20 +43,29 @@
     .add-row { display: grid; gap: 9px; }
     .location-actions { display: grid; gap: 9px; }
     .location-actions button { background: #e5f0ed; color: #087873; }
-    .fishing-panel { display: grid; gap: 12px; padding: 14px; border: 1.5px solid #b8c8bf; border-left: 4px solid #087873; border-radius: 12px; background: #fbf7ed; }
+    .fishing-panel { display: grid; gap: 12px; padding: 14px; border: 1px solid #e6e0d1; border-radius: 12px; background: #fbf7ed; }
     .fishing-panel h2 { margin: 0; font-size: 1.1rem; color: #087873; }
     .fishing-panel p { margin: 0; color: #4c5c58; line-height: 1.4; }
     .fishing-fields { display: grid; gap: 9px; }
     .fishing-fields label { margin-bottom: 4px; }
     .fishing-fields input, .fishing-fields select { min-height: 46px; }
     .metric-note { color: #4c5c58; font-size: .88rem; }
-    .extra-panel { display: grid; gap: 12px; padding: 14px; border: 1.5px solid #b8c8bf; border-left: 4px solid #c95545; border-radius: 12px; background: #fff; }
+    .extra-panel { display: grid; gap: 12px; padding: 14px; border: 1px solid #e6e0d1; border-radius: 12px; background: #fff; }
     .extra-panel h2 { margin: 0; font-size: 1.1rem; color: #087873; }
     .extra-panel p { margin: 0; line-height: 1.45; }
     .extra-panel a { color: #087873; }
     .source-links { display: grid; gap: 8px; }
     .source-link { display: flex; align-items: center; min-height: 48px; padding: 11px 13px; border-radius: 10px; background: #e5f0ed; color: #087873; font-weight: 650; text-decoration: none; }
     .source-link:focus-visible { outline: 3px solid #83bfb2; outline-offset: 2px; }
+    .reading-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .reading-grid div { padding: 10px; border-radius: 9px; background: #f8f5ed; }
+    .reading-grid dt { font-size: .8rem; color: #566761; }
+    .reading-grid dd { margin: 3px 0 0; font-weight: 650; overflow-wrap: anywhere; }
+    .activity-fields { display: grid; gap: 9px; }
+    .activity-fields label { margin-bottom: 4px; }
+    .activity-card { padding: 13px; border: 1px solid #e6e0d1; border-radius: 11px; background: #fbf7ed; }
+    .activity-card h3 { margin: 0 0 7px; color: #087873; font-size: 1rem; }
+    .activity-card p { margin: 5px 0; }
     .logbook-fields { display: grid; gap: 9px; }
     .logbook-fields label { margin-bottom: 4px; }
     .logbook-list { display: grid; gap: 9px; }
@@ -69,21 +75,6 @@
     .photo-card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 7px; }
     .photo-card p { margin: 5px 0; font-size: .82rem; overflow-wrap: anywhere; }
     .photo-card button { min-height: 38px; padding: 7px; background: #e5f0ed; color: #087873; font-size: .88rem; }
-    label[for="city-select"]::before { content: "📍"; }
-    label[for="new-city"]::before { content: "➕"; }
-    label[for="water-temperature"]::before { content: "🌡️"; }
-    label[for="sonar-depth"]::before { content: "📏"; }
-    label[for="fish-depth"]::before { content: "🐟"; }
-    label[for="sonar-frequency"]::before { content: "📡"; }
-    label[for="water-clarity"]::before { content: "💧"; }
-    label[for="target-species"]::before { content: "🎯"; }
-    label[for="bait-name"]::before { content: "🪝"; }
-    label[for="gear-category"]::before { content: "🧰"; }
-    label[for="trip-date"]::before { content: "🗓️"; }
-    label[for="trip-angler"]::before { content: "🎣"; }
-    label[for="trip-place"]::before { content: "🗺️"; }
-    label[for="trip-photo-category"]::before { content: "📷"; }
-    label[for]::before { display: inline-block; margin-right: 7px; font-size: 1rem; }
     .file-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
     .new-angler[hidden] { display: none; }
     .brand-logo { display: block; width: min(100%, 280px); max-width: 100%; max-height: 280px; height: auto; object-fit: contain; overflow: clip; margin: 0 auto 10px; }
@@ -99,11 +90,10 @@
     .bait-no-photo { display: grid; place-items: center; color: #687785; text-align: center; font-size: .8rem; }
     .bait-card h3 { margin: 0 0 5px; color: #087873; font-size: 1rem; }
     .bait-card p { margin: 0 0 5px; font-size: .88rem; line-height: 1.35; }
-    .bait-card .bait-depth { margin-top: 2px; color: #66736e; font-size: .84rem; font-weight: 550; }
     .bait-card button { grid-column: 1 / -1; min-height: 40px; background: #e5f0ed; color: #087873; }
     .gear-grid { display: grid; gap: 10px; }
     .gear-fields { display: grid; gap: 9px; }
-    .gear-card { padding: 12px; border: 1px solid #d5d4c8; border-radius: 10px; background: #f8f5ed; }
+    .gear-card { padding: 12px; border-radius: 10px; background: #f8f5ed; }
     .gear-card h3 { margin: 0 0 5px; color: #087873; }
     .gear-card p { margin: 0 0 8px; font-size: .9rem; }
     .gear-card button { min-height: 42px; background: #e5f0ed; color: #087873; }
@@ -112,10 +102,10 @@
     .record-entry p { margin: 3px 0; }
     .threshold-grid { display: grid; gap: 8px; margin: 10px 0; }
     #stats-results { display: grid; gap: 9px; }
-    .stats-card { padding: 12px; border: 1px solid #d5d4c8; border-radius: 10px; background: #f8f5ed; overflow-wrap: anywhere; }
+    .stats-card { padding: 12px; border-radius: 10px; background: #f8f5ed; overflow-wrap: anywhere; }
     .stats-card p { margin: 0 0 6px; }
     .stats-card p:last-child { margin-bottom: 0; }
-    .trip-entry { padding: 12px; border: 1px solid #d5d4c8; border-radius: 10px; background: #f8f5ed; overflow-wrap: anywhere; }
+    .trip-entry { padding: 12px; border-radius: 10px; background: #f8f5ed; overflow-wrap: anywhere; }
     .trip-entry p { margin: 0 0 5px; }
     .trip-entry button { margin-top: 7px; min-height: 42px; background: #e5f0ed; color: #087873; }
     #trip-list:empty::after { content: "Aucune sortie enregistrée pour le moment."; color: #566761; }
@@ -432,6 +422,41 @@
         </div>
         <p class="metric-note">AccuWeather et Windy.app donnent des indications générales, pas une prédiction garantie. Le point Windy sélectionné est Neuchâtel ; Yvonand est indiqué comme spot voisin. Les sources s’ouvrent seulement si tu les sélectionnes, ce qui évite de charger la webcam et les pages externes au démarrage.</p>
       </section>
+      <section class="extra-panel" aria-labelledby="yvbeach-title">
+        <h2 id="yvbeach-title">🌡️ Relevés de la station YvBeach — Yvonand</h2>
+        <p id="yvbeach-status" role="status" aria-live="polite">Les relevés automatiques nécessitent le serveur privé V4 configuré.</p>
+        <p id="yvbeach-timestamp" class="metric-note"></p>
+        <dl id="yvbeach-readings" class="reading-grid" hidden>
+          <div><dt>Pression</dt><dd id="yvbeach-pressure"></dd></div>
+          <div><dt>Rafale max. (1 h)</dt><dd id="yvbeach-gust"></dd></div>
+          <div><dt>Vent moyen (10 min)</dt><dd id="yvbeach-wind"></dd></div>
+          <div><dt>Direction moyenne</dt><dd id="yvbeach-direction"></dd></div>
+          <div><dt>Température de l’air</dt><dd id="yvbeach-temperature"></dd></div>
+          <div><dt>Température du lac</dt><dd id="yvbeach-lake"></dd></div>
+          <div><dt>Humidité</dt><dd id="yvbeach-humidity"></dd></div>
+          <div><dt>Point de rosée</dt><dd id="yvbeach-dewpoint"></dd></div>
+          <div><dt>Pluie du jour</dt><dd id="yvbeach-rain"></dd></div>
+        </dl>
+        <button id="yvbeach-refresh" class="refresh" type="button">Actualiser les relevés YvBeach</button>
+        <a href="https://www.yvbeach.com/yvmeteo.htm" target="_blank" rel="noopener noreferrer">Ouvrir la station YvBeach</a>
+        <p class="metric-note">La date et l’heure proviennent du relevé de la station. Ce relevé local est distinct des prévisions Open-Meteo.</p>
+      </section>
+      <section class="extra-panel" aria-labelledby="activity-title">
+        <h2 id="activity-title">🎣 Activité de pêche — Fishing Points</h2>
+        <p>Consulte la prévision, puis reporte ici la note et les périodes affichées. Les données seront ajoutées au carnet de la prochaine sortie.</p>
+        <a class="source-link" href="https://fishingpoints.app/fr/forecasts/europe/switzerland/c/yverdon-les-bains/" target="_blank" rel="noopener noreferrer">Ouvrir la prévision Fishing Points — Yverdon</a>
+        <div class="activity-card">
+          <h3>Enregistrer l’avis consulté</h3>
+          <div class="activity-fields">
+            <div><label for="activity-rating">Indice / note affichée (facultatif)</label><input id="activity-rating" type="text" maxlength="40" placeholder="Recopier la valeur affichée"></div>
+            <div><label for="activity-periods">Périodes majeures / mineures</label><textarea id="activity-periods" maxlength="300" placeholder="Ex. majeure 06:10–08:10 ; mineure 13:20–14:20"></textarea></div>
+            <div><label for="activity-observed-at">Date et heure de consultation</label><input id="activity-observed-at" type="datetime-local"></div>
+          </div>
+          <button id="activity-save" type="button">Enregistrer l’avis Fishing Points</button>
+          <p id="activity-summary" class="metric-note" aria-live="polite">Aucun avis Fishing Points enregistré sur cet appareil.</p>
+        </div>
+        <p class="metric-note">La page ne fournit pas d’API publique vérifiée et demande une vérification d’accès : la note et les périodes sont saisies manuellement, sans extraction automatique. L’indicateur reste un avis général, pas une garantie de prise.</p>
+      </section>
       </div>
       </details>
       <details class="accordion" data-section="session">
@@ -492,6 +517,15 @@
             <div>
               <label for="trip-catches">Poissons pris pendant cette sortie</label>
               <input id="trip-catches" type="number" inputmode="numeric" min="0" max="99" step="1" value="0" required>
+            </div>
+            <div>
+              <label for="trip-activity-match">Une prise a-t-elle eu lieu pendant une période Fishing Points ?</label>
+              <select id="trip-activity-match">
+                <option value="">Non renseigné</option>
+                <option value="yes">Oui, une prise pendant une période active</option>
+                <option value="no">Non, aucune prise pendant une période active</option>
+              </select>
+              <p class="metric-note">À renseigner d’après l’heure réelle de la prise, pas seulement l’heure de début de sortie. Sans heure individuelle de capture, les statistiques compareront les sorties marquées, pas chaque poisson à la minute près.</p>
             </div>
             <details class="inner-accordion">
               <summary>🐟 Poissons pris pendant cette session</summary>
@@ -610,6 +644,7 @@
     const tripAnimation = document.getElementById("trip-animation");
     const tripLure = document.getElementById("trip-lure");
     const tripCatches = document.getElementById("trip-catches");
+    const tripActivityMatch = document.getElementById("trip-activity-match");
     const tripResult = document.getElementById("trip-result");
     const tripPhotoCategory = document.getElementById("trip-photo-category");
     const cameraPhotos = document.getElementById("camera-photos");
@@ -625,6 +660,9 @@
     const GOLD_THRESHOLD_STORAGE_KEY = "t-appmeteo-v3-gold-thresholds";
     const CUSTOM_OPTIONS_STORAGE_KEY = "t-appmeteo-v4-custom-options";
     const TRIP_DRAFT_STORAGE_KEY = "t-appmeteo-v4-trip-draft";
+    const FISHING_ACTIVITY_STORAGE_KEY = "t-appmeteo-v4-fishing-activity";
+    const YVBEACH_STORAGE_KEY = "t-appmeteo-v4-yvbeach-latest";
+    let currentYvBeachSnapshot = null;
     const customListNames = ["anglers", "species", "techniques", "gearCategories", "sonarFrequencies", "waterClarities", "photoCategories"];
     function loadCustomLists() {
       const lists = Object.fromEntries(customListNames.map(name => [name, []]));
@@ -1150,15 +1188,14 @@
           const heading = document.createElement("h3");
           heading.textContent = bait.name;
           details.append(heading);
-          const hasMinDepth = bait.depthMin !== "" && bait.depthMin != null;
-          const hasMaxDepth = bait.depthMax !== "" && bait.depthMax != null;
-          const depth = document.createElement("p");
-          depth.className = "bait-depth";
-          depth.textContent = `Profondeur d’utilisation : Min ${hasMinDepth ? `${bait.depthMin} m` : "—"} · Max ${hasMaxDepth ? `${bait.depthMax} m` : "—"}`;
-          details.append(depth);
+          const depth = bait.depthMin !== "" && bait.depthMin != null && bait.depthMax !== "" && bait.depthMax != null
+            ? `${bait.depthMin}–${bait.depthMax} m`
+            : bait.depthMin !== "" && bait.depthMin != null ? `Dès ${bait.depthMin} m`
+            : bait.depthMax !== "" && bait.depthMax != null ? `Jusqu’à ${bait.depthMax} m` : "Non précisée";
           const lines = [
             bait.manufacturer && `Fabricant : ${bait.manufacturer}`,
             (bait.size || bait.weight) && `Taille / poids : ${bait.size ? `${bait.size} cm` : "—"} / ${bait.weight ? `${bait.weight} g` : "—"}`,
+            `Profondeur : ${depth}`,
             bait.animation && `Animation : ${bait.animation}`,
             `Cible : ${(bait.species || []).map(key => baitSpeciesNames[key] || key).join(", ") || "Non précisée"}`
           ].filter(Boolean);
@@ -1348,7 +1385,7 @@
       const draft = {
         date: tripDate.value, angler: tripAngler.value, newAngler: newAngler.value, place: tripPlace.value,
         technique: tripTechnique.value, animation: tripAnimation.value, lure: tripLure.value,
-        catches: tripCatches.value, result: tripResult.value, photoCategory: tripPhotoCategory.value,
+        catches: tripCatches.value, activityMatch: tripActivityMatch.value, result: tripResult.value, photoCategory: tripPhotoCategory.value,
         caughtSpecies: caughtSpeciesInput.value, caughtLength: caughtLengthInput.value, caughtWeight: caughtWeightInput.value,
         fishDetails: pendingFish.map(fish => ({ ...fish })),
         gear: Array.from(tripGearOptions.querySelectorAll('input[name="trip-gear"]:checked')).map(input => input.value),
@@ -1369,6 +1406,7 @@
         if (draft.technique && Array.from(tripTechnique.options).some(option => option.value === draft.technique)) tripTechnique.value = draft.technique;
         tripAnimation.value = draft.animation || ""; tripLure.value = draft.lure || "";
         tripCatches.value = draft.catches || "0"; tripResult.value = draft.result || "";
+        tripActivityMatch.value = draft.activityMatch || "";
         if (draft.photoCategory && Array.from(tripPhotoCategory.options).some(option => option.value === draft.photoCategory)) tripPhotoCategory.value = draft.photoCategory;
         if (draft.caughtSpecies && Array.from(caughtSpeciesInput.options).some(option => option.value === draft.caughtSpecies)) caughtSpeciesInput.value = draft.caughtSpecies;
         caughtLengthInput.value = draft.caughtLength || ""; caughtWeightInput.value = draft.caughtWeight || "";
@@ -1417,7 +1455,12 @@
         heading.textContent = `${new Date(trip.date).toLocaleString("fr-CH")} · ${trip.species} · ${trip.place} · Pêcheur : ${trip.angler || "non précisé"}`;
         entry.append(heading);
         const gearNames = (trip.gear || []).map(id => loadGear().find(item => item.id === id)).filter(Boolean).map(item => `${item.category} : ${item.name}`);
-        const details = [trip.technique && `Technique : ${trip.technique}`, trip.animation && `Animation : ${trip.animation}`, trip.lure && `Leurre : ${trip.lure}`, gearNames.length && `Matériel : ${gearNames.join(", ")}`, Number.isFinite(Number(trip.catches)) && `Prises : ${trip.catches}`, trip.waterTemperature && `Eau : ${trip.waterTemperature} °C`, trip.depth && `Fond : ${trip.depth} m`, trip.fishDepth && `Poissons : ${trip.fishDepth} m`, trip.sonarFrequency && `Sondeur : ${trip.sonarFrequency}`, trip.result && `Notes : ${trip.result}`].filter(Boolean);
+        const activity = trip.fishingActivity;
+        const activityInfo = activity && (activity.periods || activity.rating)
+          ? `Fishing Points : ${activity.rating ? `indice ${activity.rating} · ` : ""}${activity.periods || "périodes non renseignées"}${trip.activityMatch === "yes" ? " · prise pendant une période active" : trip.activityMatch === "no" ? " · aucune prise en période active" : ""}`
+          : trip.activityMatch === "yes" ? "Prise pendant une période Fishing Points" : trip.activityMatch === "no" ? "Aucune prise pendant une période Fishing Points" : "";
+        const yvbeachInfo = trip.yvbeachObservation?.measuredAt ? `YvBeach ${new Date(trip.yvbeachObservation.measuredAt).toLocaleString("fr-CH")}${trip.yvbeachObservation.lakeTemperatureC != null ? ` · lac ${trip.yvbeachObservation.lakeTemperatureC} °C` : ""}` : "";
+        const details = [trip.technique && `Technique : ${trip.technique}`, trip.animation && `Animation : ${trip.animation}`, trip.lure && `Leurre : ${trip.lure}`, gearNames.length && `Matériel : ${gearNames.join(", ")}`, Number.isFinite(Number(trip.catches)) && `Prises : ${trip.catches}`, activityInfo, yvbeachInfo, trip.waterTemperature && `Eau : ${trip.waterTemperature} °C`, trip.depth && `Fond : ${trip.depth} m`, trip.fishDepth && `Poissons : ${trip.fishDepth} m`, trip.sonarFrequency && `Sondeur : ${trip.sonarFrequency}`, trip.result && `Notes : ${trip.result}`].filter(Boolean);
         if (details.length) {
           const detail = document.createElement("p");
           detail.textContent = details.join(" · ");
@@ -1628,6 +1671,26 @@
       renderTrophyStats();
       const species = currentSpeciesLabel();
       const speciesTrips = loadTrips().filter(trip => trip.species === species);
+      const activityTagged = speciesTrips.filter(trip => trip.activityMatch === "yes" || trip.activityMatch === "no");
+      if (activityTagged.length) {
+        const anglerActivity = new Map();
+        activityTagged.forEach(trip => {
+          const key = trip.angler || "Pêcheur non précisé";
+          if (!anglerActivity.has(key)) anglerActivity.set(key, { yesTrips: 0, noTrips: 0, totalFish: 0 });
+          const row = anglerActivity.get(key);
+          const count = Math.max(0, Number(trip.catches) || 0);
+          if (trip.activityMatch === "yes") row.yesTrips++;
+          else row.noTrips++;
+          row.totalFish += count;
+        });
+        statsResults.append(makeStatsCard("Fishing Points · avis comparés aux prises · " + species, [...anglerActivity].map(([angler, row]) =>
+          `${angler} : ${row.yesTrips} sortie${row.yesTrips !== 1 ? "s" : ""} avec prise en période active · ${row.noTrips} sans prise en période active · ${row.totalFish} poisson${row.totalFish !== 1 ? "s" : ""} au total sur ces sorties.`
+        )));
+      } else {
+        statsResults.append(makeStatsCard("Fishing Points · données à recueillir", [
+          "Pour comparer les périodes annoncées aux résultats, enregistre les périodes consultées et indique dans chaque sortie si une prise a eu lieu pendant une période active."
+        ]));
+      }
       const recorded = speciesTrips.filter(trip => Number.isInteger(Number(trip.catches)) && Number(trip.catches) >= 0);
       if (!recorded.length) {
         statsResults.append(makeStatsCard("Conseil pour " + species, [
@@ -1703,6 +1766,9 @@
         animation: tripAnimation.value.trim(),
         lure: tripLure.value.trim(),
         catches: Math.max(Number(tripCatches.value) || 0, pendingFish.length),
+        activityMatch: tripActivityMatch.value,
+        fishingActivity: (() => { try { return JSON.parse(localStorage.getItem(FISHING_ACTIVITY_STORAGE_KEY) || "null"); } catch { return null; } })(),
+        yvbeachObservation: currentYvBeachSnapshot ? { ...currentYvBeachSnapshot } : null,
         fishDetails: pendingFish.map(fish => ({ ...fish })),
         result: tripResult.value.trim(),
         waterTemperature: fishingInputs[0].value,
@@ -1740,6 +1806,7 @@
         tripAnimation.value = "";
         tripLure.value = "";
         tripCatches.value = "0";
+        tripActivityMatch.value = "";
         tripResult.value = "";
         tripDate.value = localDateTimeValue(new Date());
         document.getElementById("status").textContent = "Sortie enregistrée dans ce navigateur.";
@@ -2187,6 +2254,92 @@
         syncStatus.textContent = `${error.message || "Serveur indisponible."} Les données locales sont conservées et seront réessayées quand le réseau sera accessible.`;
       } finally { syncRunning = false; }
     }
+    function yvbeachApiUrl() {
+      const settings = syncSetting();
+      if (!settings.url || !settings.token) return null;
+      let endpoint;
+      try { endpoint = new URL(settings.url); } catch { return null; }
+      if (endpoint.protocol !== "https:" || !/\/api\/sync\/?$/.test(endpoint.pathname)) return null;
+      endpoint.pathname = endpoint.pathname.replace(/\/api\/sync\/?$/, "/api/yvbeach");
+      endpoint.search = ""; endpoint.hash = "";
+      return { url: endpoint.toString(), token: settings.token };
+    }
+    function displayYvBeach(data, fromCache = false) {
+      currentYvBeachSnapshot = data;
+      const readings = document.getElementById("yvbeach-readings");
+      const value = (number, suffix = "") => number == null || number === "" ? "—" : `${number}${suffix}`;
+      document.getElementById("yvbeach-pressure").textContent = `${value(data.pressureMb, " mb")}${data.pressureTrendMbH ? ` · ${data.pressureTrendMbH} mb/h` : ""}`;
+      document.getElementById("yvbeach-gust").textContent = value(data.gustKmh, " km/h");
+      document.getElementById("yvbeach-wind").textContent = value(data.windKmh, " km/h");
+      document.getElementById("yvbeach-direction").textContent = [data.direction, data.directionDegrees != null ? `${data.directionDegrees}°` : ""].filter(Boolean).join(" · ") || "—";
+      document.getElementById("yvbeach-temperature").textContent = `${value(data.airTemperatureC, " °C")}${data.airTrendCPerH ? ` · ${data.airTrendCPerH} °C/h` : ""}`;
+      document.getElementById("yvbeach-lake").textContent = value(data.lakeTemperatureC, " °C");
+      document.getElementById("yvbeach-humidity").textContent = value(data.humidityPercent, " %");
+      document.getElementById("yvbeach-dewpoint").textContent = value(data.dewPointC, " °C");
+      document.getElementById("yvbeach-rain").textContent = value(data.rainMm, " mm");
+      const measured = data.measuredAt ? new Date(data.measuredAt).toLocaleString("fr-CH", { dateStyle: "short", timeStyle: "short" }) : "heure non indiquée";
+      document.getElementById("yvbeach-timestamp").textContent = `Source : YvBeach · station d’Yvonand · relevé du ${measured}${fromCache ? " · dernière valeur mémorisée" : ""}`;
+      document.getElementById("yvbeach-status").textContent = fromCache ? "Relevé mis en cache ; tentative de mise à jour…" : "Relevé YvBeach chargé.";
+      readings.hidden = false;
+    }
+    async function loadYvBeach() {
+      const status = document.getElementById("yvbeach-status");
+      try {
+        const cached = JSON.parse(localStorage.getItem(YVBEACH_STORAGE_KEY) || "null");
+        if (cached) displayYvBeach(cached, true);
+      } catch { /* Le cache est facultatif. */ }
+      const proxy = yvbeachApiUrl();
+      if (!proxy) {
+        if (!currentYvBeachSnapshot) status.textContent = "Pour afficher automatiquement les mesures, configure le serveur privé V4 (URL terminant par /api/sync et jeton).";
+        return;
+      }
+      status.textContent = "Lecture de la dernière mesure YvBeach…";
+      const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 15000);
+      try {
+        const response = await fetch(proxy.url, { headers: { Authorization: `Bearer ${proxy.token}` }, signal: controller.signal, cache: "no-store" });
+        if (!response.ok) throw new Error(response.status === 401 ? "Jeton du serveur refusé." : `Serveur privé : erreur ${response.status}.`);
+        const data = await response.json();
+        if (!data || !data.measuredAt) throw new Error("Le serveur n’a pas renvoyé de relevé YvBeach valide.");
+        displayYvBeach(data);
+        try { localStorage.setItem(YVBEACH_STORAGE_KEY, JSON.stringify(data)); }
+        catch { status.textContent = "Relevé YvBeach chargé, mais le cache local n’a pas pu être enregistré."; }
+      } catch (error) {
+        status.textContent = `${error.message || "Relevé YvBeach indisponible."}${currentYvBeachSnapshot ? " La dernière valeur mémorisée reste affichée." : " Ouvre le lien de la station pour consulter le relevé."}`;
+      } finally { clearTimeout(timeout); }
+    }
+    function loadFishingActivity() {
+      try { return JSON.parse(localStorage.getItem(FISHING_ACTIVITY_STORAGE_KEY) || "null"); } catch { return null; }
+    }
+    function renderFishingActivity() {
+      const saved = loadFishingActivity();
+      const summary = document.getElementById("activity-summary");
+      if (!saved) { summary.textContent = "Aucun avis Fishing Points enregistré sur cet appareil."; return; }
+      document.getElementById("activity-rating").value = saved.rating || "";
+      document.getElementById("activity-periods").value = saved.periods || "";
+      document.getElementById("activity-observed-at").value = saved.observedAt ? localDateTimeValue(new Date(saved.observedAt)) : "";
+      summary.textContent = `Enregistré le ${new Date(saved.observedAt).toLocaleString("fr-CH")}${saved.rating ? ` · indice : ${saved.rating}` : ""}${saved.periods ? ` · périodes : ${saved.periods}` : ""} · source Fishing Points.`;
+    }
+    document.getElementById("activity-save").addEventListener("click", () => {
+      const rating = document.getElementById("activity-rating").value.trim();
+      const periods = document.getElementById("activity-periods").value.trim();
+      const observedInput = document.getElementById("activity-observed-at").value;
+      if (!rating && !periods) { document.getElementById("activity-periods").focus(); document.getElementById("activity-summary").textContent = "Recopie au moins une période ou un indice depuis Fishing Points."; return; }
+      const observedAt = observedInput ? new Date(observedInput).toISOString() : new Date().toISOString();
+      const report = { id: makeId(), rating, periods, observedAt, source: "Fishing Points · Yverdon-les-Bains", updatedAt: new Date().toISOString() };
+      try {
+        localStorage.setItem(FISHING_ACTIVITY_STORAGE_KEY, JSON.stringify(report));
+        renderFishingActivity();
+        document.getElementById("status").textContent = "Avis Fishing Points enregistré sur cet appareil ; il sera ajouté à la prochaine sortie.";
+      } catch {
+        document.getElementById("activity-summary").textContent = "Impossible d’enregistrer cet avis dans le navigateur.";
+      }
+    });
+    document.getElementById("activity-observed-at").value = localDateTimeValue(new Date());
+    renderFishingActivity();
+    document.getElementById("yvbeach-refresh").addEventListener("click", loadYvBeach);
+    loadYvBeach();
+    window.addEventListener("online", loadYvBeach);
+    setInterval(() => { if (document.visibilityState === "visible") loadYvBeach(); }, 10 * 60 * 1000);
     document.getElementById("sync-form").addEventListener("submit", event => {
       event.preventDefault();
       const url = syncUrlInput.value.trim(); const token = syncTokenInput.value.trim();
