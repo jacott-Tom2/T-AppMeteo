@@ -42,6 +42,7 @@ Sans serveur configuré, les photos, le carnet et le matériel ne quittent pas l
 ## Sources météo et pêche
 
 - **YvBeach, Yvonand** : relevés automatiques dans V4 (pression et tendance, rafales, vent et direction, température de l’air et du lac, humidité, point de rosée, pluie) avec date/heure du relevé. Comme le site ne permet pas la lecture CORS directe depuis GitHub Pages, l’application passe par le serveur privé V4 configuré : la même adresse HTTPS `/api/sync` fournit aussi `/api/yvbeach`, avec le même jeton. Si le serveur n’est pas configuré ou indisponible, l’application garde la dernière mesure mémorisée et le lien vers la station.
+- **Sauvetage des Iris, Yverdon** : lien à la demande vers la station météo du port. Elle présente les mesures locales, les prévisions à 7 jours, ainsi que des historiques et graphiques. C’est une source complémentaire consultable sur son site ; aucune importation automatique n’est activée dans V4.
 - **MeteoNews, Grandson** : prévisions de proximité.
 - **AccuWeather, Neuchâtel** et **Windy.app, Neuchâtel** : avis secondaires destinés à la pêche.
 - **Port d’Yvonand** : webcam ouverte à la demande.
